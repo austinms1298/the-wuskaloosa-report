@@ -1,0 +1,42 @@
+backend:
+  name: github
+  repo: austinms1298/the-wuskaloosa-report
+  branch: main
+  # Live GitHub login requires an OAuth proxy. Add these after it is deployed:
+  # base_url: https://YOUR-OAUTH-WORKER.workers.dev
+  # auth_endpoint: auth
+
+local_backend: true
+publish_mode: simple
+media_folder: public/uploads
+public_folder: /uploads
+
+site_url: https://YOUR-PROJECT.pages.dev
+display_url: https://YOUR-PROJECT.pages.dev
+logo_url: /images/header-caricature.jpeg
+
+collections:
+  - name: posts
+    label: Posts
+    label_singular: Post
+    folder: src/content/posts
+    create: true
+    delete: true
+    extension: md
+    format: frontmatter
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    summary: "{{title}} — {{date}}"
+    sortable_fields: [date, title, category]
+    fields:
+      - { label: Title, name: title, widget: string }
+      - { label: URL Slug, name: slug, widget: string, hint: "Lowercase words separated by hyphens" }
+      - { label: Publish Date, name: date, widget: datetime }
+      - { label: Short Summary, name: excerpt, widget: text }
+      - { label: Featured Image, name: image, widget: image }
+      - label: Category
+        name: category
+        widget: select
+        options: [Latest Take, Analysis, Preview, Recap, Culture, Opinion]
+      - { label: Feature on Homepage, name: featured, widget: boolean, default: false }
+      - { label: "This Week's TV Schedule (PDF)", name: schedule_pdf, widget: file, required: false, hint: "Upload a PDF of this week's TV schedule — readers will get a download button at the top of the post.", media_library: { config: { multiple: false } } }
+      - { label: Article, name: body, widget: markdown }

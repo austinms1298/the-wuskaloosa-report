@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
+  <rect width="800" height="450" fill="#1e1111"/>
+  <rect x="340" y="165" width="120" height="120" rx="4" fill="#8f1224" opacity="0.7"/>
+  <text x="400" y="244" font-family="Georgia, serif" font-size="60" fill="#ffffff" text-anchor="middle" opacity="0.5">🏈</text>
+  <text x="400" y="330" font-family="Arial, sans-serif" font-size="16" fill="#ffffff" text-anchor="middle" opacity="0.4" letter-spacing="3">THE WUSKALOOSA REPORT</text>
+</svg>
