@@ -1,0 +1,215 @@
+THE WUSKALOOSA REPORT — PROJECT HANDOFF
+========================================
+Last updated: August 21, 2026
+
+
+WHAT THIS PROJECT IS
+---------------------
+A static Alabama football sports blog styled like a cross between ESPN College GameDay,
+Barstool Sports, and Saturday Down South. Publishing happens entirely through Decap CMS
+(a browser-based admin panel) — no editing HTML directly.
+
+Live repo: https://github.com/austinms1298/the-wuskaloosa-report
+Deploy target: Cloudflare Pages (connected to the GitHub repo above)
+
+
+TECH STACK
+----------
+- Vite 8 (multi-page static site builder, no framework)
+- Vanilla JS (client-side routing via window.location.pathname)
+- Decap CMS (GitHub backend, markdown posts)
+- Cloudflare Pages (hosting + auto-deploy on git push)
+- Google Fonts: Oswald (display/headings) + Inter (body)
+
+
+PROJECT STRUCTURE
+-----------------
+the-wuskaloosa-report/
+  index.html          → Homepage
+  about.html          → About page
+  archive.html        → Past Takes (post archive)
+  schedule.html       → Full 2026 schedule
+  post.html           → Individual post view
+  404.html            → Custom 404 page
+  vite.config.js      → Multi-page build config
+  package.json        → Dependencies
+
+  src/
+    main.js           → All page rendering logic (single JS entry point)
+    styles.css        → All site styles (single CSS file)
+    data/
+      site.js         → Schedule data + site metadata (title, email, tagline)
+    content/
+      posts/          → Markdown post files (managed by Decap CMS)
+
+  public/
+    admin/
+      index.html      → Decap CMS admin panel
+      config.yml      → CMS configuration
+    images/
+      logo.png        → Crimson badge logo
+      hero-panel.png  → Caricature broadcast panel (pre-cropped, use as-is)
+      header-caricature.jpeg
+    fonts/
+      SpringtownMarket.otf  → Purchased font (PERSONAL USE ONLY — do NOT use on site
+                               until commercial license is purchased from MyFonts)
+    uploads/          → Media uploaded through Decap CMS goes here
+
+
+GETTING STARTED ON A NEW COMPUTER
+-----------------------------------
+1. Make sure you have Node.js installed (https://nodejs.org — use LTS version)
+2. Make sure you have Git installed (https://git-scm.com)
+3. Open Terminal and run:
+
+   git clone https://github.com/austinms1298/the-wuskaloosa-report.git
+   cd the-wuskaloosa-report
+   npm install
+   npm run dev
+
+4. Site will be running at http://localhost:5173
+
+To run Decap CMS locally (so you can write/edit posts):
+   npx decap-server
+   (Run this in a second terminal tab while `npm run dev` is running)
+   Then visit http://localhost:5173/admin/
+
+To build for production:
+   npm run build
+   (Output goes to the dist/ folder)
+
+
+PUSHING CHANGES TO GITHUB
+--------------------------
+First-time setup on a new computer:
+   git config user.email "9phqjvsppv@privaterelay.appleid.com"
+   git config user.name "Austin"
+
+Then to push changes:
+   git add -A
+   git commit -m "Your commit message here"
+   git push origin main
+
+GitHub auth: use your GitHub username + a Personal Access Token (not your password).
+Create one at: github.com → Settings → Developer Settings → Personal Access Tokens
+→ Tokens (classic) → New token → check the "repo" scope.
+
+Cloudflare Pages auto-deploys every time you push to main.
+
+
+DECAP CMS — HOW TO PUBLISH POSTS
+----------------------------------
+Once the site is live on Cloudflare Pages, you'll need an OAuth proxy to log into
+the CMS from the live URL. Until then, use local mode (npx decap-server).
+
+The config.yml has placeholders you'll need to fill in:
+  - site_url: https://YOUR-PROJECT.pages.dev   ← replace with your actual Cloudflare URL
+  - display_url: same
+
+For OAuth (so CMS works on the live site):
+  You need a Cloudflare Worker acting as an OAuth proxy for GitHub.
+  Repo: https://github.com/stereobooster/decap-proxy
+  Once deployed, add to config.yml:
+    base_url: https://YOUR-OAUTH-WORKER.workers.dev
+    auth_endpoint: auth
+
+
+POST FIELDS IN DECAP CMS
+--------------------------
+When you create a new post in the CMS, you'll fill in:
+  - Title
+  - URL Slug (lowercase-words-with-hyphens)
+  - Publish Date
+  - Short Summary (shows as excerpt/preview)
+  - Featured Image (not shown on homepage but stored in post)
+  - Category: Latest Take / Analysis / Preview / Recap / Culture / Opinion
+  - Feature on Homepage: toggle on to make it the big "Latest Wuskaloosa Report" hero take
+  - This Week's TV Schedule (PDF): optional — upload a PDF and readers get a download
+    button at the top of the post
+  - Article body (full markdown editor)
+
+Posts are saved as .md files in src/content/posts/
+
+
+KEY DESIGN DECISIONS
+----------------------
+- Logo is "stamped" overlapping the crimson navbar border and the hero image.
+  It uses position:absolute with z-index:30, header has overflow:visible.
+- Hero image (hero-panel.png) is displayed with height:auto — NO cropping.
+  The image was pre-cropped to exactly the right dimensions.
+- Schedule card on homepage uses a 3-column symmetric grid (1fr 2fr 1fr) so team
+  names are truly centered.
+- "THIS WEEK!" is auto-detected: any game within 7 days from today highlights
+  automatically. No manual update needed.
+- Oswald font (Google Fonts) is used for all display/marker headings.
+  Springtown Market was considered but is "Personal Use Only" — would need a
+  commercial license from MyFonts before using on a public site.
+- Footer sticks to the bottom on short pages via: body { display:flex;
+  flex-direction:column; min-height:100vh } + main { flex:1 }
+- cssMinify is set to false in vite.config.js to avoid a lightningcss binary
+  compatibility issue between macOS and Linux.
+
+
+CSS CUSTOM PROPERTIES (colors/fonts)
+--------------------------------------
+--crimson: #8f1224   (Alabama crimson)
+--deep:    #171313   (near-black)
+--paper:   #f8f6f1   (warm off-white background)
+--line:    #ded9d0   (border/divider color)
+--muted:   #706a64   (secondary text)
+--white:   #fff
+--marker:  'Oswald', sans-serif   (headings, labels)
+--sans:    'Inter', sans-serif    (body text)
+
+
+PAGES OVERVIEW
+---------------
+Homepage (index.html / homePage()):
+  - Hero panel image full-width
+  - "Latest Wuskaloosa Report" — shows most recent/featured post, or just the
+    heading if no posts exist yet
+  - 2026 Alabama Football Schedule sidebar card (with THIS WEEK! auto-detection)
+  - "Current Takes" — 3 most recent non-featured posts (or a "coming soon" message)
+  - Sponsor ad placeholder
+  - Newsletter signup (connect to Mailchimp/ConvertKit before launch)
+
+Past Takes (/archive.html):
+  - Full grid of all posts
+
+Schedule (/schedule.html):
+  - Full 2026 schedule with dates, matchups, cities, times
+  - THIS WEEK! highlighted in crimson with left border
+
+About (/about.html):
+  - Placeholder copy — replace with your actual bio/story
+  - Newsletter signup
+
+Post (/post.html?slug=...):
+  - Individual post view
+  - Optional PDF download banner at top (if schedule_pdf field is filled in CMS)
+
+404 (/404.html):
+  - "OUT of Bounds." — custom styled 404 page
+
+
+STILL TODO BEFORE LAUNCH
+--------------------------
+[ ] Replace "YOUR-PROJECT.pages.dev" in public/admin/config.yml with real Cloudflare URL
+[ ] Set up OAuth proxy (Cloudflare Worker) so CMS login works on the live site
+[ ] Connect newsletter form to Mailchimp, ConvertKit, or similar email service
+[ ] Write the About page copy (currently placeholder text)
+[ ] Write actual blog posts!
+[ ] Consider buying Springtown Market commercial license from MyFonts if you want
+    to swap it back in for Oswald
+[ ] Add favicon (currently none set)
+[ ] Set up custom domain (thewuskaloosareport.com) in Cloudflare Pages settings
+
+
+CONTACT / SITE EMAIL
+----------------------
+hello@thewuskaloosareport.com
+(Used in the footer, nav icon, and sponsor CTA)
+
+
+========================================
+END OF HANDOFF DOC

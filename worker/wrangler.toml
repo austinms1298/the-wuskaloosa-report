@@ -1,0 +1,17 @@
+name = "wuskaloosa-admin"
+main = "worker.js"
+compatibility_date = "2024-11-01"
+
+# After running `wrangler deploy`, set these secrets:
+#
+#   wrangler secret put USER1_USERNAME   (your username)
+#   wrangler secret put USER1_PASSWORD   (your password)
+#   wrangler secret put USER2_USERNAME   (jackie's username)
+#   wrangler secret put USER2_PASSWORD   (jackie's password)
+#   wrangler secret put GITHUB_PAT       (GitHub fine-grained PAT)
+#   wrangler secret put JWT_SECRET       (any long random string)
+#
+# Your worker URL will be:
+#   https://wuskaloosa-admin.YOUR-ACCOUNT.workers.dev
+#
+# Paste that URL into the API_URL constant in public/admin/index.html

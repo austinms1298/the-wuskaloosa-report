@@ -11,8 +11,8 @@ publish_mode: simple
 media_folder: public/uploads
 public_folder: /uploads
 
-site_url: https://YOUR-PROJECT.pages.dev
-display_url: https://YOUR-PROJECT.pages.dev
+site_url: https://wuskaloosareport.com
+display_url: https://wuskaloosareport.com
 logo_url: /images/header-caricature.jpeg
 
 collections:

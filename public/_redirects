@@ -1,0 +1,9 @@
+# Cloudflare Pages routing
+# Clean URLs → HTML files (200 = serve the file without changing the browser URL)
+/archive  /archive.html  200
+/schedule /schedule.html 200
+/about    /about.html    200
+/post     /post.html     200
+
+# Custom 404 — Cloudflare Pages also picks this up automatically from 404.html in dist
+/*  /404.html  404

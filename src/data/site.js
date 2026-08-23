@@ -17,5 +17,5 @@ export const schedule = [
 export const site = {
   title: 'The Wuskaloosa Report',
   tagline: 'Smart Takes, Sassy Opinions and some football! Roll Tide!',
-  email: 'hello@thewuskaloosareport.com'
+  email: 'hello@wuskaloosareport.com'
 };
