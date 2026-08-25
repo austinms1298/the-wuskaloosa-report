@@ -22,6 +22,7 @@ function parsePost(path, raw) {
     image: data.image || '/images/post-placeholder.svg',
     category: data.category || 'Latest Take',
     featured: Boolean(data.featured),
+    draft: Boolean(data.draft),
     schedulePdf: data.schedule_pdf || null,
     body,
     html: body.trim().startsWith('<') ? body.trim() : marked.parse(body)
@@ -30,6 +31,7 @@ function parsePost(path, raw) {
 
 const posts = Object.entries(rawPosts)
   .map(([path, raw]) => parsePost(path, raw))
+  .filter(p => !p.draft)
   .sort((a, b) => b.date - a.date);
 
 const escapeHtml = (value = '') => String(value).replace(/[&<>'"]/g, char => ({
@@ -490,7 +492,7 @@ function postPage() {
     <main class="page-shell inner-page narrow">
       <p class="eyebrow crimson">404</p>
       <h1>Take not found.</h1>
-      <p><a href="/archive" style="color:var(--crimson);font-weight:700">← Back to all takes</a></p>
+      <p><a href="/archive" style="color:var(--crimson);font-weight:700">← Back</a></p>
     </main>
     ${footer()}`;
 
@@ -512,7 +514,7 @@ function postPage() {
       <article class="article">
         <header class="article-header">
           <p style="font-size:13px;font-weight:700;color:var(--muted);margin:0 0 20px">
-            <a href="/archive" style="color:var(--crimson)">← All Takes</a>
+            <a href="/archive" style="color:var(--crimson)">← Back</a>
           </p>
           <p class="eyebrow crimson">${escapeHtml(post.category)} &middot; ${formatDate(post.date)}</p>
           <h1>${escapeHtml(post.title)}</h1>
@@ -577,36 +579,51 @@ async function loadAds() {
     const res = await fetch('/ads/config.json');
     if (!res.ok) return;
     const cfg = await res.json();
+    const intervalMs = ((cfg.rotate && cfg.rotate.interval) || 6) * 1000;
 
-    // Support both new library format and old flat format
-    function resolveAd(slotKey) {
+    // Returns an array of ad objects for the given slot
+    function resolveAds(slotKey) {
       if (cfg.library) {
-        // New format: resolve via slug→filename→post override or default
         let slug = new URLSearchParams(window.location.search).get('slug');
         if (!slug) slug = window.location.pathname.replace(/^\//, '');
         const postConfig = slug ? cfg.posts?.[slug] : null;
         const field = slotKey === 'post-top' ? 'top' : slotKey === 'post-bottom' ? 'bottom' : 'homepage';
-        const adId = postConfig?.[field] !== undefined
+        const raw = postConfig?.[field] !== undefined
           ? postConfig[field]
           : (cfg.defaults?.[slotKey] || null);
-        return adId ? cfg.library[adId] : null;
+        if (!raw) return [];
+        const ids = Array.isArray(raw) ? raw : [raw];
+        return ids.map(id => cfg.library[id]).filter(Boolean);
       }
       // Old flat format
-      return cfg[slotKey] || null;
+      const ad = cfg[slotKey] || null;
+      return ad ? [ad] : [];
+    }
+
+    function adMarkup(ad) {
+      const openTag = ad.link
+        ? `<a href="${escapeHtml(ad.link)}" target="_blank" rel="noopener sponsored">`
+        : '<span>';
+      const closeTag = ad.link ? '</a>' : '</span>';
+      return `${openTag}<img src="${escapeHtml(ad.imageUrl)}" alt="Sponsor" loading="lazy" onerror="this.closest('.ad-slot-wrap').style.display='none'">${closeTag}`;
+    }
+
+    function startRotation(el, ads, prefix) {
+      el.innerHTML = prefix + adMarkup(ads[0]);
+      if (ads.length < 2) return;
+      let idx = 0;
+      setInterval(() => {
+        idx = (idx + 1) % ads.length;
+        el.innerHTML = prefix + adMarkup(ads[idx]);
+      }, intervalMs);
     }
 
     function injectAd(elId, slotKey) {
       const el = document.getElementById(elId);
       if (!el) return;
-      const ad = resolveAd(slotKey);
-      if (!ad || !ad.imageUrl) return;
-      const openTag = ad.link
-        ? `<a href="${escapeHtml(ad.link)}" target="_blank" rel="noopener sponsored">`
-        : '<span>';
-      const closeTag = ad.link ? '</a>' : '</span>';
-      el.innerHTML =
-        `<p class="ad-label">Advertisement</p>` +
-        `${openTag}<img src="${escapeHtml(ad.imageUrl)}" alt="Sponsor" loading="lazy" onerror="this.closest('.ad-slot-wrap').style.display='none'">${closeTag}`;
+      const ads = resolveAds(slotKey);
+      if (!ads.length) return;
+      startRotation(el, ads, '<p class="ad-label">Advertisement</p>');
     }
 
     injectAd('ad-post-top', 'post-top');
@@ -614,15 +631,25 @@ async function loadAds() {
 
     // Homepage box
     const homeEl = document.getElementById('ad-homepage');
-    const homeAd = resolveAd('homepage');
-    if (homeEl && homeAd && homeAd.imageUrl) {
-      const openTag = homeAd.link
-        ? `<a href="${escapeHtml(homeAd.link)}" target="_blank" rel="noopener sponsored">`
-        : '<span>';
-      const closeTag = homeAd.link ? '</a>' : '</span>';
-      homeEl.innerHTML =
-        `<p class="eyebrow">SPONSOR</p>` +
-        `${openTag}<img src="${escapeHtml(homeAd.imageUrl)}" alt="Sponsor" loading="lazy" style="max-width:300px;max-height:250px;margin:auto;display:block" onerror="this.closest('.sponsor-ad').style.display='none'">${closeTag}`;
+    if (homeEl) {
+      const homeAds = resolveAds('homepage');
+      if (homeAds.length) {
+        const homeMarkup = (ad) => {
+          const openTag = ad.link
+            ? `<a href="${escapeHtml(ad.link)}" target="_blank" rel="noopener sponsored">`
+            : '<span>';
+          const closeTag = ad.link ? '</a>' : '</span>';
+          return `<p class="eyebrow">SPONSOR</p>${openTag}<img src="${escapeHtml(ad.imageUrl)}" alt="Sponsor" loading="lazy" style="max-width:300px;max-height:250px;margin:auto;display:block" onerror="this.closest('.sponsor-ad').style.display='none'">${closeTag}`;
+        };
+        homeEl.innerHTML = homeMarkup(homeAds[0]);
+        if (homeAds.length > 1) {
+          let idx = 0;
+          setInterval(() => {
+            idx = (idx + 1) % homeAds.length;
+            homeEl.innerHTML = homeMarkup(homeAds[idx]);
+          }, intervalMs);
+        }
+      }
     }
   } catch { /* ads are non-critical — fail silently */ }
 }
