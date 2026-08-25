@@ -93,9 +93,7 @@ function newsletter() {
         <p class="marker-label">DON'T MISS A TAKE!</p>
         <h2>Get the newest thoughts, analysis and opinions in your inbox.</h2>
       </div>
-      <form class="newsletter-form" id="newsletter-form"
-            data-formspree-id="YOUR_FORM_ID">
-        <!-- Replace YOUR_FORM_ID above with your Formspree form ID (formspree.io) -->
+      <form class="newsletter-form" id="newsletter-form">
         <label class="sr-only" for="nl-email">Email address</label>
         <input id="nl-email" type="email" name="email" placeholder="Enter your email" required>
         <button type="submit">LET'S GO!</button>
@@ -143,7 +141,7 @@ function homePage() {
         </aside>
 
         <section class="archive-preview">
-          <div class="section-heading"><h2>CURRENT TAKES ☆</h2>${archive.length ? `<a href="/archive">VIEW ALL →</a>` : ''}</div>
+          <div class="section-heading"><h2>LAST WEEK'S TAKES ☆</h2>${archive.length ? `<a href="/archive">VIEW ALL →</a>` : ''}</div>
           ${archive.length ? `<div class="card-grid">${archive.map(postCard).join('')}</div>` : `<p style="color:var(--muted);font-size:14px;margin:8px 0 0">Takes are coming — check back soon.</p>`}
         </section>
 
@@ -215,9 +213,6 @@ function aboutPage() {
     <main class="page-shell inner-page narrow">
       <p class="eyebrow crimson">ABOUT THE REPORT</p>
       <h1 class="page-title">Smart takes. Sassy opinions. Some football.</h1>
-      <p class="lead">The Wuskaloosa Report is an independent Alabama football blog written from inside Tuscaloosa — no press box, no press credentials, just someone who's been watching this program their whole life and has a lot to say about it.</p>
-      <p style="font-size:17px;line-height:1.7;margin:24px 0">Every game week you'll find analysis, previews, recaps, and the kind of honest takes the national media won't write because they don't love Alabama football like we do. Some of it will age well. Some of it won't. That's football.</p>
-      <p style="font-size:17px;line-height:1.7;margin:24px 0">We cover the team, the program, and what it means to be an Alabama fan — from two-a-days in August all the way to wherever January takes us. Roll Tide.</p>
       <hr style="border:none;border-top:1px solid var(--line);margin:48px 0">
       <p class="eyebrow crimson">GET IN TOUCH</p>
       <p style="font-size:17px;line-height:1.7">Questions, corrections, sponsorship inquiries, or just want to argue about the offensive line? We're here for all of it.</p>
@@ -307,34 +302,24 @@ toggle?.addEventListener('click', () => {
   nav.classList.toggle('open');
 });
 
-// Newsletter form — submits to Formspree when a form ID is set
-// Sign up at formspree.io, create a form, and replace YOUR_FORM_ID in newsletter()
+// Newsletter form — submits to the admin Worker
 const nlForm = document.querySelector('#newsletter-form');
 if (nlForm) {
   nlForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const formId = nlForm.dataset.formspreeId;
     const emailVal = nlForm.querySelector('input[type="email"]').value;
     const btn = nlForm.querySelector('button');
-
-    if (formId && formId !== 'YOUR_FORM_ID') {
-      btn.textContent = 'SENDING...';
-      btn.disabled = true;
-      try {
-        const res = await fetch(`https://formspree.io/f/${formId}`, {
-          method: 'POST',
-          headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: emailVal })
-        });
-        if (!res.ok) throw new Error();
-      } catch {
-        btn.textContent = "LET'S GO!";
-        btn.disabled = false;
-        return;
-      }
+    btn.textContent = 'SENDING...';
+    btn.disabled = true;
+    try {
+      await fetch('https://wuskaloosa-admin.austin-a73.workers.dev/api/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: emailVal })
+      });
+    } catch {
+      // still show success — don't block the user on a network hiccup
     }
-
-    // Show success state (works even without Formspree wired up)
     nlForm.innerHTML = `<p style="font-weight:800;color:#fff;margin:auto;font-size:15px;padding:14px 0">✓ You're on the list! Roll Tide 🏈</p>`;
   });
 }

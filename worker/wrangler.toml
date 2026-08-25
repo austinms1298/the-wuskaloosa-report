@@ -15,3 +15,10 @@ compatibility_date = "2024-11-01"
 #   https://wuskaloosa-admin.YOUR-ACCOUNT.workers.dev
 #
 # Paste that URL into the API_URL constant in public/admin/index.html
+
+# ── Email list KV (run once to create, then paste the id below) ───────────────
+#   cd worker && wrangler kv namespace create EMAIL_LIST
+#   → paste the returned "id" value below
+[[kv_namespaces]]
+binding = "EMAIL_LIST"
+id      = "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"

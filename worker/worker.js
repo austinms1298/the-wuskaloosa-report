@@ -212,6 +212,63 @@ async function handleSaveAds(req, env, ch) {
   return respond({ ok: true, sha: updated.sha }, 200, ch);
 }
 
+
+// ── Email list (KV: EMAIL_LIST) ───────────────────────────────────────────────
+
+async function handleSubscribe(req, env, ch) {
+  const { email } = await req.json().catch(() => ({}));
+  if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))
+    return respond({ error: 'Invalid email' }, 400, ch);
+  if (!env.EMAIL_LIST) return respond({ error: 'Email list not configured' }, 503, ch);
+  const key = 'sub:' + email.toLowerCase();
+  const existing = await env.EMAIL_LIST.get(key);
+  if (existing) return respond({ ok: true, duplicate: true }, 200, ch);
+  await env.EMAIL_LIST.put(key, JSON.stringify({
+    email: email.toLowerCase(),
+    timestamp: new Date().toISOString(),
+    source: 'signup',
+  }));
+  return respond({ ok: true }, 200, ch);
+}
+
+async function handleListEmails(env, ch) {
+  if (!env.EMAIL_LIST) return respond({ emails: [], total: 0 }, 200, ch);
+  const list = await env.EMAIL_LIST.list({ prefix: 'sub:' });
+  const emails = [];
+  for (const key of list.keys) {
+    const val = await env.EMAIL_LIST.get(key.name);
+    if (val) { try { emails.push(JSON.parse(val)); } catch {} }
+  }
+  emails.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+  return respond({ emails, total: emails.length }, 200, ch);
+}
+
+async function handleImportEmails(req, env, ch) {
+  if (!env.EMAIL_LIST) return respond({ error: 'Email list not configured' }, 503, ch);
+  const { emails } = await req.json().catch(() => ({}));
+  if (!Array.isArray(emails)) return respond({ error: 'emails must be an array' }, 400, ch);
+  let added = 0, skipped = 0;
+  for (const email of emails) {
+    if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(email).trim())) { skipped++; continue; }
+    const key = 'sub:' + String(email).trim().toLowerCase();
+    const existing = await env.EMAIL_LIST.get(key);
+    if (existing) { skipped++; continue; }
+    await env.EMAIL_LIST.put(key, JSON.stringify({
+      email: String(email).trim().toLowerCase(),
+      timestamp: new Date().toISOString(),
+      source: 'import',
+    }));
+    added++;
+  }
+  return respond({ ok: true, added, skipped }, 200, ch);
+}
+
+async function handleDeleteEmail(email, env, ch) {
+  if (!env.EMAIL_LIST) return respond({ error: 'Email list not configured' }, 503, ch);
+  await env.EMAIL_LIST.delete('sub:' + email.toLowerCase());
+  return respond({ ok: true }, 200, ch);
+}
+
 // ── Main ─────────────────────────────────────────────────────────────────────
 export default {
   async fetch(request, env) {
@@ -226,6 +283,8 @@ export default {
       // ── Public routes ──
       if (url.pathname === '/api/login' && method === 'POST')
         return await handleLogin(request, env, ch);
+      if (url.pathname === '/api/subscribe' && method === 'POST')
+        return await handleSubscribe(request, env, ch);
       if (url.pathname === '/api/ads' && method === 'GET')
         return await handleGetAds(env, ch);
 
@@ -241,6 +300,15 @@ export default {
       // ── Protected: ads config ──
       if (url.pathname === '/api/ads' && method === 'POST')
         return await handleSaveAds(request, env, ch);
+
+      // ── Protected: email list ──
+      if (url.pathname === '/api/emails' && method === 'GET')
+        return await handleListEmails(env, ch);
+      if (url.pathname === '/api/emails/import' && method === 'POST')
+        return await handleImportEmails(request, env, ch);
+      const emailDel = url.pathname.match(/^\/api\/emails\/(.+)$/);
+      if (emailDel && method === 'DELETE')
+        return await handleDeleteEmail(decodeURIComponent(emailDel[1]), env, ch);
 
       // ── Protected: posts ──
       const m        = url.pathname.match(/^\/api\/posts(?:\/([^?]+))?$/);
