@@ -157,6 +157,15 @@
 
     .lib-empty { padding:32px;text-align:center;color:var(--muted);font-size:14px;background:#fff;border:1px solid var(--line);border-radius:3px; }
 
+    /* ── Multi-upload file rows ── */
+    .ad-file-rows { display:flex;flex-direction:column;gap:8px;margin-top:12px; }
+    .ad-file-row { display:grid;grid-template-columns:56px 1fr;gap:12px;align-items:start;background:var(--paper);border:1px solid var(--line);border-radius:2px;padding:10px 12px; }
+    .ad-file-thumb { width:56px;height:40px;background:#fff;border:1px solid var(--line);border-radius:2px;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0; }
+    .ad-file-thumb img { max-width:100%;max-height:100%;object-fit:contain; }
+    .ad-file-fields { display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px; }
+    .ad-file-fields input,.ad-file-fields select { padding:7px 9px;font-size:12px;border:1px solid var(--line);border-radius:2px;font-family:'Inter',sans-serif;background:#fff; }
+    @media (max-width:700px) { .ad-file-fields { grid-template-columns:1fr 1fr; } }
+
     /* ════════════════════════════════════════════════
        PREVIEW OVERLAY
     ════════════════════════════════════════════════ */
@@ -253,6 +262,15 @@
           <div class="toggle-row"><input type="checkbox" id="f-featured"><label for="f-featured">Feature on Homepage</label></div>
           <p class="toggle-hint" style="margin-top:6px">Only one post should be featured at a time.</p>
         </div>
+        <div class="sidebar-section">
+          <h3>Ads</h3>
+          <div class="field"><label class="lbl">Top Banner</label>
+            <select id="f-ad-top"><option value="">— None —</option></select>
+          </div>
+          <div class="field" style="margin-bottom:0"><label class="lbl">Bottom Banner</label>
+            <select id="f-ad-bottom"><option value="">— None —</option></select>
+          </div>
+        </div>
         <div class="pdf-section">
           <h3>TV Schedule PDF</h3>
           <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Stored at <code style="font-size:11px">/schedules/{year}/week-{n}.pdf</code></p>
@@ -294,31 +312,13 @@
 
       <!-- Add-ad form -->
       <div class="add-ad-panel" id="add-ad-panel">
-        <div class="field-row">
-          <div class="field">
-            <label class="lbl">Ad / Sponsor Name</label>
-            <input type="text" id="new-ad-name" placeholder="e.g. Tuscaloosa Toyota">
-          </div>
-          <div class="field">
-            <label class="lbl">Ad Size</label>
-            <select id="new-ad-size">
-              <option value="leaderboard">Post Banner — 728 × 90 px</option>
-              <option value="medium-rect">Homepage Box — 300 × 250 px</option>
-            </select>
-          </div>
+        <div class="field">
+          <label class="lbl">Image Files (JPG, PNG, GIF, WebP — select multiple)</label>
+          <input type="file" id="new-ad-file" accept="image/*" multiple style="padding:8px 10px;border:1px solid var(--line);border-radius:2px;background:#fff;width:100%;cursor:pointer;font-size:13px;">
         </div>
-        <div class="field-row">
-          <div class="field">
-            <label class="lbl">Image File (JPG, PNG, GIF, WebP)</label>
-            <input type="file" id="new-ad-file" accept="image/*" style="padding:8px 10px;border:1px solid var(--line);border-radius:2px;background:#fff;width:100%;cursor:pointer;font-size:13px;">
-          </div>
-          <div class="field">
-            <label class="lbl">Click-Through URL</label>
-            <input type="url" id="new-ad-link" placeholder="https://sponsor.com">
-          </div>
-        </div>
-        <div style="display:flex;align-items:center;gap:12px;margin-top:4px;">
-          <button class="btn btn-primary" id="btn-upload-ad">Upload Ad</button>
+        <div id="new-ad-rows" class="ad-file-rows"></div>
+        <div style="display:flex;align-items:center;gap:12px;margin-top:12px;">
+          <button class="btn btn-primary" id="btn-upload-ad">Upload</button>
           <span id="new-ad-status" style="font-size:13px;font-weight:600;"></span>
         </div>
       </div>
@@ -573,8 +573,14 @@ function openEditor(filename, sha, content) {
   }
   document.getElementById('f-pdf-file').value = '';
   document.getElementById('pdf-status').textContent = '';
+  // Reset ad dropdowns while loading
+  ['f-ad-top','f-ad-bottom'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = '<option value="">— Loading… —</option>';
+  });
   showView('view-editor');
   document.getElementById('f-title').focus();
+  loadEditorAds(filename);
 }
 
 async function openEditPost(filename, sha) {
@@ -639,6 +645,22 @@ document.getElementById('btn-publish').addEventListener('click', async () => {
     editFile = filename; editSha = result.sha;
     document.getElementById('editor-toolbar-title').textContent = 'Edit Post';
     document.getElementById('btn-delete-post').classList.remove('hidden');
+    // Save ad assignments for this post
+    const adTop    = document.getElementById('f-ad-top').value;
+    const adBottom = document.getElementById('f-ad-bottom').value;
+    if (adsConfig.library) {
+      if (!adsConfig.posts) adsConfig.posts = {};
+      if (adTop || adBottom) {
+        const pa = {};
+        if (adTop)    pa.top    = adTop;
+        if (adBottom) pa.bottom = adBottom;
+        adsConfig.posts[filename] = pa;
+      } else {
+        delete adsConfig.posts[filename];
+      }
+      api('POST', '/api/ads', { config: adsConfig, sha: adsSha||undefined })
+        .then(s => { adsSha = s.sha; }).catch(() => {});
+    }
     showBanner('success', 'Published');
   } catch (err) { showBanner('error', `Error: ${err.message}`); }
   finally { btn.textContent='Publish'; btn.disabled=false; }
@@ -768,6 +790,31 @@ function escHtml(s) {
 }
 
 /* ══════════════════════════════════════════════════════
+   EDITOR ADS
+══════════════════════════════════════════════════════ */
+async function loadEditorAds(filename) {
+  // Load ads config if not already in memory
+  if (!adsConfig.library) {
+    try {
+      const data = await api('GET', '/api/ads');
+      adsConfig = normAdsConfig(data.config);
+      adsSha    = data.sha || null;
+    } catch { return; }
+  }
+  const lib      = adsConfig.library || {};
+  const postAds  = filename ? (adsConfig.posts?.[filename] || {}) : {};
+  [['f-ad-top', 'top'], ['f-ad-bottom', 'bottom']].forEach(([selId, field]) => {
+    const sel = document.getElementById(selId);
+    if (!sel) return;
+    const cur = postAds[field] || '';
+    sel.innerHTML = `<option value="">— None —</option>` +
+      Object.entries(lib).map(([id, ad]) =>
+        `<option value="${id}"${cur === id ? ' selected' : ''}>${escHtml(ad.name)}</option>`
+      ).join('');
+  });
+}
+
+/* ══════════════════════════════════════════════════════
    ADS VIEW — library + per-post assignments
 ══════════════════════════════════════════════════════ */
 
@@ -894,42 +941,76 @@ async function openAdsView() {
 
 document.getElementById('btn-ads-back').addEventListener('click', () => loadPostList());
 
-// ── Upload new ad ──
+// ── Multi-file upload ──
+document.getElementById('new-ad-file').addEventListener('change', () => {
+  const files = [...document.getElementById('new-ad-file').files];
+  const wrap  = document.getElementById('new-ad-rows');
+  if (!files.length) { wrap.innerHTML = ''; return; }
+  wrap.innerHTML = files.map((f, i) => {
+    const baseName = f.name.replace(/\.[^/.]+$/, '').replace(/[-_]+/g, ' ').replace(/^\w/, c => c.toUpperCase());
+    return `<div class="ad-file-row" data-index="${i}">
+      <div class="ad-file-thumb" id="ad-thumb-${i}"></div>
+      <div class="ad-file-fields">
+        <input type="text" class="ad-fname" placeholder="Sponsor name" value="${escHtml(baseName)}">
+        <select class="ad-fsize">
+          <option value="leaderboard">Post Banner 728×90</option>
+          <option value="medium-rect">Homepage Box 300×250</option>
+        </select>
+        <input type="url" class="ad-flink" placeholder="https://sponsor.com">
+      </div>
+    </div>`;
+  }).join('');
+  files.forEach((f, i) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const el = document.getElementById(`ad-thumb-${i}`);
+      if (el) el.innerHTML = `<img src="${e.target.result}">`;
+    };
+    reader.readAsDataURL(f);
+  });
+});
+
 document.getElementById('btn-upload-ad').addEventListener('click', async () => {
-  const name     = document.getElementById('new-ad-name').value.trim();
-  const size     = document.getElementById('new-ad-size').value;
-  const fileInput= document.getElementById('new-ad-file');
-  const link     = document.getElementById('new-ad-link').value.trim();
-  const statusEl = document.getElementById('new-ad-status');
+  const fileInput = document.getElementById('new-ad-file');
+  const statusEl  = document.getElementById('new-ad-status');
+  const btn       = document.getElementById('btn-upload-ad');
+  const files     = [...fileInput.files];
+  if (!files.length) { statusEl.textContent = 'Choose at least one image.'; statusEl.style.color = '#991b1b'; return; }
 
-  if (!name) { statusEl.textContent = 'Please enter a sponsor name.'; statusEl.style.color = '#991b1b'; return; }
-  if (!fileInput.files.length) { statusEl.textContent = 'Please choose an image file.'; statusEl.style.color = '#991b1b'; return; }
-
-  const file = fileInput.files[0];
-  const ext  = file.type.includes('png') ? 'png' : file.type.includes('gif') ? 'gif' : file.type.includes('webp') ? 'webp' : 'jpg';
-  const id   = 'ad_' + Date.now();
-  const path = `ads/${id}.${ext}`;
-
-  statusEl.textContent = 'Uploading…'; statusEl.style.color = '#706a64';
-  const btn = document.getElementById('btn-upload-ad');
+  if (!adsConfig.library) adsConfig = normAdsConfig(adsConfig);
   btn.disabled = true;
+  let uploaded = 0;
+  const rows = document.querySelectorAll('.ad-file-row');
+
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    const row  = rows[i];
+    const name = row ? row.querySelector('.ad-fname').value.trim() || file.name : file.name;
+    const size = row ? row.querySelector('.ad-fsize').value : 'leaderboard';
+    const link = row ? row.querySelector('.ad-flink').value.trim() : '';
+    const ext  = file.type.includes('png') ? 'png' : file.type.includes('gif') ? 'gif' : file.type.includes('webp') ? 'webp' : 'jpg';
+    const id   = 'ad_' + Date.now() + '_' + i;
+    const path = `ads/${id}.${ext}`;
+    statusEl.textContent = `Uploading ${i + 1} of ${files.length}…`; statusEl.style.color = '#706a64';
+    try {
+      const b64    = await fileToBase64(file);
+      const result = await api('POST', '/api/upload', { path, content: b64 });
+      adsConfig.library[id] = { name, imageUrl: result.url, imageSha: result.sha, link: link || '', size };
+      uploaded++;
+    } catch (err) { console.warn(`Upload failed for ${name}:`, err.message); }
+  }
 
   try {
-    const b64 = await fileToBase64(file);
-    const result = await api('POST', '/api/upload', { path, content: b64 });
-
-    if (!adsConfig.library) adsConfig = normAdsConfig(adsConfig);
-    adsConfig.library[id] = { name, imageUrl: result.url, imageSha: result.sha, link: link || '', size };
-
     const saved = await api('POST', '/api/ads', { config: adsConfig, sha: adsSha || undefined });
     adsSha = saved.sha;
-
-    statusEl.textContent = 'Uploaded'; statusEl.style.color = '#065f46';
-    fileInput.value = ''; document.getElementById('new-ad-name').value = ''; document.getElementById('new-ad-link').value = '';
+    statusEl.textContent = uploaded === files.length ? 'Uploaded' : `${uploaded} of ${files.length} uploaded`;
+    statusEl.style.color = '#065f46';
+    fileInput.value = '';
+    document.getElementById('new-ad-rows').innerHTML = '';
     renderAdLibrary(); renderDefaultSlots(); renderPostAssignments();
     setTimeout(() => { statusEl.textContent = ''; }, 4000);
   } catch (err) {
-    statusEl.textContent = `Error: ${err.message}`; statusEl.style.color = '#991b1b';
+    statusEl.textContent = `Save failed: ${err.message}`; statusEl.style.color = '#991b1b';
   }
   btn.disabled = false;
 });
