@@ -1,5 +1,13 @@
 {
-  "library": {},
+  "library": {
+    "ad_1787673057444_0": {
+      "name": "1",
+      "imageUrl": "/ads/ad_1787673057444_0.png",
+      "imageSha": "913720eb2f5cc3b19e723cceaa4f8ecb5baedba0",
+      "link": "https://www.pepsi.com",
+      "size": "leaderboard"
+    }
+  },
   "defaults": {
     "post-top": null,
     "post-bottom": null,
