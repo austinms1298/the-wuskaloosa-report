@@ -1255,17 +1255,54 @@ function renderEmailTable() {
     table.innerHTML = '<div style="padding:24px;text-align:center;color:var(--muted);font-size:14px">No emails yet — list will grow as people subscribe.</div>';
     return;
   }
-  table.innerHTML = mlEmails.map(e => {
+  table.innerHTML = mlEmails.map((e, i) => {
     const date = new Date(e.timestamp).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
     const badge = e.source === 'import'
       ? `<span style="font-size:10px;background:#f3f4f6;color:#6b7280;padding:2px 7px;border-radius:8px;font-weight:700;letter-spacing:.05em">IMPORTED</span>`
       : `<span style="font-size:10px;background:#dcfce7;color:#166534;padding:2px 7px;border-radius:8px;font-weight:700;letter-spacing:.05em">SIGNUP</span>`;
-    return `<div style="display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--line);font-size:13px">
-      <span style="flex:1;font-weight:600">${e.email}</span>
+    return `<div style="display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--line);font-size:13px" id="ml-row-${i}">
+      <span class="ml-email-label" style="flex:1;font-weight:600">${e.email}</span>
+      <input class="ml-email-edit" type="email" value="${e.email}" style="display:none;flex:1;padding:5px 8px;font-size:13px;border:1px solid var(--line);border-radius:2px;font-family:'Inter',sans-serif">
       ${badge}
       <span style="color:var(--muted);white-space:nowrap;font-size:12px">${date}</span>
+      <button class="btn btn-white btn-sm" style="padding:3px 10px;font-size:11px" onclick="startEditEmail(${i})">Edit</button>
+      <button class="btn btn-sm" style="padding:3px 10px;font-size:11px;background:#dc2626;color:#fff;border:none" onclick="deleteEmail('${e.email}')">✕</button>
     </div>`;
   }).join('');
+}
+
+function startEditEmail(i) {
+  const row = document.getElementById('ml-row-' + i);
+  const label = row.querySelector('.ml-email-label');
+  const input = row.querySelector('.ml-email-edit');
+  const editBtn = row.querySelectorAll('button')[0];
+  label.style.display = 'none';
+  input.style.display = 'block';
+  input.focus();
+  editBtn.textContent = 'Save';
+  editBtn.onclick = () => saveEditEmail(i, mlEmails[i].email, input.value.trim());
+}
+
+async function saveEditEmail(i, oldEmail, newEmail) {
+  if (!newEmail || newEmail === oldEmail) { renderEmailTable(); return; }
+  try {
+    // Import new email first, then delete old
+    await api('POST', '/api/emails/import', { emails: [newEmail] });
+    await api('DELETE', '/api/emails/' + encodeURIComponent(oldEmail));
+    await loadEmails();
+  } catch(err) {
+    alert('Error: ' + err.message);
+  }
+}
+
+async function deleteEmail(email) {
+  if (!confirm('Remove ' + email + ' from the list?')) return;
+  try {
+    await api('DELETE', '/api/emails/' + encodeURIComponent(email));
+    await loadEmails();
+  } catch(err) {
+    alert('Error: ' + err.message);
+  }
 }
 
 document.getElementById('btn-mailing-list').addEventListener('click', openMailingList);
