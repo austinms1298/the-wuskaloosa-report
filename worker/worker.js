@@ -192,6 +192,36 @@ async function handleDeletePost(filename, sha, env, ch) {
   return respond({ ok: true }, 200, ch);
 }
 
+async function handleUpload(req, env, ch) {
+  const { path, content, sha } = await req.json().catch(() => ({}));
+
+  // Validate path
+  if (!path || typeof path !== 'string')
+    return respond({ error: 'Missing or invalid path' }, 400, ch);
+  if (path.startsWith('/'))
+    return respond({ error: 'path must not start with /' }, 400, ch);
+  if (path.split('/').some(seg => seg === '..'))
+    return respond({ error: 'path must not contain ..' }, 400, ch);
+
+  // Validate content (base64 string)
+  if (!content || typeof content !== 'string')
+    return respond({ error: 'Missing or invalid content (expected base64 string)' }, 400, ch);
+
+  const repoPath = `public/${path}`;
+  await ghRequest('PUT', `/repos/${REPO}/contents/${repoPath}`, env.GITHUB_PAT, {
+    message: `Upload: ${repoPath}`,
+    content,   // already base64 — GitHub API expects this directly
+    branch: BRANCH,
+    ...(sha ? { sha } : {}),
+  });
+
+  // Fetch back the committed file to get its new SHA
+  const updated = await ghRequest(
+    'GET', `/repos/${REPO}/contents/${repoPath}?ref=${BRANCH}`, env.GITHUB_PAT
+  );
+  return respond({ ok: true, url: `/${path}`, sha: updated.sha }, 200, ch);
+}
+
 // ── Main ─────────────────────────────────────────────────────────────────────
 
 export default {
@@ -213,6 +243,10 @@ export default {
       const authHeader = request.headers.get('Authorization') || '';
       const payload    = await jwtVerify(authHeader.replace(/^Bearer /, ''), env.JWT_SECRET || '');
       if (!payload) return respond({ error: 'Unauthorized' }, 401, ch);
+
+      // ── Protected: file upload ──
+      if (url.pathname === '/api/upload' && method === 'POST')
+        return await handleUpload(request, env, ch);
 
       // ── Protected: posts ──
       const m        = url.pathname.match(/^\/api\/posts(?:\/([^?]+))?$/);

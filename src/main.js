@@ -24,7 +24,7 @@ function parsePost(path, raw) {
     featured: Boolean(data.featured),
     schedulePdf: data.schedule_pdf || null,
     body,
-    html: marked.parse(body)
+    html: body.trim().startsWith('<') ? body.trim() : marked.parse(body)
   };
 }
 

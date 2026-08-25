@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/easymde/2.18.0/easymde.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.7/quill.snow.min.css">
   <style>
     /* ─── Tokens ─── */
     :root {
@@ -40,6 +40,7 @@
     .btn-outline  { background: transparent; color: var(--cr); border: 1.5px solid var(--cr); }
     .btn-danger   { background: #dc2626; color: #fff; }
     .btn-sm       { padding: 6px 13px; font-size: 12px; }
+    .btn-pdf      { background: #1e3a8a; color: #fff; }
 
     /* ─── Form fields ─── */
     label.lbl {
@@ -48,7 +49,7 @@
     }
     .field { margin-bottom: 18px; }
     input[type=text], input[type=password], input[type=datetime-local],
-    textarea, select {
+    input[type=number], textarea, select {
       width: 100%; padding: 10px 12px;
       border: 1px solid var(--line); border-radius: 2px;
       font-size: 14px; font-family: 'Inter', sans-serif;
@@ -59,6 +60,7 @@
       outline: none; border-color: var(--cr); box-shadow: 0 0 0 3px rgba(143,18,36,.08);
     }
     textarea { resize: vertical; min-height: 72px; }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
     /* ─── Toolbar ─── */
     .toolbar {
@@ -122,9 +124,8 @@
 
     /* ─── EDITOR VIEW ─── */
     #view-editor { display: none; }
-    .editor-wrap { padding: 32px; max-width: 1140px; margin: 0 auto; }
+    .editor-wrap { padding: 32px; max-width: 1200px; margin: 0 auto; }
     .editor-layout { display: grid; grid-template-columns: 300px 1fr; gap: 36px; align-items: start; }
-    .editor-sidebar {}
     .sidebar-section { background: #fff; border: 1px solid var(--line); border-radius: 2px; padding: 20px; margin-bottom: 16px; }
     .sidebar-section h3 {
       font-family: 'Oswald', sans-serif; font-weight: 400; font-size: 16px;
@@ -145,6 +146,50 @@
     }
     .editor-title-input:focus { outline: none; border-color: var(--cr); }
 
+    /* ─── Quill editor ─── */
+    #quill-editor {
+      background: #fff;
+      min-height: 520px;
+      font-size: 16px;
+      line-height: 1.65;
+      font-family: 'Inter', sans-serif;
+    }
+    .ql-container { border-color: var(--line) !important; border-radius: 0 0 2px 2px; }
+    .ql-toolbar { border-color: var(--line) !important; border-radius: 2px 2px 0 0; background: var(--paper); }
+    .ql-editor { min-height: 520px; font-size: 16px; font-family: 'Inter', sans-serif; }
+    .ql-editor p { margin-bottom: 1em; }
+
+    /* ─── PDF section ─── */
+    .pdf-section {
+      background: #fff; border: 1px solid var(--line); border-radius: 2px;
+      padding: 20px; margin-bottom: 16px;
+    }
+    .pdf-section h3 {
+      font-family: 'Oswald', sans-serif; font-weight: 400; font-size: 16px;
+      margin-bottom: 18px; padding-bottom: 10px; border-bottom: 1px solid var(--line);
+    }
+    .pdf-current {
+      font-size: 12px; color: var(--muted); margin-top: 10px;
+      word-break: break-all; min-height: 16px;
+    }
+    .pdf-current a { color: var(--cr); text-decoration: none; }
+    .pdf-current a:hover { text-decoration: underline; }
+    .pdf-file-row {
+      display: flex; gap: 8px; align-items: center;
+      margin-top: 12px;
+    }
+    .pdf-file-row input[type=file] {
+      flex: 1; font-size: 12px; padding: 6px 8px;
+      border: 1px solid var(--line); border-radius: 2px; background: #fff;
+      cursor: pointer;
+    }
+    .pdf-status {
+      font-size: 12px; margin-top: 8px; min-height: 16px;
+      font-weight: 600;
+    }
+    .pdf-status.ok  { color: #065f46; }
+    .pdf-status.err { color: #991b1b; }
+
     /* ─── Status banner ─── */
     .status-banner {
       padding: 12px 24px; font-size: 13px; font-weight: 600;
@@ -153,12 +198,8 @@
     .status-banner.success { background: var(--success-bg); color: var(--success-fg); }
     .status-banner.error   { background: var(--error-bg);   color: var(--error-fg); }
 
-    /* ─── EasyMDE tweaks ─── */
-    .EasyMDEContainer .CodeMirror { height: 520px; font-family: 'Inter', ui-monospace, monospace; font-size: 15px; line-height: 1.65; }
-    .editor-toolbar { background: var(--paper); border: 1px solid var(--line); }
-
     /* ─── Responsive ─── */
-    @media (max-width: 800px) {
+    @media (max-width: 900px) {
       .editor-layout { grid-template-columns: 1fr; }
       .posts-body, .editor-wrap { padding: 16px; }
       .login-card { padding: 36px 24px; }
@@ -228,8 +269,10 @@
       autocomplete="off"
     >
     <div class="editor-layout">
-      <!-- Sidebar -->
+
+      <!-- ── Sidebar ── -->
       <div class="editor-sidebar">
+
         <div class="sidebar-section">
           <h3>Details</h3>
           <div class="field">
@@ -239,6 +282,16 @@
           <div class="field">
             <label class="lbl" for="f-date">Publish Date</label>
             <input id="f-date" type="datetime-local">
+          </div>
+          <div class="field-row field">
+            <div>
+              <label class="lbl" for="f-week">Week #</label>
+              <input id="f-week" type="number" min="0" max="18" value="1" placeholder="1">
+            </div>
+            <div>
+              <label class="lbl" for="f-year">Year</label>
+              <input id="f-year" type="number" min="2020" max="2099" value="2026" placeholder="2026">
+            </div>
           </div>
           <div class="field">
             <label class="lbl" for="f-category">Category</label>
@@ -252,6 +305,7 @@
             </select>
           </div>
         </div>
+
         <div class="sidebar-section">
           <h3>Summary</h3>
           <div class="field" style="margin-bottom:0">
@@ -259,6 +313,7 @@
             <textarea id="f-excerpt" rows="4" placeholder="One or two lines shown in post previews…"></textarea>
           </div>
         </div>
+
         <div class="sidebar-section">
           <h3>Homepage</h3>
           <div class="toggle-row">
@@ -267,34 +322,54 @@
           </div>
           <p class="toggle-hint" style="margin-top:6px">Only one post should be featured at a time.</p>
         </div>
+
+        <!-- ── TV Schedule PDF ── -->
+        <div class="pdf-section">
+          <h3>📺 TV Schedule PDF</h3>
+          <p style="font-size:12px;color:var(--muted);margin-bottom:12px">
+            Upload the weekly TV schedule PDF. It will be stored at
+            <code style="font-size:11px">/schedules/{year}/week-{n}.pdf</code>
+            and linked in the post header.
+          </p>
+          <div class="pdf-file-row">
+            <input type="file" id="f-pdf-file" accept=".pdf">
+            <button class="btn btn-pdf btn-sm" id="btn-upload-pdf">Upload PDF</button>
+          </div>
+          <div class="pdf-status" id="pdf-status"></div>
+          <div class="pdf-current" id="pdf-current"></div>
+        </div>
+
         <button class="btn btn-danger btn-sm hidden" id="btn-delete-post" style="margin-top:4px;width:100%;justify-content:center">
           Delete Post
         </button>
+
       </div>
-      <!-- Body editor -->
+
+      <!-- ── Body editor ── -->
       <div class="editor-main">
         <h3>Article Body</h3>
-        <textarea id="f-body"></textarea>
+        <div id="quill-editor"></div>
       </div>
+
     </div>
   </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/easymde/2.18.0/easymde.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.7/quill.min.js"></script>
 <script>
 // ═════════════════════════════════════════════════════════════════════════════
 // CONFIGURATION
-// ─────────────────────────────────────────────────────────────────────────────
-// After deploying the Cloudflare Worker, paste its URL here:
 const API_URL = 'https://wuskaloosa-admin.austin-a73.workers.dev';
 // ═════════════════════════════════════════════════════════════════════════════
 
 /* ── State ── */
-let token    = localStorage.getItem('wkr_token') || null;
-let username = localStorage.getItem('wkr_user')  || null;
-let mde      = null;   // EasyMDE instance
-let editFile = null;   // filename currently being edited (null = new post)
-let editSha  = null;   // GitHub SHA for the current file
+let token     = localStorage.getItem('wkr_token') || null;
+let username  = localStorage.getItem('wkr_user')  || null;
+let quill     = null;   // Quill instance
+let editFile  = null;   // filename currently being edited (null = new post)
+let editSha   = null;   // GitHub SHA for the current file
+let pdfUrl    = null;   // schedule_pdf value (stored after upload or loaded from frontmatter)
+let pdfSha    = null;   // SHA of already-uploaded PDF (for updates)
 
 /* ── API helper ── */
 async function api(method, path, body) {
@@ -336,14 +411,9 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const errEl = document.getElementById('login-err');
   const btn   = document.getElementById('btn-login');
-  errEl.textContent   = '';
-  btn.textContent     = 'Signing in…';
-  btn.disabled        = true;
-
-  if (API_URL.includes('YOUR-ACCOUNT')) {
-    errEl.textContent = 'Set API_URL in admin/index.html first.';
-    btn.textContent = 'SIGN IN →'; btn.disabled = false; return;
-  }
+  errEl.textContent = '';
+  btn.textContent   = 'Signing in…';
+  btn.disabled      = true;
 
   try {
     const u = document.getElementById('inp-user').value.trim();
@@ -374,8 +444,7 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
 ────────────────────────────────────────────────────────────── */
 async function loadPostList() {
   showView('view-posts');
-  const toolbarUser = document.getElementById('toolbar-user');
-  toolbarUser.textContent = username ? `Signed in as ${username}` : '';
+  document.getElementById('toolbar-user').textContent = username ? `Signed in as ${username}` : '';
 
   const listEl = document.getElementById('posts-list');
   listEl.innerHTML = '<p class="posts-loading">Loading posts…</p>';
@@ -391,12 +460,11 @@ async function loadPostList() {
       return;
     }
     listEl.innerHTML = posts.map(p => {
-      // Derive human label from filename: 2026-08-22-my-slug.md
-      const parts  = p.name.replace('.md', '').split('-');
+      const parts   = p.name.replace('.md', '').split('-');
       const dateStr = parts.length >= 3 ? `${parts[0]}-${parts[1]}-${parts[2]}` : '';
       const rawLabel = parts.slice(3).join(' ') || p.name;
-      const label  = rawLabel.charAt(0).toUpperCase() + rawLabel.slice(1);
-      const disp   = dateStr
+      const label   = rawLabel.charAt(0).toUpperCase() + rawLabel.slice(1);
+      const disp    = dateStr
         ? new Date(dateStr + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
         : '';
       return `
@@ -435,10 +503,31 @@ async function confirmDelete(filename, sha) {
 }
 
 /* ────────────────────────────────────────────────────────────
-   EDITOR
+   EDITOR — Quill init
 ────────────────────────────────────────────────────────────── */
+function initQuill() {
+  if (quill) return;
+  quill = new Quill('#quill-editor', {
+    theme: 'snow',
+    placeholder: 'Write your take here…',
+    modules: {
+      toolbar: [
+        [{ font: [] }],
+        [{ size: ['small', false, 'large', 'huge'] }],
+        ['bold', 'italic', 'underline', 'strike'],
+        [{ color: [] }, { background: [] }],
+        [{ header: [1, 2, 3, false] }],
+        [{ list: 'ordered' }, { list: 'bullet' }],
+        [{ indent: '-1' }, { indent: '+1' }],
+        [{ align: [] }],
+        ['link', 'blockquote'],
+        ['clean'],
+      ],
+    },
+  });
+}
 
-// Auto-slug from title (new posts only)
+/* ── Auto-slug from title (new posts only) ── */
 document.getElementById('f-title').addEventListener('input', () => {
   if (editFile) return;
   document.getElementById('f-slug').value = document.getElementById('f-title').value
@@ -449,27 +538,15 @@ document.getElementById('f-title').addEventListener('input', () => {
     .replace(/^-+|-+$/g, '');
 });
 
-function initMDE() {
-  if (mde) return;
-  mde = new EasyMDE({
-    element:      document.getElementById('f-body'),
-    spellChecker: false,
-    placeholder:  'Write your take here…',
-    toolbar: [
-      'bold','italic','heading','|',
-      'quote','unordered-list','ordered-list','|',
-      'link','|',
-      'preview','side-by-side','fullscreen','|','guide'
-    ],
-    status: ['lines', 'words'],
-    renderingConfig: { singleLineBreaks: false },
-  });
-}
-
+/* ────────────────────────────────────────────────────────────
+   OPEN / LOAD EDITOR
+────────────────────────────────────────────────────────────── */
 function openEditor(filename, sha, content) {
   editFile = filename;
   editSha  = sha;
-  initMDE();
+  pdfUrl   = null;
+  pdfSha   = null;
+  initQuill();
   hideBanner();
 
   const isNew = !filename;
@@ -490,6 +567,8 @@ function openEditor(filename, sha, content) {
     document.getElementById('f-slug').value     = data.slug     || '';
     document.getElementById('f-excerpt').value  = data.excerpt  || '';
     document.getElementById('f-featured').checked = data.featured === 'true' || data.featured === true;
+    document.getElementById('f-week').value     = data.week     !== undefined ? data.week     : 1;
+    document.getElementById('f-year').value     = data.year     !== undefined ? data.year     : 2026;
     const cats = ['Latest Take','Analysis','Preview','Recap','Culture','Opinion'];
     document.getElementById('f-category').value = cats.includes(data.category) ? data.category : 'Latest Take';
     if (data.date) {
@@ -498,19 +577,37 @@ function openEditor(filename, sha, content) {
     } else {
       document.getElementById('f-date').value = toLocalInput(new Date());
     }
-    mde.value(body || '');
+    // Restore PDF reference
+    pdfUrl = data.schedule_pdf || null;
+    renderPdfStatus();
+    // Set editor body — handle HTML or plain text
+    const isHtml = body.trim().startsWith('<');
+    if (isHtml) {
+      quill.root.innerHTML = body.trim();
+    } else {
+      // Plain text (legacy Markdown stored as text) — insert as-is
+      quill.setText(body.trim());
+    }
   } else {
     document.getElementById('f-title').value    = '';
     document.getElementById('f-slug').value     = '';
     document.getElementById('f-excerpt').value  = '';
     document.getElementById('f-featured').checked = false;
+    document.getElementById('f-week').value     = 1;
+    document.getElementById('f-year').value     = new Date().getFullYear();
     document.getElementById('f-category').value = 'Latest Take';
     document.getElementById('f-date').value     = toLocalInput(new Date());
-    mde.value('');
+    pdfUrl = null;
+    pdfSha = null;
+    renderPdfStatus();
+    quill.setText('');
   }
 
+  // Reset file input
+  document.getElementById('f-pdf-file').value = '';
+  document.getElementById('pdf-status').textContent = '';
+
   showView('view-editor');
-  setTimeout(() => mde.codemirror.refresh(), 60);
   document.getElementById('f-title').focus();
 }
 
@@ -527,6 +624,82 @@ document.getElementById('btn-back').addEventListener('click', () => {
   if (confirm('Go back? Unsaved changes will be lost.')) loadPostList();
 });
 
+/* ────────────────────────────────────────────────────────────
+   PDF UPLOAD
+────────────────────────────────────────────────────────────── */
+function renderPdfStatus() {
+  const el = document.getElementById('pdf-current');
+  if (pdfUrl) {
+    el.innerHTML = `Current: <a href="${pdfUrl}" target="_blank">${pdfUrl}</a>`;
+  } else {
+    el.textContent = 'No PDF linked yet.';
+  }
+}
+
+document.getElementById('btn-upload-pdf').addEventListener('click', async () => {
+  const fileInput = document.getElementById('f-pdf-file');
+  const statusEl  = document.getElementById('pdf-status');
+  const btn       = document.getElementById('btn-upload-pdf');
+
+  if (!fileInput.files.length) {
+    statusEl.textContent = 'Choose a PDF file first.';
+    statusEl.className   = 'pdf-status err';
+    return;
+  }
+
+  const file = fileInput.files[0];
+  if (!file.name.endsWith('.pdf')) {
+    statusEl.textContent = 'Only PDF files are supported.';
+    statusEl.className   = 'pdf-status err';
+    return;
+  }
+
+  const week = parseInt(document.getElementById('f-week').value, 10);
+  const year = parseInt(document.getElementById('f-year').value, 10);
+  if (isNaN(week) || isNaN(year)) {
+    statusEl.textContent = 'Set Week # and Year before uploading.';
+    statusEl.className   = 'pdf-status err';
+    return;
+  }
+
+  btn.textContent = 'Uploading…';
+  btn.disabled    = true;
+  statusEl.textContent = '';
+
+  try {
+    // Read file as base64
+    const b64 = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload  = () => resolve(reader.result.split(',')[1]); // strip data: prefix
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
+    const path = `schedules/${year}/week-${week}.pdf`;
+    const result = await api('POST', '/api/upload', {
+      path,
+      content: b64,
+      sha: pdfSha || undefined,
+    });
+
+    pdfUrl = result.url;     // e.g. "/schedules/2026/week-3.pdf"
+    pdfSha = result.sha;
+    renderPdfStatus();
+    statusEl.textContent = '✓ PDF uploaded!';
+    statusEl.className   = 'pdf-status ok';
+    fileInput.value = '';
+  } catch (err) {
+    statusEl.textContent = `Upload failed: ${err.message}`;
+    statusEl.className   = 'pdf-status err';
+  } finally {
+    btn.textContent = 'Upload PDF';
+    btn.disabled    = false;
+  }
+});
+
+/* ────────────────────────────────────────────────────────────
+   PUBLISH
+────────────────────────────────────────────────────────────── */
 document.getElementById('btn-publish').addEventListener('click', async () => {
   const title    = document.getElementById('f-title').value.trim();
   const slug     = document.getElementById('f-slug').value.trim();
@@ -534,7 +707,13 @@ document.getElementById('btn-publish').addEventListener('click', async () => {
   const category = document.getElementById('f-category').value;
   const featured = document.getElementById('f-featured').checked;
   const dateVal  = document.getElementById('f-date').value;
-  const body     = mde.value().trim();
+  const week     = parseInt(document.getElementById('f-week').value, 10);
+  const year     = parseInt(document.getElementById('f-year').value, 10);
+
+  // Get HTML body from Quill
+  const body = quill.root.innerHTML.trim();
+  // Treat empty editor as empty
+  const bodyIsEmpty = quill.getText().trim() === '';
 
   if (!title)   { showBanner('error', 'Title is required.'); return; }
   if (!slug)    { showBanner('error', 'URL Slug is required.'); return; }
@@ -542,10 +721,12 @@ document.getElementById('btn-publish').addEventListener('click', async () => {
 
   const dateISO  = new Date(dateVal).toISOString();
   const filename = editFile || makeFilename(slug, dateVal);
-  const content  = buildFrontmatter({ title, slug, date: dateISO, excerpt, category, featured }) + body;
+  const content  = buildFrontmatter({ title, slug, date: dateISO, excerpt, category, featured, week, year, schedulePdf: pdfUrl })
+    + (bodyIsEmpty ? '' : body);
 
   const btn = document.getElementById('btn-publish');
-  btn.textContent = 'Publishing…'; btn.disabled = true;
+  btn.textContent = 'Publishing…';
+  btn.disabled    = true;
   hideBanner();
 
   try {
@@ -554,21 +735,21 @@ document.getElementById('btn-publish').addEventListener('click', async () => {
       sha: editSha || undefined,
     });
     editFile = filename;
-    editSha  = result.sha; // Worker returns updated SHA
+    editSha  = result.sha;
     document.getElementById('editor-toolbar-title').textContent = 'Edit Post';
     document.getElementById('btn-delete-post').classList.remove('hidden');
     showBanner('success', '✓ Published! Your site will rebuild in about a minute. Roll Tide 🏈');
   } catch (err) {
     showBanner('error', `Error: ${err.message}`);
   } finally {
-    btn.textContent = 'Publish'; btn.disabled = false;
+    btn.textContent = 'Publish';
+    btn.disabled    = false;
   }
 });
 
 /* ────────────────────────────────────────────────────────────
    HELPERS
 ────────────────────────────────────────────────────────────── */
-
 function parseFrontmatter(raw) {
   const m = raw.match(/^---\s*\n([\s\S]*?)\n---\s*\n?([\s\S]*)$/);
   if (!m) return { data: {}, body: raw };
@@ -583,9 +764,9 @@ function parseFrontmatter(raw) {
   return { data, body: m[2].trim() };
 }
 
-function buildFrontmatter({ title, slug, date, excerpt, category, featured }) {
+function buildFrontmatter({ title, slug, date, excerpt, category, featured, week, year, schedulePdf }) {
   const q = v => `"${String(v).replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
-  return [
+  const lines = [
     '---',
     `title: ${q(title)}`,
     `slug: ${q(slug)}`,
@@ -593,10 +774,12 @@ function buildFrontmatter({ title, slug, date, excerpt, category, featured }) {
     `excerpt: ${q(excerpt)}`,
     `category: "${category}"`,
     `featured: ${featured}`,
-    '---',
-    '',
-    '',
-  ].join('\n');
+    `week: ${isNaN(week) ? 1 : week}`,
+    `year: ${isNaN(year) ? 2026 : year}`,
+  ];
+  if (schedulePdf) lines.push(`schedule_pdf: "${schedulePdf}"`);
+  lines.push('---', '', '');
+  return lines.join('\n');
 }
 
 function makeFilename(slug, dateVal) {
