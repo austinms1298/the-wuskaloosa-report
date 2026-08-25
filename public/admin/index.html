@@ -240,7 +240,7 @@
       <div class="editor-sidebar">
         <div class="sidebar-section">
           <h3>Details</h3>
-          <div class="field"><label class="lbl" for="f-slug">URL Slug</label><input id="f-slug" type="text" placeholder="my-post-slug" autocomplete="off"></div>
+          <input id="f-slug" type="hidden" autocomplete="off">
           <div class="field"><label class="lbl" for="f-date">Publish Date</label><input id="f-date" type="datetime-local"></div>
           <div class="field-row field">
             <div><label class="lbl" for="f-week">Week #</label><input id="f-week" type="number" min="0" max="18" value="1"></div>
@@ -624,7 +624,6 @@ document.getElementById('btn-publish').addEventListener('click', async () => {
   const body     = quill.root.innerHTML.trim();
   const bodyIsEmpty = quill.getText().trim() === '';
   if (!title)   { showBanner('error','Title is required.'); return; }
-  if (!slug)    { showBanner('error','URL Slug is required.'); return; }
   if (!dateVal) { showBanner('error','Publish date is required.'); return; }
   const filename = editFile || makeFilename(slug, dateVal);
   const content  = buildFrontmatter({title,slug,date:new Date(dateVal).toISOString(),excerpt,category,week,year,schedulePdf:pdfUrl})
