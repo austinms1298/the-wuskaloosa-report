@@ -6,6 +6,13 @@
       "imageSha": "913720eb2f5cc3b19e723cceaa4f8ecb5baedba0",
       "link": "https://www.pepsi.com",
       "size": "leaderboard"
+    },
+    "ad_1787673072668_0": {
+      "name": "2",
+      "imageUrl": "/ads/ad_1787673072668_0.png",
+      "imageSha": "c86778d6e212708133bfd00936b93b01c714574c",
+      "link": "https://www.princelaw.net",
+      "size": "leaderboard"
     }
   },
   "defaults": {
