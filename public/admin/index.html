@@ -164,6 +164,16 @@
     .rotate-bar { display:flex;align-items:center;gap:10px;margin-bottom:14px; }
     .rotate-bar input { width:64px;padding:7px 9px;border:1px solid var(--line);border-radius:2px;font-size:13px;font-family:'Inter',sans-serif; }
 
+    /* ── Ad checkbox lists ── */
+    .ad-check-list { display:flex;flex-direction:column;gap:5px; }
+    .ad-check-item { display:flex;align-items:center;gap:10px;padding:7px 10px;border:1px solid var(--line);border-radius:2px;cursor:pointer;background:#fff;transition:border-color .15s; }
+    .ad-check-item:hover { border-color:#c9c1bb;background:var(--paper); }
+    .ad-check-item input[type=checkbox] { width:15px;height:15px;accent-color:var(--cr);flex-shrink:0;cursor:pointer; }
+    .ad-check-thumb { width:52px;height:28px;object-fit:contain;border:1px solid var(--line);border-radius:2px;background:var(--paper);flex-shrink:0; }
+    .ad-check-label { font-size:13px;font-weight:600;flex:1;line-height:1.3; }
+    .ad-check-empty { font-size:12px;color:var(--muted);font-style:italic;margin:0;padding:6px 0; }
+    .assign-summary { font-size:13px;color:var(--deep);align-self:center; }
+
     /* ── Multi-upload file rows ── */
     .ad-file-rows { display:flex;flex-direction:column;gap:8px;margin-top:12px; }
     .ad-file-row { display:grid;grid-template-columns:56px 1fr;gap:12px;align-items:start;background:var(--paper);border:1px solid var(--line);border-radius:2px;padding:10px 12px; }
@@ -268,11 +278,24 @@
         </div>
         <div class="sidebar-section">
           <h3>Ads</h3>
-          <div class="field"><label class="lbl">Top Banner</label>
-            <select id="f-ad-top"><option value="">— None —</option></select>
+          <div class="field">
+            <label class="lbl">Rotate every</label>
+            <div style="display:flex;align-items:center;gap:8px">
+              <input type="number" id="f-ad-interval" min="2" max="300" value="6" style="width:70px;padding:7px 9px;border:1px solid var(--line);border-radius:2px;font-size:13px;font-family:'Inter',sans-serif;">
+              <span style="font-size:13px;color:var(--muted)">seconds</span>
+            </div>
           </div>
-          <div class="field" style="margin-bottom:0"><label class="lbl">Bottom Banner</label>
-            <select id="f-ad-bottom"><option value="">— None —</option></select>
+          <div class="field">
+            <label class="lbl">Top Banner</label>
+            <div id="f-ad-top-checks" class="ad-check-list">
+              <p class="ad-check-empty">Loading ads…</p>
+            </div>
+          </div>
+          <div class="field" style="margin-bottom:0">
+            <label class="lbl">Bottom Banner</label>
+            <div id="f-ad-bottom-checks" class="ad-check-list">
+              <p class="ad-check-empty">Loading ads…</p>
+            </div>
           </div>
         </div>
         <div class="pdf-section">
@@ -347,23 +370,20 @@
       <div class="slot-table">
         <div class="slot-row">
           <div class="slot-label">Post Top Banner<span class="slot-dim">728 × 90 px · Above every article</span></div>
-          <div class="slot-multi">
-            <select id="default-post-top" multiple></select>
-            <p class="slot-multi-note">Hold Ctrl / ⌘ to select multiple ads for rotation</p>
+          <div id="default-check-post-top" class="ad-check-list">
+            <p class="ad-check-empty">Loading ads…</p>
           </div>
         </div>
         <div class="slot-row">
           <div class="slot-label">Post Bottom Banner<span class="slot-dim">728 × 90 px · Below every article</span></div>
-          <div class="slot-multi">
-            <select id="default-post-bottom" multiple></select>
-            <p class="slot-multi-note">Hold Ctrl / ⌘ to select multiple ads for rotation</p>
+          <div id="default-check-post-bottom" class="ad-check-list">
+            <p class="ad-check-empty">Loading ads…</p>
           </div>
         </div>
         <div class="slot-row">
           <div class="slot-label">Homepage Box<span class="slot-dim">300 × 250 px · Right column on home page</span></div>
-          <div class="slot-multi">
-            <select id="default-homepage" multiple></select>
-            <p class="slot-multi-note">Hold Ctrl / ⌘ to select multiple ads for rotation</p>
+          <div id="default-check-homepage" class="ad-check-list">
+            <p class="ad-check-empty">Loading ads…</p>
           </div>
         </div>
       </div>
@@ -375,7 +395,7 @@
         <h2>Post Assignments</h2>
       </div>
       <p class="ads-section-note">
-        Override which ad runs on a specific post. "Default" uses whatever you set above. "None" shows no ad on that post.
+        Ad assignments per post are set in the post editor sidebar. This shows a read-only summary of what's currently assigned.
       </p>
       <div id="post-assignments-wrap">
         <div class="lib-empty">Loading posts…</div>
@@ -634,10 +654,10 @@ function openEditor(filename, sha, content) {
   }
   document.getElementById('f-pdf-file').value = '';
   document.getElementById('pdf-status').textContent = '';
-  // Reset ad dropdowns while loading
-  ['f-ad-top','f-ad-bottom'].forEach(id => {
+  // Reset ad checkbox lists while loading
+  ['f-ad-top-checks','f-ad-bottom-checks'].forEach(id => {
     const el = document.getElementById(id);
-    if (el) el.innerHTML = '<option value="">— Loading… —</option>';
+    if (el) el.innerHTML = '<p class="ad-check-empty">Loading ads…</p>';
   });
   showView('view-editor');
   document.getElementById('f-title').focus();
@@ -716,18 +736,18 @@ document.getElementById('btn-publish').addEventListener('click', async () => {
     document.getElementById('editor-toolbar-title').textContent = 'Edit Post';
     document.getElementById('btn-delete-post').classList.remove('hidden');
     // Save ad assignments for this post
-    const adTop    = document.getElementById('f-ad-top').value;
-    const adBottom = document.getElementById('f-ad-bottom').value;
+    const getCheckedIds = (divId) => Array.from(document.querySelectorAll(`#${divId} input[type=checkbox]:checked`)).map(c => c.value).filter(Boolean);
+    const adTopIds    = getCheckedIds('f-ad-top-checks');
+    const adBottomIds = getCheckedIds('f-ad-bottom-checks');
+    const adInterval  = parseInt(document.getElementById('f-ad-interval')?.value, 10);
     if (adsConfig.library) {
       if (!adsConfig.posts) adsConfig.posts = {};
-      if (adTop || adBottom) {
-        const pa = {};
-        if (adTop)    pa.top    = adTop;
-        if (adBottom) pa.bottom = adBottom;
-        adsConfig.posts[slug] = pa;
-      } else {
-        delete adsConfig.posts[slug];
-      }
+      const pa = {};
+      if (adTopIds.length)    pa.top    = adTopIds.length === 1 ? adTopIds[0] : adTopIds;
+      if (adBottomIds.length) pa.bottom = adBottomIds.length === 1 ? adBottomIds[0] : adBottomIds;
+      if (Object.keys(pa).length) { adsConfig.posts[slug] = pa; }
+      else { delete adsConfig.posts[slug]; }
+      if (!isNaN(adInterval) && adInterval >= 2) adsConfig.rotate = { interval: adInterval };
       api('POST', '/api/ads', { config: adsConfig, sha: adsSha||undefined })
         .then(s => { adsSha = s.sha; }).catch(() => {});
     }
@@ -903,18 +923,39 @@ async function loadEditorAds(filename) {
       const data = await api('GET', '/api/ads');
       adsConfig = normAdsConfig(data.config);
       adsSha    = data.sha || null;
-    } catch { return; }
+    } catch {
+      ['f-ad-top-checks','f-ad-bottom-checks'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = '<p class="ad-check-empty">Could not load ads.</p>';
+      });
+      return;
+    }
   }
-  const lib      = adsConfig.library || {};
-  const postAds  = filename ? (adsConfig.posts?.[filename] || {}) : {};
-  [['f-ad-top', 'top'], ['f-ad-bottom', 'bottom']].forEach(([selId, field]) => {
-    const sel = document.getElementById(selId);
-    if (!sel) return;
-    const cur = postAds[field] || '';
-    sel.innerHTML = `<option value="">— None —</option>` +
-      Object.entries(lib).map(([id, ad]) =>
-        `<option value="${id}"${cur === id ? ' selected' : ''}>${escHtml(ad.name)}</option>`
-      ).join('');
+  const lib = adsConfig.library || {};
+  const postSlug = filename ? slugFromFilename(filename) : null;
+  const postAds  = postSlug ? (adsConfig.posts?.[postSlug] || {}) : {};
+
+  // Set rotation interval from config
+  const intEl = document.getElementById('f-ad-interval');
+  if (intEl) intEl.value = adsConfig.rotate?.interval || 6;
+
+  [['f-ad-top-checks', 'top'], ['f-ad-bottom-checks', 'bottom']].forEach(([divId, field]) => {
+    const el = document.getElementById(divId);
+    if (!el) return;
+    const selected = postAds[field];
+    const curIds = Array.isArray(selected) ? selected : (selected ? [selected] : []);
+    const entries = Object.entries(lib);
+    if (!entries.length) {
+      el.innerHTML = '<p class="ad-check-empty">No ads uploaded yet — add some in Manage Ads.</p>';
+      return;
+    }
+    el.innerHTML = entries.map(([id, ad]) =>
+      `<label class="ad-check-item">
+        <input type="checkbox" name="${divId}" value="${escHtml(id)}"${curIds.includes(id) ? ' checked' : ''}>
+        <img class="ad-check-thumb" src="${escHtml(ad.imageUrl)}" alt="" onerror="this.style.display='none'">
+        <span class="ad-check-label">${escHtml(ad.name)}</span>
+      </label>`
+    ).join('');
   });
 }
 
@@ -981,14 +1022,24 @@ function renderAdLibrary() {
 
 function renderDefaultSlots() {
   const d = adsConfig.defaults || {};
-  ['post-top','post-bottom','homepage'].forEach(slot => {
-    const sel = document.getElementById(`default-${slot}`);
-    if (!sel) return;
+  const slotMap = [['post-top','default-check-post-top'],['post-bottom','default-check-post-bottom'],['homepage','default-check-homepage']];
+  slotMap.forEach(([slot, divId]) => {
+    const el = document.getElementById(divId);
+    if (!el) return;
     const curVal = d[slot];
     const curIds = Array.isArray(curVal) ? curVal : (curVal ? [curVal] : []);
-    sel.innerHTML = Object.entries(adsConfig.library||{}).map(([id,ad]) =>
-      `<option value="${id}"${curIds.includes(id)?' selected':''}>${escHtml(ad.name)}</option>`
-    ).join('') || '<option disabled value="">— Upload ads first —</option>';
+    const entries = Object.entries(adsConfig.library || {});
+    if (!entries.length) {
+      el.innerHTML = '<p class="ad-check-empty">No ads uploaded yet.</p>';
+      return;
+    }
+    el.innerHTML = entries.map(([id, ad]) =>
+      `<label class="ad-check-item">
+        <input type="checkbox" name="${divId}" value="${escHtml(id)}"${curIds.includes(id) ? ' checked' : ''}>
+        <img class="ad-check-thumb" src="${escHtml(ad.imageUrl)}" alt="" onerror="this.style.display='none'">
+        <span class="ad-check-label">${escHtml(ad.name)}</span>
+      </label>`
+    ).join('');
   });
   const intervalEl = document.getElementById('rotate-interval');
   if (intervalEl) intervalEl.value = adsConfig.rotate?.interval || 6;
@@ -999,38 +1050,33 @@ async function renderPostAssignments() {
   let posts;
   try { posts = await api('GET', '/api/posts'); }
   catch { wrap.innerHTML = '<div class="lib-empty">Could not load posts.</div>'; return; }
-  if (!posts.length) {
-    wrap.innerHTML = '<div class="lib-empty">No posts yet — write some takes first!</div>';
+  const published = posts.filter(p => !p.name.startsWith('draft-'));
+  if (!published.length) {
+    wrap.innerHTML = '<div class="lib-empty">No published posts yet — write some takes first!</div>';
     return;
   }
   const assigned = adsConfig.posts || {};
-  const rows = posts.map(p => {
+  const lib = adsConfig.library || {};
+  const adNames = (val) => {
+    if (!val) return '<span style="color:var(--muted);font-style:italic">Default</span>';
+    const ids = Array.isArray(val) ? val : [val];
+    if (!ids.length) return '<span style="color:var(--muted);font-style:italic">Default</span>';
+    return escHtml(ids.map(id => lib[id]?.name || id).join(', '));
+  };
+  const rows = published.map(p => {
     const postSlug = slugFromFilename(p.name);
     const pa = assigned[postSlug] || {};
-    const weekMatch = p.name.match(/^(\d{4})-(week(\d+))\.md$/);
-    let label, disp;
-    if (weekMatch) {
-      label = `Week ${weekMatch[3]} (${weekMatch[1]})`;
-      disp = '';
-    } else {
-      const parts = p.name.replace('.md','').split('-');
-      const ds = parts.length >= 3 ? `${parts[0]}-${parts[1]}-${parts[2]}` : '';
-      label = (parts.slice(3).join(' ') || p.name).replace(/^\w/, c => c.toUpperCase());
-      disp = ds ? new Date(ds+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
-    }
-    const mkOpts = (selected) => {
-      const lib = adsConfig.library || {};
-      return `<option value="__default__"${!selected||selected==='__default__'?' selected':''}>Default</option>` +
-        Object.entries(lib).map(([id,ad]) => `<option value="${id}"${selected===id?' selected':''}>${escHtml(ad.name)}</option>`).join('') +
-        `<option value="__none__"${selected==='__none__'?' selected':''}>None (no ad)</option>`;
-    };
-    return `<div class="assign-row" data-post="${escHtml(postSlug)}">
+    const parts = p.name.replace('.md','').split('-');
+    const ds = parts.length >= 3 ? `${parts[0]}-${parts[1]}-${parts[2]}` : '';
+    const label = (parts.slice(3).join(' ') || p.name).replace(/^\w/, c => c.toUpperCase());
+    const disp = ds ? new Date(ds+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
+    return `<div class="assign-row">
       <div>
         <div class="assign-post-name">${escHtml(label)}</div>
         ${disp ? `<div class="assign-post-date">${disp}</div>` : ''}
       </div>
-      <select class="assign-top">${mkOpts(pa.top)}</select>
-      <select class="assign-bottom">${mkOpts(pa.bottom)}</select>
+      <div class="assign-summary">${adNames(pa.top)}</div>
+      <div class="assign-summary">${adNames(pa.bottom)}</div>
     </div>`;
   }).join('');
   wrap.innerHTML = `<div class="assign-table">
@@ -1165,34 +1211,17 @@ document.getElementById('btn-save-assignments').addEventListener('click', async 
   const statusEl = document.getElementById('assignments-status');
   statusEl.textContent = 'Saving…'; statusEl.className = 'ads-save-status';
 
-  // Collect defaults (multi-select → array or single value)
+  // Collect defaults from checkbox lists
   adsConfig.defaults = {};
-  ['post-top','post-bottom','homepage'].forEach(slot => {
-    const sel = document.getElementById(`default-${slot}`);
-    if (!sel) return;
-    const selected = Array.from(sel.selectedOptions).map(o => o.value).filter(Boolean);
-    adsConfig.defaults[slot] = selected.length === 1 ? selected[0] : (selected.length > 1 ? selected : null);
+  [['post-top','default-check-post-top'],['post-bottom','default-check-post-bottom'],['homepage','default-check-homepage']].forEach(([slot, divId]) => {
+    const checked = Array.from(document.querySelectorAll(`#${divId} input[type=checkbox]:checked`)).map(c => c.value).filter(Boolean);
+    adsConfig.defaults[slot] = checked.length === 0 ? null : (checked.length === 1 ? checked[0] : checked);
   });
   // Collect rotation interval
   const rotateInterval = parseInt(document.getElementById('rotate-interval')?.value, 10);
   if (!isNaN(rotateInterval) && rotateInterval >= 2) {
     adsConfig.rotate = { interval: rotateInterval };
   }
-  // Collect post assignments
-  adsConfig.posts = {};
-  document.querySelectorAll('.assign-row[data-post]').forEach(row => {
-    const postSlug = row.dataset.post;
-    const top    = row.querySelector('.assign-top').value;
-    const bottom = row.querySelector('.assign-bottom').value;
-    adsConfig.posts[postSlug] = {
-      top:    top    === '__default__' ? undefined : (top    === '__none__' ? null : top),
-      bottom: bottom === '__default__' ? undefined : (bottom === '__none__' ? null : bottom),
-    };
-    // Clean up undefined entries
-    if (adsConfig.posts[postSlug].top === undefined)    delete adsConfig.posts[postSlug].top;
-    if (adsConfig.posts[postSlug].bottom === undefined) delete adsConfig.posts[postSlug].bottom;
-    if (!Object.keys(adsConfig.posts[postSlug]).length) delete adsConfig.posts[postSlug];
-  });
 
   try {
     const saved = await api('POST', '/api/ads', { config: adsConfig, sha: adsSha || undefined });
