@@ -21,4 +21,4 @@ compatibility_date = "2024-11-01"
 #   → paste the returned "id" value below
 [[kv_namespaces]]
 binding = "EMAIL_LIST"
-id      = "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"
+id      = "43b9e05a80394e9086afa444f03bdd31"
