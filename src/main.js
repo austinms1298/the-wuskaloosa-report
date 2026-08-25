@@ -70,7 +70,7 @@ function header(active = 'home', hideBrand = false) {
       ${hideBrand ? '' : `<a class="brand" href="/" aria-label="The Wuskaloosa Report home">
         <img src="/images/logo.png" alt="The Wuskaloosa Report" class="brand-logo">
       </a>`}
-      <button class="menu-toggle" aria-expanded="false" aria-controls="site-nav">Menu</button>
+      <button class="menu-toggle" aria-expanded="false" aria-controls="site-nav" aria-label="Open menu">☰</button>
       <nav id="site-nav" class="site-nav" aria-label="Primary navigation">
         ${links.map(([id, href, label]) => `<a class="${active === id ? 'active' : ''}" href="${href}">${label}</a>`).join('')}
       </nav>
@@ -105,7 +105,7 @@ function homePage() {
   const featured = posts[0];
   const archive = posts.filter(post => post.slug !== featured?.slug).slice(0, 3);
   return `
-    ${header('home', true)}
+    ${header('home')}
     <main>
       <section class="hero">
         <img src="/images/hero-panel.png" alt="A colorful caricature-style football broadcast panel seated on the University of Alabama campus">
@@ -224,7 +224,7 @@ function aboutPage() {
 
 function notFoundPage() {
   return `
-    ${header('home', true)}
+    ${header('home')}
     <main class="page-shell inner-page narrow" style="text-align:center">
       <p class="eyebrow crimson">404</p>
       <h1 class="page-title" style="font-size:clamp(60px,10vw,120px)">OUT of Bounds.</h1>
@@ -239,7 +239,7 @@ function postPage() {
   if (!slug) slug = window.location.pathname.replace(/^\//, '');
   const post = posts.find(item => item.slug === slug);
   if (!post) return `
-    ${header('home', true)}
+    ${header('home')}
     <main class="page-shell inner-page narrow">
       <p class="eyebrow crimson">404</p>
       <h1>Take not found.</h1>
@@ -259,7 +259,7 @@ function postPage() {
     : '';
 
   return `
-    ${header('home', true)}
+    ${header('home')}
     <main>
       <div class="ad-slot-wrap" id="ad-post-top"></div>
       <article class="article">
