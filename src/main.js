@@ -61,7 +61,7 @@ function header(active = 'home', hideBrand = false) {
   const links = [
     ['home', '/', 'Home'],
     ['archive', '/archive', 'Past Takes'],
-    ['schedule', '/schedule', 'Schedule'],
+    ['schedule', '/schedule', 'SEC Schedules'],
     ['about', '/about', 'About'],
   ];
   return `
@@ -434,7 +434,7 @@ function schedulePage() {
   const teamBlock = (t) => `
     <details class="sec-team"${t.isHome ? ' open' : ''}>
       <summary class="sec-team-hd">
-        <span class="sec-team-name">${t.name}${t.isHome ? ' <span class="sec-home-star">★</span>' : ''}</span>
+        <span class="sec-team-name">${t.name}</span>
         <span class="sec-arrow">▼</span>
       </summary>
       <div class="sec-games">
@@ -447,7 +447,7 @@ function schedulePage() {
     <main class="page-shell inner-page">
       <p class="eyebrow crimson">2026 SEASON</p>
       <h1 class="page-title">SEC Schedules</h1>
-      <p style="color:var(--muted);font-size:14px;margin:-28px 0 36px">All 16 SEC teams. Click any team to expand their schedule. <span style="color:var(--crimson);font-weight:700">★</span> marks our team.</p>
+      <p style="color:var(--muted);font-size:14px;margin:-28px 0 36px">All 16 SEC teams. Click any team to expand their schedule.</p>
       <div class="sec-accordion">
         ${SEC.map(teamBlock).join('')}
       </div>
