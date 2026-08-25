@@ -142,9 +142,16 @@ async function handleLogin(req, env, ch) {
 }
 
 async function handleListPosts(env, ch) {
-  const files = await ghRequest(
-    'GET', `/repos/${REPO}/contents/${POSTS_PATH}?ref=${BRANCH}`, env.GITHUB_PAT
-  );
+  let files;
+  try {
+    files = await ghRequest(
+      'GET', `/repos/${REPO}/contents/${POSTS_PATH}?ref=${BRANCH}`, env.GITHUB_PAT
+    );
+  } catch (err) {
+    // Posts directory doesn't exist yet — return empty list so admin still loads
+    if (err.message.includes('404')) return respond([], 200, ch);
+    throw err;
+  }
   const posts = (Array.isArray(files) ? files : [])
     .filter(f => f.name.endsWith('.md'))
     .map(f => ({ name: f.name, sha: f.sha }))
