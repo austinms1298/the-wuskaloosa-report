@@ -166,6 +166,21 @@ async function handleDeletePost(filename, sha, env, ch) {
   return respond({ ok: true }, 200, ch);
 }
 
+async function handleDeleteFile(req, env, ch) {
+  const { path, sha } = await req.json().catch(() => ({}));
+  if (!path || typeof path !== 'string')       return respond({ error: 'Missing path' }, 400, ch);
+  if (path.startsWith('/'))                    return respond({ error: 'path must not start with /' }, 400, ch);
+  if (path.split('/').some(s => s === '..'))   return respond({ error: 'path must not contain ..' }, 400, ch);
+  if (!sha)                                    return respond({ error: 'Missing sha' }, 400, ch);
+  const repoPath = `public/${path}`;
+  await ghRequest('DELETE', `/repos/${REPO}/contents/${repoPath}`, env.GITHUB_PAT, {
+    message: `Delete: ${repoPath}`,
+    sha,
+    branch: BRANCH,
+  });
+  return respond({ ok: true }, 200, ch);
+}
+
 async function handleUpload(req, env, ch) {
   const { path, content, sha } = await req.json().catch(() => ({}));
   if (!path || typeof path !== 'string')      return respond({ error: 'Missing or invalid path' }, 400, ch);
@@ -296,6 +311,8 @@ export default {
       // ── Protected: file upload ──
       if (url.pathname === '/api/upload' && method === 'POST')
         return await handleUpload(request, env, ch);
+      if (url.pathname === '/api/upload' && method === 'DELETE')
+        return await handleDeleteFile(request, env, ch);
 
       // ── Protected: ads config ──
       if (url.pathname === '/api/ads' && method === 'POST')

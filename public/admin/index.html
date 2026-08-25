@@ -1293,11 +1293,14 @@ window.deleteAd = async function(id) {
     });
   });
 
+  // Refresh SHA before saving
+  try { const fresh = await api('GET', '/api/ads'); if (fresh.sha) adsSha = fresh.sha; } catch {}
+
   try {
     const saved = await api('POST', '/api/ads', { config: adsConfig, sha: adsSha || undefined });
     adsSha = saved.sha;
     renderAdLibrary(); renderDefaultSlots(); renderPostAssignments();
-  } catch (err) { alert(`Error: ${err.message}`); }
+  } catch (err) { alert(`Error saving: ${err.message}`); }
 };
 
 // ── Edit ad link ──
@@ -1329,15 +1332,19 @@ document.getElementById('btn-save-assignments').addEventListener('click', async 
     adsConfig.rotate = { interval: rotateInterval };
   }
 
+  // Refresh SHA before saving so we never conflict with a stale sha
+  try { const fresh = await api('GET', '/api/ads'); if (fresh.sha) adsSha = fresh.sha; } catch {}
+
   try {
     const saved = await api('POST', '/api/ads', { config: adsConfig, sha: adsSha || undefined });
     adsSha = saved.sha;
-    statusEl.textContent = 'Saved';
+    statusEl.textContent = 'Saved ✓';
     statusEl.className = 'ads-save-status ok';
-    setTimeout(() => { statusEl.textContent = ''; }, 6000);
+    setTimeout(() => { statusEl.textContent = ''; }, 4000);
   } catch (err) {
-    statusEl.textContent = `Error: ${err.message}`;
+    statusEl.textContent = `Error: ${err.message} — try refreshing the page`;
     statusEl.className = 'ads-save-status err';
+    console.error('Save assignments failed:', err);
   }
 });
 
