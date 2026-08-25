@@ -809,31 +809,50 @@ document.getElementById('btn-preview').addEventListener('click', async () => {
     : new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
 
   // Load current ads if not already loaded
-  if (!adsConfig.library && !adsConfig['post-top']) {
+  if (!adsConfig.library) {
     try {
       const r = await fetch(`${API_URL}/api/ads`);
-      if (r.ok) { const d = await r.json(); adsConfig = d.config || {}; adsSha = d.sha || null; }
+      if (r.ok) { const d = await r.json(); adsConfig = normAdsConfig(d.config || {}); adsSha = d.sha || null; }
     } catch {}
   }
 
+  const rotateInterval = parseInt(document.getElementById('f-ad-interval')?.value, 10) || adsConfig.rotate?.interval || 6;
+
   const adHtml = (slot) => {
-    // Resolve ad from library format or old flat format
-    let ad = null;
-    if (adsConfig.library) {
-      const key = slot === 'post-top' ? 'post-top' : slot === 'post-bottom' ? 'post-bottom' : 'homepage';
-      const postOverrides = editFile ? adsConfig.posts?.[editFile] : null;
-      const slotKey = slot === 'post-top' ? 'top' : slot === 'post-bottom' ? 'bottom' : 'homepage';
-      const adId = postOverrides?.[slotKey] !== undefined ? postOverrides[slotKey]
-                 : adsConfig.defaults?.[key] || null;
-      ad = adId ? adsConfig.library[adId] : null;
-    } else {
-      ad = adsConfig[slot] || null;
+    const lib = adsConfig.library || {};
+    // Read live checkbox state from the editor sidebar
+    let checkedIds = [];
+    if (slot === 'post-top' || slot === 'post-bottom') {
+      const divId = slot === 'post-top' ? 'f-ad-top-checks' : 'f-ad-bottom-checks';
+      checkedIds = Array.from(document.querySelectorAll(`#${divId} input[type=checkbox]:checked`))
+        .map(c => c.value).filter(Boolean);
     }
-    if (!ad || !ad.imageUrl) {
-      return `<div class="ad-placeholder"><span>${slot === 'homepage' ? '300 × 250' : '728 × 90'} — Ad Slot</span></div>`;
+    // Fall back to saved defaults if no live selection in the checkboxes
+    if (!checkedIds.length) {
+      const defaultSlot = slot === 'post-top' ? 'post-top' : 'post-bottom';
+      const defVal = adsConfig.defaults?.[defaultSlot];
+      checkedIds = Array.isArray(defVal) ? defVal : (defVal ? [defVal] : []);
     }
-    const img = `<img src="${ad.imageUrl}" alt="Advertisement" style="max-width:100%;display:block;margin:0 auto;">`;
-    return ad.link ? `<a href="${ad.link}" target="_blank" rel="noopener sponsored">${img}</a>` : img;
+    const ads = checkedIds.map(id => lib[id]).filter(Boolean);
+    if (!ads.length) {
+      return `<div class="ad-placeholder"><span>728 × 90 — Ad Slot</span></div>`;
+    }
+    if (ads.length === 1) {
+      const ad = ads[0];
+      const img = `<img src="${escHtml(ad.imageUrl)}" alt="Advertisement" style="max-width:100%;display:block;margin:0 auto;">`;
+      return ad.link ? `<a href="${escHtml(ad.link)}" target="_blank" rel="noopener sponsored">${img}</a>` : img;
+    }
+    // Multiple ads — rotate in the preview iframe
+    const rotId = 'rot_' + slot.replace(/-/g, '_');
+    const adsJson = JSON.stringify(ads.map(a => ({ i: a.imageUrl, l: a.link || '' })));
+    return `<div id="${rotId}" style="line-height:0;text-align:center"></div>
+<script>
+(function(){
+  var ads=${adsJson},idx=0,el=document.getElementById('${rotId}');
+  function show(){var a=ads[idx];el.innerHTML=a.l?'<a href="'+a.l+'" target="_blank" rel="noopener sponsored"><img src="'+a.i+'" alt="Ad" style="max-width:100%;display:block;margin:0 auto"></a>':'<img src="'+a.i+'" alt="Ad" style="max-width:100%;display:block;margin:0 auto">';}
+  show();setInterval(function(){idx=(idx+1)%ads.length;show();},${rotateInterval*1000});
+})();
+<\/script>`;
   };
 
   const pdfBanner = pdfUrl ? `
@@ -1236,14 +1255,44 @@ document.getElementById('btn-upload-ad').addEventListener('click', async () => {
 // ── Delete ad ──
 window.deleteAd = async function(id) {
   const ad = adsConfig.library?.[id];
-  if (!ad || !confirm(`Delete "${ad.name}"? This won't remove the image file from GitHub — just removes it from the library and any assignments.`)) return;
+  if (!ad || !confirm(`Delete "${ad.name}"? This will permanently remove the image from GitHub and all assignments.`)) return;
+
+  // Delete the image file from GitHub (non-fatal if it fails)
+  if (ad.imageUrl && ad.imageSha) {
+    const imgPath = ad.imageUrl.replace(/^\//, '');
+    try { await api('DELETE', '/api/upload', { path: imgPath, sha: ad.imageSha }); }
+    catch (err) { console.warn('Image file delete failed (continuing):', err.message); }
+  }
+
   delete adsConfig.library[id];
-  // Remove from defaults and post assignments
-  ['post-top','post-bottom','homepage'].forEach(k => { if (adsConfig.defaults?.[k] === id) delete adsConfig.defaults[k]; });
-  Object.values(adsConfig.posts || {}).forEach(pa => {
-    if (pa.top === id) delete pa.top;
-    if (pa.bottom === id) delete pa.bottom;
+
+  // Remove from defaults — handle both single value and array
+  ['post-top','post-bottom','homepage'].forEach(k => {
+    const cur = adsConfig.defaults?.[k];
+    if (!cur) return;
+    if (Array.isArray(cur)) {
+      const filtered = cur.filter(v => v !== id);
+      adsConfig.defaults[k] = filtered.length === 0 ? null : (filtered.length === 1 ? filtered[0] : filtered);
+    } else if (cur === id) {
+      delete adsConfig.defaults[k];
+    }
   });
+
+  // Remove from post assignments — handle both single value and array
+  Object.values(adsConfig.posts || {}).forEach(pa => {
+    ['top','bottom'].forEach(field => {
+      const cur = pa[field];
+      if (!cur) return;
+      if (Array.isArray(cur)) {
+        const filtered = cur.filter(v => v !== id);
+        pa[field] = filtered.length === 0 ? undefined : (filtered.length === 1 ? filtered[0] : filtered);
+        if (!pa[field]) delete pa[field];
+      } else if (cur === id) {
+        delete pa[field];
+      }
+    });
+  });
+
   try {
     const saved = await api('POST', '/api/ads', { config: adsConfig, sha: adsSha || undefined });
     adsSha = saved.sha;
