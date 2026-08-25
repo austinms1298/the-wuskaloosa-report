@@ -63,7 +63,6 @@ function header(active = 'home', hideBrand = false) {
     ['archive', '/archive', 'Past Takes'],
     ['schedule', '/schedule', 'Schedule'],
     ['about', '/about', 'About'],
-    ['subscribe', '#subscribe', 'Subscribe']
   ];
   return `
     <header class="site-header">
@@ -80,6 +79,7 @@ function header(active = 'home', hideBrand = false) {
 
 function footer() {
   return `
+    ${newsletter()}
     <footer class="footer">
       <div><strong>${site.title}</strong><p>${site.tagline}</p></div>
       <p>© ${new Date().getFullYear()} The Wuskaloosa Report &mdash; <a href="mailto:${site.email}" style="color:#bbb">${site.email}</a></p>
@@ -152,7 +152,6 @@ function homePage() {
           <a href="mailto:${site.email}?subject=Wuskaloosa%20Report%20Sponsorship">BECOME A SPONSOR →</a>
         </aside>
 
-        ${newsletter()}
       </div>
     </main>
     ${footer()}`;
@@ -217,7 +216,6 @@ function aboutPage() {
       <p class="eyebrow crimson">GET IN TOUCH</p>
       <p style="font-size:17px;line-height:1.7">Questions, corrections, sponsorship inquiries, or just want to argue about the offensive line? We're here for all of it.</p>
       <a class="button" href="mailto:${site.email}" style="margin-bottom:48px">EMAIL US <span>→</span></a>
-      ${newsletter()}
     </main>
     ${footer()}`;
 }
