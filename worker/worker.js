@@ -3,15 +3,10 @@
 // =============================================================================
 // Deploy: wrangler deploy
 //
-// Set these secrets with: wrangler secret put SECRET_NAME
-//
-//   USER1_USERNAME   first admin username  (e.g. "austin")
-//   USER1_PASSWORD   first admin password
-//   USER2_USERNAME   second admin username (e.g. "jackie")
-//   USER2_PASSWORD   second admin password
-//   GITHUB_PAT       GitHub Fine-grained PAT with "Contents: Read & Write"
-//                    on the "the-wuskaloosa-report" repo
-//   JWT_SECRET       any long random string (openssl rand -hex 32)
+//   USER1_USERNAME / USER1_PASSWORD   first admin
+//   USER2_USERNAME / USER2_PASSWORD   second admin
+//   GITHUB_PAT                        Fine-grained PAT, Contents: Read & Write
+//   JWT_SECRET                        openssl rand -hex 32
 // =============================================================================
 
 const REPO       = 'austinms1298/the-wuskaloosa-report';
@@ -20,7 +15,6 @@ const BRANCH     = 'main';
 const GH_API     = 'https://api.github.com';
 
 // ── CORS ─────────────────────────────────────────────────────────────────────
-
 function corsHeaders(origin) {
   const allowed =
     origin === 'https://wuskaloosareport.com' ||
@@ -42,7 +36,6 @@ function respond(data, status, ch) {
 }
 
 // ── JWT ──────────────────────────────────────────────────────────────────────
-
 function b64url(str) {
   return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
@@ -59,8 +52,7 @@ async function jwtSign(payload, secret) {
     { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
   );
   const rawSig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(msg));
-  const sig    = b64url(String.fromCharCode(...new Uint8Array(rawSig)));
-  return `${msg}.${sig}`;
+  return `${msg}.${b64url(String.fromCharCode(...new Uint8Array(rawSig)))}`;
 }
 
 async function jwtVerify(token, secret) {
@@ -73,27 +65,22 @@ async function jwtVerify(token, secret) {
       { name: 'HMAC', hash: 'SHA-256' }, false, ['verify']
     );
     const sigBytes = Uint8Array.from(atob(fromb64url(s)), c => c.charCodeAt(0));
-    const ok = await crypto.subtle.verify(
-      'HMAC', key, sigBytes, new TextEncoder().encode(`${h}.${b}`)
-    );
+    const ok = await crypto.subtle.verify('HMAC', key, sigBytes, new TextEncoder().encode(`${h}.${b}`));
     if (!ok) return null;
     const payload = JSON.parse(atob(fromb64url(b)));
     if (payload.exp && Date.now() > payload.exp) return null;
     return payload;
-  } catch {
-    return null;
-  }
+  } catch { return null; }
 }
 
 // ── GitHub helpers ────────────────────────────────────────────────────────────
-
 function ghHeaders(pat) {
   return {
-    Authorization:        `Bearer ${pat}`,
-    Accept:               'application/vnd.github+json',
+    Authorization:          `Bearer ${pat}`,
+    Accept:                 'application/vnd.github+json',
     'X-GitHub-Api-Version': '2022-11-28',
-    'Content-Type':       'application/json',
-    'User-Agent':         'wuskaloosa-admin-worker',
+    'Content-Type':         'application/json',
+    'User-Agent':           'wuskaloosa-admin-worker',
   };
 }
 
@@ -108,7 +95,6 @@ async function ghRequest(method, path, pat, body) {
   return text ? JSON.parse(text) : {};
 }
 
-// Base64 encode/decode that handles UTF-8 (for blog post content with smart quotes, etc.)
 function b64decode(str) {
   const bytes = Uint8Array.from(atob(str.replace(/\n/g, '')), c => c.charCodeAt(0));
   return new TextDecoder('utf-8').decode(bytes);
@@ -125,17 +111,14 @@ function b64encode(str) {
 async function handleLogin(req, env, ch) {
   const body = await req.json().catch(() => ({}));
   const { username = '', password = '' } = body;
-
   const users = [
     { u: env.USER1_USERNAME, p: env.USER1_PASSWORD },
     { u: env.USER2_USERNAME, p: env.USER2_PASSWORD },
-  ].filter(x => x.u); // ignore unconfigured slots
-
+  ].filter(x => x.u);
   const match = users.find(x => x.u === username && x.p === password);
   if (!match) return respond({ error: 'Invalid credentials' }, 401, ch);
-
   const token = await jwtSign(
-    { sub: username, iat: Date.now(), exp: Date.now() + 8 * 60 * 60 * 1000 }, // 8-hour session
+    { sub: username, iat: Date.now(), exp: Date.now() + 8 * 60 * 60 * 1000 },
     env.JWT_SECRET
   );
   return respond({ token, username }, 200, ch);
@@ -144,18 +127,15 @@ async function handleLogin(req, env, ch) {
 async function handleListPosts(env, ch) {
   let files;
   try {
-    files = await ghRequest(
-      'GET', `/repos/${REPO}/contents/${POSTS_PATH}?ref=${BRANCH}`, env.GITHUB_PAT
-    );
+    files = await ghRequest('GET', `/repos/${REPO}/contents/${POSTS_PATH}?ref=${BRANCH}`, env.GITHUB_PAT);
   } catch (err) {
-    // Posts directory doesn't exist yet — return empty list so admin still loads
     if (err.message.includes('404')) return respond([], 200, ch);
     throw err;
   }
   const posts = (Array.isArray(files) ? files : [])
     .filter(f => f.name.endsWith('.md'))
     .map(f => ({ name: f.name, sha: f.sha }))
-    .sort((a, b) => b.name.localeCompare(a.name)); // newest first
+    .sort((a, b) => b.name.localeCompare(a.name));
   return respond(posts, 200, ch);
 }
 
@@ -168,16 +148,12 @@ async function handleGetPost(filename, env, ch) {
 
 async function handleSavePost(req, filename, env, ch) {
   const { content, sha } = await req.json();
-  await ghRequest(
-    'PUT', `/repos/${REPO}/contents/${POSTS_PATH}/${filename}`, env.GITHUB_PAT,
-    {
-      message: sha ? `Update: ${filename}` : `Add: ${filename}`,
-      content: b64encode(content),
-      branch:  BRANCH,
-      ...(sha ? { sha } : {}),
-    }
-  );
-  // Return updated SHA so the client can do follow-up saves
+  await ghRequest('PUT', `/repos/${REPO}/contents/${POSTS_PATH}/${filename}`, env.GITHUB_PAT, {
+    message: sha ? `Update: ${filename}` : `Add: ${filename}`,
+    content: b64encode(content),
+    branch:  BRANCH,
+    ...(sha ? { sha } : {}),
+  });
   const updated = await ghRequest(
     'GET', `/repos/${REPO}/contents/${POSTS_PATH}/${filename}?ref=${BRANCH}`, env.GITHUB_PAT
   );
@@ -185,45 +161,58 @@ async function handleSavePost(req, filename, env, ch) {
 }
 
 async function handleDeletePost(filename, sha, env, ch) {
-  await ghRequest(
-    'DELETE', `/repos/${REPO}/contents/${POSTS_PATH}/${filename}`, env.GITHUB_PAT,
-    { message: `Delete: ${filename}`, sha, branch: BRANCH }
-  );
+  await ghRequest('DELETE', `/repos/${REPO}/contents/${POSTS_PATH}/${filename}`, env.GITHUB_PAT,
+    { message: `Delete: ${filename}`, sha, branch: BRANCH });
   return respond({ ok: true }, 200, ch);
 }
 
 async function handleUpload(req, env, ch) {
   const { path, content, sha } = await req.json().catch(() => ({}));
-
-  // Validate path
-  if (!path || typeof path !== 'string')
-    return respond({ error: 'Missing or invalid path' }, 400, ch);
-  if (path.startsWith('/'))
-    return respond({ error: 'path must not start with /' }, 400, ch);
-  if (path.split('/').some(seg => seg === '..'))
-    return respond({ error: 'path must not contain ..' }, 400, ch);
-
-  // Validate content (base64 string)
-  if (!content || typeof content !== 'string')
-    return respond({ error: 'Missing or invalid content (expected base64 string)' }, 400, ch);
+  if (!path || typeof path !== 'string')      return respond({ error: 'Missing or invalid path' }, 400, ch);
+  if (path.startsWith('/'))                   return respond({ error: 'path must not start with /' }, 400, ch);
+  if (path.split('/').some(s => s === '..'))  return respond({ error: 'path must not contain ..' }, 400, ch);
+  if (!content || typeof content !== 'string') return respond({ error: 'Missing content' }, 400, ch);
 
   const repoPath = `public/${path}`;
   await ghRequest('PUT', `/repos/${REPO}/contents/${repoPath}`, env.GITHUB_PAT, {
     message: `Upload: ${repoPath}`,
-    content,   // already base64 — GitHub API expects this directly
+    content,
     branch: BRANCH,
     ...(sha ? { sha } : {}),
   });
-
-  // Fetch back the committed file to get its new SHA
-  const updated = await ghRequest(
-    'GET', `/repos/${REPO}/contents/${repoPath}?ref=${BRANCH}`, env.GITHUB_PAT
-  );
+  const updated = await ghRequest('GET', `/repos/${REPO}/contents/${repoPath}?ref=${BRANCH}`, env.GITHUB_PAT);
   return respond({ ok: true, url: `/${path}`, sha: updated.sha }, 200, ch);
 }
 
-// ── Main ─────────────────────────────────────────────────────────────────────
+// Ads config stored at public/ads/config.json
+const ADS_CONFIG_PATH = 'public/ads/config.json';
 
+async function handleGetAds(env, ch) {
+  try {
+    const file = await ghRequest('GET', `/repos/${REPO}/contents/${ADS_CONFIG_PATH}?ref=${BRANCH}`, env.GITHUB_PAT);
+    const config = JSON.parse(b64decode(file.content));
+    return respond({ config, sha: file.sha }, 200, ch);
+  } catch (err) {
+    if (err.message.includes('404')) return respond({ config: {}, sha: null }, 200, ch);
+    throw err;
+  }
+}
+
+async function handleSaveAds(req, env, ch) {
+  const { config, sha } = await req.json().catch(() => ({}));
+  if (!config || typeof config !== 'object') return respond({ error: 'Invalid config' }, 400, ch);
+  const content = b64encode(JSON.stringify(config, null, 2));
+  await ghRequest('PUT', `/repos/${REPO}/contents/${ADS_CONFIG_PATH}`, env.GITHUB_PAT, {
+    message: 'Update ads config',
+    content,
+    branch: BRANCH,
+    ...(sha ? { sha } : {}),
+  });
+  const updated = await ghRequest('GET', `/repos/${REPO}/contents/${ADS_CONFIG_PATH}?ref=${BRANCH}`, env.GITHUB_PAT);
+  return respond({ ok: true, sha: updated.sha }, 200, ch);
+}
+
+// ── Main ─────────────────────────────────────────────────────────────────────
 export default {
   async fetch(request, env) {
     const url    = new URL(request.url);
@@ -231,13 +220,14 @@ export default {
     const origin = request.headers.get('Origin') || '';
     const ch     = corsHeaders(origin);
 
-    // CORS preflight
     if (method === 'OPTIONS') return new Response(null, { status: 204, headers: ch });
 
     try {
-      // ── Public: login ──
+      // ── Public routes ──
       if (url.pathname === '/api/login' && method === 'POST')
         return await handleLogin(request, env, ch);
+      if (url.pathname === '/api/ads' && method === 'GET')
+        return await handleGetAds(env, ch);
 
       // ── Auth guard ──
       const authHeader = request.headers.get('Authorization') || '';
@@ -248,10 +238,13 @@ export default {
       if (url.pathname === '/api/upload' && method === 'POST')
         return await handleUpload(request, env, ch);
 
+      // ── Protected: ads config ──
+      if (url.pathname === '/api/ads' && method === 'POST')
+        return await handleSaveAds(request, env, ch);
+
       // ── Protected: posts ──
       const m        = url.pathname.match(/^\/api\/posts(?:\/([^?]+))?$/);
       const filename = m?.[1];
-
       if (!filename && method === 'GET') return await handleListPosts(env, ch);
       if (filename  && method === 'GET') return await handleGetPost(filename, env, ch);
       if (filename  && method === 'POST') return await handleSavePost(request, filename, env, ch);

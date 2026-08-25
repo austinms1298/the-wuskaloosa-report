@@ -10,221 +10,175 @@
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.7/quill.snow.min.css">
   <style>
-    /* ─── Tokens ─── */
     :root {
-      --cr: #8f1224;
-      --deep: #171313;
-      --paper: #f8f6f1;
-      --line: #ded9d0;
-      --muted: #706a64;
+      --cr: #8f1224; --deep: #171313; --paper: #f8f6f1;
+      --line: #ded9d0; --muted: #706a64;
       --success-bg: #d1fae5; --success-fg: #065f46;
-      --error-bg: #fee2e2;   --error-fg: #991b1b;
+      --error-bg:   #fee2e2; --error-fg:   #991b1b;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Inter', sans-serif; background: var(--paper); color: var(--deep); min-height: 100vh; }
-
-    /* ─── Utilities ─── */
     .hidden { display: none !important; }
 
-    /* ─── Buttons ─── */
-    .btn {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 9px 18px; font-size: 13px; font-weight: 700;
-      border: none; border-radius: 2px; cursor: pointer; letter-spacing: .04em;
-      transition: opacity .15s;
-    }
-    .btn:disabled { opacity: .45; cursor: not-allowed; }
-    .btn-primary  { background: var(--cr); color: #fff; }
-    .btn-white    { background: #fff; color: var(--cr); }
-    .btn-ghost    { background: rgba(255,255,255,.18); color: #fff; border: 1px solid rgba(255,255,255,.35); }
-    .btn-outline  { background: transparent; color: var(--cr); border: 1.5px solid var(--cr); }
-    .btn-danger   { background: #dc2626; color: #fff; }
-    .btn-sm       { padding: 6px 13px; font-size: 12px; }
-    .btn-pdf      { background: #1e3a8a; color: #fff; }
+    /* ── Buttons ── */
+    .btn { display:inline-flex;align-items:center;gap:6px;padding:9px 18px;font-size:13px;font-weight:700;border:none;border-radius:2px;cursor:pointer;letter-spacing:.04em;transition:opacity .15s; }
+    .btn:disabled { opacity:.45;cursor:not-allowed; }
+    .btn-primary { background:var(--cr);color:#fff; }
+    .btn-white   { background:#fff;color:var(--cr); }
+    .btn-ghost   { background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.35); }
+    .btn-outline { background:transparent;color:var(--cr);border:1.5px solid var(--cr); }
+    .btn-danger  { background:#dc2626;color:#fff; }
+    .btn-navy    { background:#1e3a8a;color:#fff; }
+    .btn-sm      { padding:6px 13px;font-size:12px; }
+    .btn-preview { background:#166534;color:#fff; }
 
-    /* ─── Form fields ─── */
-    label.lbl {
-      display: block; font-size: 11px; font-weight: 700;
-      letter-spacing: .09em; text-transform: uppercase; color: var(--muted); margin-bottom: 5px;
+    /* ── Form ── */
+    label.lbl { display:block;font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-bottom:5px; }
+    .field { margin-bottom:18px; }
+    .field-row { display:grid;grid-template-columns:1fr 1fr;gap:12px; }
+    input[type=text],input[type=password],input[type=datetime-local],input[type=number],input[type=url],textarea,select {
+      width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:2px;
+      font-size:14px;font-family:'Inter',sans-serif;background:#fff;color:var(--deep);transition:border-color .15s;
     }
-    .field { margin-bottom: 18px; }
-    input[type=text], input[type=password], input[type=datetime-local],
-    input[type=number], textarea, select {
-      width: 100%; padding: 10px 12px;
-      border: 1px solid var(--line); border-radius: 2px;
-      font-size: 14px; font-family: 'Inter', sans-serif;
-      background: #fff; color: var(--deep);
-      transition: border-color .15s;
-    }
-    input:focus, textarea:focus, select:focus {
-      outline: none; border-color: var(--cr); box-shadow: 0 0 0 3px rgba(143,18,36,.08);
-    }
-    textarea { resize: vertical; min-height: 72px; }
-    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    input:focus,textarea:focus,select:focus { outline:none;border-color:var(--cr);box-shadow:0 0 0 3px rgba(143,18,36,.08); }
+    textarea { resize:vertical;min-height:72px; }
 
-    /* ─── Toolbar ─── */
-    .toolbar {
-      position: sticky; top: 0; z-index: 100;
-      display: flex; align-items: center; gap: 10px;
-      padding: 0 24px; height: 54px;
-      background: var(--cr); color: #fff;
-      box-shadow: 0 2px 8px rgba(0,0,0,.25);
-    }
-    .toolbar-brand {
-      font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 17px;
-      letter-spacing: .06em; flex: 1;
-    }
-    .toolbar-brand span { font-weight: 400; opacity: .6; font-size: 13px; margin-left: 6px; }
-    .toolbar-user { font-size: 12px; opacity: .7; margin-right: 4px; }
+    /* ── Toolbar ── */
+    .toolbar { position:sticky;top:0;z-index:100;display:flex;align-items:center;gap:10px;padding:0 24px;height:54px;background:var(--cr);color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.25); }
+    .toolbar-brand { font-family:'Oswald',sans-serif;font-weight:700;font-size:17px;letter-spacing:.06em;flex:1; }
+    .toolbar-brand span { font-weight:400;opacity:.6;font-size:13px;margin-left:6px; }
+    .toolbar-user { font-size:12px;opacity:.7;margin-right:4px; }
 
-    /* ─── LOGIN VIEW ─── */
-    #view-login {
-      display: flex; align-items: center; justify-content: center;
-      min-height: 100vh; background: var(--deep);
-    }
-    .login-wrap { width: 100%; max-width: 420px; padding: 20px; }
-    .login-card {
-      background: #fff; border-radius: 3px;
-      border-top: 5px solid var(--cr); padding: 48px 40px;
-    }
-    .login-brand {
-      font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 20px;
-      color: var(--cr); letter-spacing: .06em; margin-bottom: 4px;
-    }
-    .login-sub { font-size: 14px; color: var(--muted); margin-bottom: 36px; }
-    .login-card .btn { width: 100%; justify-content: center; margin-top: 6px; padding: 12px; font-size: 14px; }
-    .err-msg { font-size: 13px; color: #dc2626; margin-top: 14px; min-height: 18px; text-align: center; }
+    /* ── LOGIN ── */
+    #view-login { display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--deep); }
+    .login-wrap { width:100%;max-width:420px;padding:20px; }
+    .login-card { background:#fff;border-radius:3px;border-top:5px solid var(--cr);padding:48px 40px; }
+    .login-brand { font-family:'Oswald',sans-serif;font-weight:700;font-size:20px;color:var(--cr);letter-spacing:.06em;margin-bottom:4px; }
+    .login-sub { font-size:14px;color:var(--muted);margin-bottom:36px; }
+    .login-card .btn { width:100%;justify-content:center;margin-top:6px;padding:12px;font-size:14px; }
+    .err-msg { font-size:13px;color:#dc2626;margin-top:14px;min-height:18px;text-align:center; }
 
-    /* ─── POSTS LIST VIEW ─── */
-    #view-posts { display: none; }
-    .posts-body { padding: 36px; max-width: 900px; margin: 0 auto; }
-    .posts-header { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
-    .posts-header h2 {
-      font-family: 'Oswald', sans-serif; font-weight: 400; font-size: 26px; flex: 1;
-    }
-    .post-row {
-      display: flex; align-items: center; gap: 14px;
-      padding: 14px 18px; background: #fff; border: 1px solid var(--line);
-      border-radius: 2px; margin-bottom: 8px;
-    }
-    .post-row:hover { border-color: #c9c1bb; }
-    .post-info { flex: 1; min-width: 0; }
-    .post-name {
-      font-size: 15px; font-weight: 600;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-    .post-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
-    .posts-empty {
-      text-align: center; padding: 72px 24px; color: var(--muted);
-      border: 2px dashed var(--line); border-radius: 3px; background: #fff;
-    }
-    .posts-empty p:first-child { font-size: 40px; margin-bottom: 12px; }
-    .posts-empty p { font-size: 15px; }
-    .posts-loading { color: var(--muted); font-size: 14px; padding: 40px 0; text-align: center; }
+    /* ── POSTS LIST ── */
+    #view-posts { display:none; }
+    .posts-body { padding:36px;max-width:900px;margin:0 auto; }
+    .posts-header { display:flex;align-items:center;gap:12px;margin-bottom:28px; }
+    .posts-header h2 { font-family:'Oswald',sans-serif;font-weight:400;font-size:26px;flex:1; }
+    .post-row { display:flex;align-items:center;gap:14px;padding:14px 18px;background:#fff;border:1px solid var(--line);border-radius:2px;margin-bottom:8px; }
+    .post-row:hover { border-color:#c9c1bb; }
+    .post-info { flex:1;min-width:0; }
+    .post-name { font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+    .post-meta { font-size:12px;color:var(--muted);margin-top:2px; }
+    .posts-empty { text-align:center;padding:72px 24px;color:var(--muted);border:2px dashed var(--line);border-radius:3px;background:#fff; }
+    .posts-empty p:first-child { font-size:40px;margin-bottom:12px; }
+    .posts-empty p { font-size:15px; }
+    .posts-loading { color:var(--muted);font-size:14px;padding:40px 0;text-align:center; }
 
-    /* ─── EDITOR VIEW ─── */
-    #view-editor { display: none; }
-    .editor-wrap { padding: 32px; max-width: 1200px; margin: 0 auto; }
-    .editor-layout { display: grid; grid-template-columns: 300px 1fr; gap: 36px; align-items: start; }
-    .sidebar-section { background: #fff; border: 1px solid var(--line); border-radius: 2px; padding: 20px; margin-bottom: 16px; }
-    .sidebar-section h3 {
-      font-family: 'Oswald', sans-serif; font-weight: 400; font-size: 16px;
-      margin-bottom: 18px; padding-bottom: 10px; border-bottom: 1px solid var(--line);
-    }
-    .toggle-row { display: flex; align-items: center; gap: 10px; }
-    .toggle-row input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--cr); flex-shrink: 0; }
-    .toggle-row label { font-size: 13px; font-weight: 600; cursor: pointer; }
-    .toggle-hint { font-size: 11px; color: var(--muted); margin-top: 4px; }
-    .editor-main h3 {
-      font-family: 'Oswald', sans-serif; font-weight: 400; font-size: 16px;
-      margin-bottom: 14px;
-    }
-    .editor-title-input {
-      font-size: 22px; font-weight: 700; padding: 12px 14px;
-      border: 1px solid var(--line); border-radius: 2px; width: 100%;
-      margin-bottom: 24px;
-    }
-    .editor-title-input:focus { outline: none; border-color: var(--cr); }
+    /* ── EDITOR ── */
+    #view-editor { display:none; }
+    .editor-wrap { padding:32px;max-width:1200px;margin:0 auto; }
+    .editor-layout { display:grid;grid-template-columns:300px 1fr;gap:36px;align-items:start; }
+    .sidebar-section { background:#fff;border:1px solid var(--line);border-radius:2px;padding:20px;margin-bottom:16px; }
+    .sidebar-section h3 { font-family:'Oswald',sans-serif;font-weight:400;font-size:16px;margin-bottom:18px;padding-bottom:10px;border-bottom:1px solid var(--line); }
+    .toggle-row { display:flex;align-items:center;gap:10px; }
+    .toggle-row input[type=checkbox] { width:17px;height:17px;accent-color:var(--cr);flex-shrink:0; }
+    .toggle-row label { font-size:13px;font-weight:600;cursor:pointer; }
+    .toggle-hint { font-size:11px;color:var(--muted);margin-top:4px; }
+    .editor-main h3 { font-family:'Oswald',sans-serif;font-weight:400;font-size:16px;margin-bottom:14px; }
+    .editor-title-input { font-size:22px;font-weight:700;padding:12px 14px;border:1px solid var(--line);border-radius:2px;width:100%;margin-bottom:24px; }
+    .editor-title-input:focus { outline:none;border-color:var(--cr); }
+    #quill-editor { background:#fff;min-height:520px; }
+    .ql-container { border-color:var(--line) !important;border-radius:0 0 2px 2px; }
+    .ql-toolbar { border-color:var(--line) !important;border-radius:2px 2px 0 0;background:var(--paper); }
+    .ql-editor { min-height:520px;font-size:16px;font-family:'Inter',sans-serif; }
+    .ql-editor p { margin-bottom:1em; }
 
-    /* ─── Quill editor ─── */
-    #quill-editor {
-      background: #fff;
-      min-height: 520px;
-      font-size: 16px;
-      line-height: 1.65;
-      font-family: 'Inter', sans-serif;
-    }
-    .ql-container { border-color: var(--line) !important; border-radius: 0 0 2px 2px; }
-    .ql-toolbar { border-color: var(--line) !important; border-radius: 2px 2px 0 0; background: var(--paper); }
-    .ql-editor { min-height: 520px; font-size: 16px; font-family: 'Inter', sans-serif; }
-    .ql-editor p { margin-bottom: 1em; }
+    /* ── PDF section ── */
+    .pdf-section { background:#fff;border:1px solid var(--line);border-radius:2px;padding:20px;margin-bottom:16px; }
+    .pdf-section h3 { font-family:'Oswald',sans-serif;font-weight:400;font-size:16px;margin-bottom:18px;padding-bottom:10px;border-bottom:1px solid var(--line); }
+    .pdf-file-row { display:flex;gap:8px;align-items:center;margin-top:12px; }
+    .pdf-file-row input[type=file] { flex:1;font-size:12px;padding:6px 8px;border:1px solid var(--line);border-radius:2px;background:#fff;cursor:pointer; }
+    .pdf-status { font-size:12px;margin-top:8px;min-height:16px;font-weight:600; }
+    .pdf-status.ok  { color:#065f46; }
+    .pdf-status.err { color:#991b1b; }
+    .pdf-current { font-size:12px;color:var(--muted);margin-top:10px;word-break:break-all;min-height:16px; }
+    .pdf-current a { color:var(--cr); }
 
-    /* ─── PDF section ─── */
-    .pdf-section {
-      background: #fff; border: 1px solid var(--line); border-radius: 2px;
-      padding: 20px; margin-bottom: 16px;
-    }
-    .pdf-section h3 {
-      font-family: 'Oswald', sans-serif; font-weight: 400; font-size: 16px;
-      margin-bottom: 18px; padding-bottom: 10px; border-bottom: 1px solid var(--line);
-    }
-    .pdf-current {
-      font-size: 12px; color: var(--muted); margin-top: 10px;
-      word-break: break-all; min-height: 16px;
-    }
-    .pdf-current a { color: var(--cr); text-decoration: none; }
-    .pdf-current a:hover { text-decoration: underline; }
-    .pdf-file-row {
-      display: flex; gap: 8px; align-items: center;
-      margin-top: 12px;
-    }
-    .pdf-file-row input[type=file] {
-      flex: 1; font-size: 12px; padding: 6px 8px;
-      border: 1px solid var(--line); border-radius: 2px; background: #fff;
-      cursor: pointer;
-    }
-    .pdf-status {
-      font-size: 12px; margin-top: 8px; min-height: 16px;
-      font-weight: 600;
-    }
-    .pdf-status.ok  { color: #065f46; }
-    .pdf-status.err { color: #991b1b; }
+    /* ── Status banner ── */
+    .status-banner { padding:12px 24px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px; }
+    .status-banner.success { background:var(--success-bg);color:var(--success-fg); }
+    .status-banner.error   { background:var(--error-bg);color:var(--error-fg); }
 
-    /* ─── Status banner ─── */
-    .status-banner {
-      padding: 12px 24px; font-size: 13px; font-weight: 600;
-      display: flex; align-items: center; gap: 8px;
-    }
-    .status-banner.success { background: var(--success-bg); color: var(--success-fg); }
-    .status-banner.error   { background: var(--error-bg);   color: var(--error-fg); }
+    /* ════════════════════════════════════════════════
+       ADS VIEW
+    ════════════════════════════════════════════════ */
+    #view-ads { display:none; }
+    .ads-body { padding:36px;max-width:1000px;margin:0 auto; }
+    .ads-header { display:flex;align-items:center;gap:12px;margin-bottom:8px; }
+    .ads-header h2 { font-family:'Oswald',sans-serif;font-weight:400;font-size:26px;flex:1; }
+    .ads-intro { font-size:14px;color:var(--muted);margin-bottom:32px;max-width:700px;line-height:1.6; }
+    .ads-grid { display:grid;grid-template-columns:1fr 1fr;gap:24px; }
+    .ads-grid .full-width { grid-column:1/-1; }
 
-    /* ─── Responsive ─── */
-    @media (max-width: 900px) {
-      .editor-layout { grid-template-columns: 1fr; }
-      .posts-body, .editor-wrap { padding: 16px; }
-      .login-card { padding: 36px 24px; }
+    .ad-card { background:#fff;border:1px solid var(--line);border-radius:3px;overflow:hidden; }
+    .ad-card-header { padding:16px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px; }
+    .ad-card-header h3 { font-family:'Oswald',sans-serif;font-weight:400;font-size:17px;flex:1; }
+    .ad-dim-badge { background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:3px 10px;font-size:11px;font-weight:700;color:var(--muted);white-space:nowrap; }
+    .ad-card-body { padding:20px; }
+
+    /* Ad preview boxes */
+    .ad-preview-area { position:relative;margin-bottom:16px;border:2px dashed var(--line);border-radius:2px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:repeating-linear-gradient(-45deg,#faf8f5,#faf8f5 8px,#f0ede8 8px,#f0ede8 16px); }
+    .ad-preview-area.leaderboard { width:100%;aspect-ratio:728/90;max-height:110px; }
+    .ad-preview-area.medium-rect { width:300px;aspect-ratio:300/250;max-width:100%; }
+    .ad-preview-area img { position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#fff; }
+    .ad-preview-placeholder { font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);user-select:none; }
+    .ad-preview-live { position:absolute;top:6px;right:8px;font-size:10px;font-weight:800;letter-spacing:.08em;color:#065f46;background:#d1fae5;padding:2px 7px;border-radius:10px; }
+
+    .ad-upload-row { display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;margin-top:4px; }
+    .ad-upload-row input[type=file] { font-size:12px;padding:7px 10px;border:1px solid var(--line);border-radius:2px;background:#fff;cursor:pointer;width:100%; }
+    .ad-status { font-size:12px;margin-top:8px;min-height:16px;font-weight:600; }
+    .ad-status.ok  { color:#065f46; }
+    .ad-status.err { color:#991b1b; }
+
+    .ad-fields { display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:16px; }
+    .ad-fields .field { margin-bottom:0; }
+
+    /* ════════════════════════════════════════════════
+       PREVIEW OVERLAY
+    ════════════════════════════════════════════════ */
+    #preview-overlay {
+      position:fixed;inset:0;z-index:999;
+      display:flex;flex-direction:column;
+      background:#1a1a1a;
+    }
+    .preview-topbar {
+      display:flex;align-items:center;gap:16px;
+      padding:10px 20px;background:#111;flex-shrink:0;
+      border-bottom:1px solid #333;
+    }
+    .preview-topbar-title { font-family:'Oswald',sans-serif;color:#fff;font-size:15px;letter-spacing:.05em;flex:1; }
+    .preview-badge { font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;background:#166534;color:#fff;padding:3px 9px;border-radius:10px; }
+    #preview-frame { flex:1;border:none;background:#fff; }
+
+    /* ── Responsive ── */
+    @media (max-width:900px) {
+      .editor-layout,.ads-grid { grid-template-columns:1fr; }
+      .ads-grid .full-width { grid-column:1; }
+      .posts-body,.editor-wrap,.ads-body { padding:16px; }
+      .login-card { padding:36px 24px; }
     }
   </style>
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     LOGIN VIEW
-══════════════════════════════════════════════════════════════════════════════ -->
+<!-- ════ LOGIN ════════════════════════════════════════════════════════════════ -->
 <div id="view-login">
   <div class="login-wrap">
     <div class="login-card">
       <div class="login-brand">THE WUSKALOOSA REPORT</div>
       <div class="login-sub">Admin — sign in to manage posts</div>
       <form id="login-form">
-        <div class="field">
-          <label class="lbl" for="inp-user">Username</label>
-          <input id="inp-user" type="text" autocomplete="username" required>
-        </div>
-        <div class="field">
-          <label class="lbl" for="inp-pass">Password</label>
-          <input id="inp-pass" type="password" autocomplete="current-password" required>
-        </div>
+        <div class="field"><label class="lbl" for="inp-user">Username</label><input id="inp-user" type="text" autocomplete="username" required></div>
+        <div class="field"><label class="lbl" for="inp-pass">Password</label><input id="inp-pass" type="password" autocomplete="current-password" required></div>
         <button class="btn btn-primary" type="submit" id="btn-login">SIGN IN →</button>
       </form>
       <p class="err-msg" id="login-err"></p>
@@ -232,155 +186,208 @@
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     POSTS LIST VIEW
-══════════════════════════════════════════════════════════════════════════════ -->
+<!-- ════ POSTS LIST ══════════════════════════════════════════════════════════ -->
 <div id="view-posts">
   <div class="toolbar">
     <div class="toolbar-brand">THE WUSKALOOSA REPORT <span>/ ADMIN</span></div>
     <span class="toolbar-user" id="toolbar-user"></span>
+    <button class="btn btn-white" id="btn-manage-ads">📺 Manage Ads</button>
     <button class="btn btn-white" id="btn-new-post">+ New Post</button>
     <button class="btn btn-ghost btn-sm" id="btn-logout">Log Out</button>
   </div>
   <div class="posts-body">
-    <div class="posts-header">
-      <h2>All Posts</h2>
-    </div>
+    <div class="posts-header"><h2>All Posts</h2></div>
     <div id="posts-list"></div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     EDITOR VIEW
-══════════════════════════════════════════════════════════════════════════════ -->
+<!-- ════ EDITOR ══════════════════════════════════════════════════════════════ -->
 <div id="view-editor">
   <div class="toolbar">
     <div class="toolbar-brand" id="editor-toolbar-title">New Post</div>
     <button class="btn btn-ghost btn-sm" id="btn-back">← All Posts</button>
+    <button class="btn btn-preview" id="btn-preview">👁 Preview</button>
     <button class="btn btn-white" id="btn-publish">Publish</button>
   </div>
   <div id="status-banner" class="status-banner hidden"></div>
   <div class="editor-wrap">
-    <input
-      id="f-title"
-      class="editor-title-input"
-      type="text"
-      placeholder="Post title…"
-      autocomplete="off"
-    >
+    <input id="f-title" class="editor-title-input" type="text" placeholder="Post title…" autocomplete="off">
     <div class="editor-layout">
-
-      <!-- ── Sidebar ── -->
       <div class="editor-sidebar">
-
         <div class="sidebar-section">
           <h3>Details</h3>
-          <div class="field">
-            <label class="lbl" for="f-slug">URL Slug</label>
-            <input id="f-slug" type="text" placeholder="my-post-slug" autocomplete="off">
-          </div>
-          <div class="field">
-            <label class="lbl" for="f-date">Publish Date</label>
-            <input id="f-date" type="datetime-local">
-          </div>
+          <div class="field"><label class="lbl" for="f-slug">URL Slug</label><input id="f-slug" type="text" placeholder="my-post-slug" autocomplete="off"></div>
+          <div class="field"><label class="lbl" for="f-date">Publish Date</label><input id="f-date" type="datetime-local"></div>
           <div class="field-row field">
-            <div>
-              <label class="lbl" for="f-week">Week #</label>
-              <input id="f-week" type="number" min="0" max="18" value="1" placeholder="1">
-            </div>
-            <div>
-              <label class="lbl" for="f-year">Year</label>
-              <input id="f-year" type="number" min="2020" max="2099" value="2026" placeholder="2026">
-            </div>
+            <div><label class="lbl" for="f-week">Week #</label><input id="f-week" type="number" min="0" max="18" value="1"></div>
+            <div><label class="lbl" for="f-year">Year</label><input id="f-year" type="number" min="2020" max="2099" value="2026"></div>
           </div>
-          <div class="field">
-            <label class="lbl" for="f-category">Category</label>
+          <div class="field"><label class="lbl" for="f-category">Category</label>
             <select id="f-category">
-              <option>Latest Take</option>
-              <option>Analysis</option>
-              <option>Preview</option>
-              <option>Recap</option>
-              <option>Culture</option>
-              <option>Opinion</option>
+              <option>Latest Take</option><option>Analysis</option><option>Preview</option>
+              <option>Recap</option><option>Culture</option><option>Opinion</option>
             </select>
           </div>
         </div>
-
         <div class="sidebar-section">
           <h3>Summary</h3>
-          <div class="field" style="margin-bottom:0">
-            <label class="lbl" for="f-excerpt">Excerpt</label>
-            <textarea id="f-excerpt" rows="4" placeholder="One or two lines shown in post previews…"></textarea>
-          </div>
+          <div class="field" style="margin-bottom:0"><label class="lbl" for="f-excerpt">Excerpt</label><textarea id="f-excerpt" rows="4" placeholder="One or two lines shown in post previews…"></textarea></div>
         </div>
-
         <div class="sidebar-section">
           <h3>Homepage</h3>
-          <div class="toggle-row">
-            <input type="checkbox" id="f-featured">
-            <label for="f-featured">Feature on Homepage</label>
-          </div>
+          <div class="toggle-row"><input type="checkbox" id="f-featured"><label for="f-featured">Feature on Homepage</label></div>
           <p class="toggle-hint" style="margin-top:6px">Only one post should be featured at a time.</p>
         </div>
-
-        <!-- ── TV Schedule PDF ── -->
         <div class="pdf-section">
           <h3>📺 TV Schedule PDF</h3>
-          <p style="font-size:12px;color:var(--muted);margin-bottom:12px">
-            Upload the weekly TV schedule PDF. It will be stored at
-            <code style="font-size:11px">/schedules/{year}/week-{n}.pdf</code>
-            and linked in the post header.
-          </p>
+          <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Stored at <code style="font-size:11px">/schedules/{year}/week-{n}.pdf</code></p>
           <div class="pdf-file-row">
             <input type="file" id="f-pdf-file" accept=".pdf">
-            <button class="btn btn-pdf btn-sm" id="btn-upload-pdf">Upload PDF</button>
+            <button class="btn btn-navy btn-sm" id="btn-upload-pdf">Upload PDF</button>
           </div>
           <div class="pdf-status" id="pdf-status"></div>
           <div class="pdf-current" id="pdf-current"></div>
         </div>
-
-        <button class="btn btn-danger btn-sm hidden" id="btn-delete-post" style="margin-top:4px;width:100%;justify-content:center">
-          Delete Post
-        </button>
-
+        <button class="btn btn-danger btn-sm hidden" id="btn-delete-post" style="margin-top:4px;width:100%;justify-content:center">Delete Post</button>
       </div>
-
-      <!-- ── Body editor ── -->
       <div class="editor-main">
         <h3>Article Body</h3>
         <div id="quill-editor"></div>
       </div>
-
     </div>
   </div>
 </div>
 
+<!-- ════ ADS VIEW ════════════════════════════════════════════════════════════ -->
+<div id="view-ads">
+  <div class="toolbar">
+    <div class="toolbar-brand">THE WUSKALOOSA REPORT <span>/ ADS</span></div>
+    <button class="btn btn-ghost btn-sm" id="btn-ads-back">← All Posts</button>
+  </div>
+  <div class="ads-body">
+    <div class="ads-header"><h2>Ad Management</h2></div>
+    <p class="ads-intro">
+      Upload ad images for each slot below and add a click-through URL. When an ad slot is empty the space disappears on the live site — no blank boxes. After uploading, the site rebuilds in about a minute.
+      <br><br>
+      <strong>Dimensions:</strong> Post ads are <strong>728 × 90 px</strong> (leaderboard — industry standard, easy to source from sponsors). Homepage box is <strong>300 × 250 px</strong> (medium rectangle — premium, commands higher rates).
+    </p>
+
+    <div class="ads-grid">
+      <!-- Post Top -->
+      <div class="ad-card full-width" id="adcard-post-top">
+        <div class="ad-card-header">
+          <h3>📰 Post Top Banner</h3>
+          <span class="ad-dim-badge">728 × 90 px</span>
+          <span style="font-size:12px;color:var(--muted)">Appears above every article</span>
+        </div>
+        <div class="ad-card-body">
+          <div class="ad-preview-area leaderboard" id="adprev-post-top">
+            <span class="ad-preview-placeholder">728 × 90 px — No Ad</span>
+          </div>
+          <div class="ad-fields">
+            <div class="field"><label class="lbl">Click-Through URL</label><input type="url" id="adlink-post-top" placeholder="https://sponsor.com"></div>
+          </div>
+          <div class="ad-upload-row">
+            <input type="file" id="adfile-post-top" accept="image/*">
+            <button class="btn btn-navy btn-sm" onclick="saveAd('post-top')">Save Ad</button>
+          </div>
+          <div class="ad-status" id="adstatus-post-top"></div>
+        </div>
+      </div>
+
+      <!-- Post Bottom -->
+      <div class="ad-card full-width" id="adcard-post-bottom">
+        <div class="ad-card-header">
+          <h3>📰 Post Bottom Banner</h3>
+          <span class="ad-dim-badge">728 × 90 px</span>
+          <span style="font-size:12px;color:var(--muted)">Appears below every article</span>
+        </div>
+        <div class="ad-card-body">
+          <div class="ad-preview-area leaderboard" id="adprev-post-bottom">
+            <span class="ad-preview-placeholder">728 × 90 px — No Ad</span>
+          </div>
+          <div class="ad-fields">
+            <div class="field"><label class="lbl">Click-Through URL</label><input type="url" id="adlink-post-bottom" placeholder="https://sponsor.com"></div>
+          </div>
+          <div class="ad-upload-row">
+            <input type="file" id="adfile-post-bottom" accept="image/*">
+            <button class="btn btn-navy btn-sm" onclick="saveAd('post-bottom')">Save Ad</button>
+          </div>
+          <div class="ad-status" id="adstatus-post-bottom"></div>
+        </div>
+      </div>
+
+      <!-- Homepage -->
+      <div class="ad-card" id="adcard-homepage">
+        <div class="ad-card-header">
+          <h3>🏠 Homepage Box</h3>
+          <span class="ad-dim-badge">300 × 250 px</span>
+        </div>
+        <div class="ad-card-body">
+          <div class="ad-preview-area medium-rect" id="adprev-homepage">
+            <span class="ad-preview-placeholder">300 × 250</span>
+          </div>
+          <div class="ad-fields" style="margin-top:16px">
+            <div class="field"><label class="lbl">Click-Through URL</label><input type="url" id="adlink-homepage" placeholder="https://sponsor.com"></div>
+          </div>
+          <div class="ad-upload-row">
+            <input type="file" id="adfile-homepage" accept="image/*">
+            <button class="btn btn-navy btn-sm" onclick="saveAd('homepage')">Save Ad</button>
+          </div>
+          <div class="ad-status" id="adstatus-homepage"></div>
+        </div>
+      </div>
+
+      <!-- Preview panel -->
+      <div class="ad-card" style="display:flex;flex-direction:column">
+        <div class="ad-card-header"><h3>👁 Ad Preview</h3></div>
+        <div class="ad-card-body" style="flex:1;display:flex;flex-direction:column;gap:16px">
+          <p style="font-size:13px;color:var(--muted);line-height:1.6">
+            See how the post-top ad looks on an article before going live. The preview opens a new tab showing a sample article with your current ads in place.
+          </p>
+          <button class="btn btn-preview" id="btn-preview-ads" style="width:100%;justify-content:center">Open Ad Preview →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ PREVIEW OVERLAY ════════════════════════════════════════════════════ -->
+<div id="preview-overlay" class="hidden">
+  <div class="preview-topbar">
+    <div class="preview-topbar-title">Post Preview <span class="preview-badge">PREVIEW</span></div>
+    <button class="btn btn-ghost btn-sm" id="btn-close-preview">✕ Close Preview</button>
+  </div>
+  <iframe id="preview-frame" src="about:blank" title="Post preview"></iframe>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.7/quill.min.js"></script>
 <script>
-// ═════════════════════════════════════════════════════════════════════════════
-// CONFIGURATION
+// ═══════════════════════════════════════════════════════
 const API_URL = 'https://wuskaloosa-admin.austin-a73.workers.dev';
-// ═════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 
-/* ── State ── */
-let token     = localStorage.getItem('wkr_token') || null;
-let username  = localStorage.getItem('wkr_user')  || null;
-let quill     = null;   // Quill instance
-let editFile  = null;   // filename currently being edited (null = new post)
-let editSha   = null;   // GitHub SHA for the current file
-let pdfUrl    = null;   // schedule_pdf value (stored after upload or loaded from frontmatter)
-let pdfSha    = null;   // SHA of already-uploaded PDF (for updates)
+let token    = localStorage.getItem('wkr_token') || null;
+let username = localStorage.getItem('wkr_user')  || null;
+let quill    = null;
+let editFile = null;
+let editSha  = null;
+let pdfUrl   = null;
+let pdfSha   = null;
 
-/* ── API helper ── */
+// Ads state
+let adsConfig = {};   // {slot: {imageUrl, link, imageSha}}
+let adsSha    = null; // GitHub SHA of ads/config.json
+
+/* ── API ── */
 async function api(method, path, body) {
   const headers = { 'Content-Type': 'application/json' };
   if (token) headers['Authorization'] = `Bearer ${token}`;
   const res = await fetch(`${API_URL}${path}`, {
-    method,
-    headers,
+    method, headers,
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
-  if (res.status === 401) { logout(); throw new Error('Session expired — please sign in again.'); }
+  if (res.status === 401) { logout(); throw new Error('Session expired.'); }
   const data = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
   if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
   return data;
@@ -388,13 +395,13 @@ async function api(method, path, body) {
 
 /* ── Views ── */
 function showView(id) {
-  for (const v of ['view-login', 'view-posts', 'view-editor'])
-    document.getElementById(v).style.display = v === id
-      ? (v === 'view-login' ? 'flex' : 'block')
-      : 'none';
+  ['view-login','view-posts','view-editor','view-ads'].forEach(v => {
+    document.getElementById(v).style.display =
+      v === id ? (v === 'view-login' ? 'flex' : 'block') : 'none';
+  });
 }
 
-/* ── Status banner ── */
+/* ── Banner ── */
 function showBanner(type, msg) {
   const el = document.getElementById('status-banner');
   el.className = `status-banner ${type}`;
@@ -404,78 +411,58 @@ function showBanner(type, msg) {
 }
 function hideBanner() { document.getElementById('status-banner').classList.add('hidden'); }
 
-/* ────────────────────────────────────────────────────────────
+/* ══════════════════════════════════════════════════════
    LOGIN
-────────────────────────────────────────────────────────────── */
-document.getElementById('login-form').addEventListener('submit', async (e) => {
+══════════════════════════════════════════════════════ */
+document.getElementById('login-form').addEventListener('submit', async e => {
   e.preventDefault();
   const errEl = document.getElementById('login-err');
   const btn   = document.getElementById('btn-login');
-  errEl.textContent = '';
-  btn.textContent   = 'Signing in…';
-  btn.disabled      = true;
-
+  errEl.textContent = ''; btn.textContent = 'Signing in…'; btn.disabled = true;
   try {
-    const u = document.getElementById('inp-user').value.trim();
-    const p = document.getElementById('inp-pass').value;
     const res = await fetch(`${API_URL}/api/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username: u, password: p }),
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ username: document.getElementById('inp-user').value.trim(), password: document.getElementById('inp-pass').value }),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Login failed');
-    token    = data.token;
-    username = data.username;
+    token = data.token; username = data.username;
     localStorage.setItem('wkr_token', token);
-    localStorage.setItem('wkr_user',  username);
+    localStorage.setItem('wkr_user', username);
     loadPostList();
   } catch (err) {
-    errEl.textContent = err.message === 'Invalid credentials'
-      ? 'Wrong username or password.'
-      : `Error: ${err.message}`;
-    btn.textContent = 'SIGN IN →';
-    btn.disabled    = false;
+    errEl.textContent = err.message === 'Invalid credentials' ? 'Wrong username or password.' : `Error: ${err.message}`;
+    btn.textContent = 'SIGN IN →'; btn.disabled = false;
   }
 });
 
-/* ────────────────────────────────────────────────────────────
+/* ══════════════════════════════════════════════════════
    POST LIST
-────────────────────────────────────────────────────────────── */
+══════════════════════════════════════════════════════ */
 async function loadPostList() {
   showView('view-posts');
   document.getElementById('toolbar-user').textContent = username ? `Signed in as ${username}` : '';
-
   const listEl = document.getElementById('posts-list');
   listEl.innerHTML = '<p class="posts-loading">Loading posts…</p>';
-
   try {
     const posts = await api('GET', '/api/posts');
     if (!posts.length) {
-      listEl.innerHTML = `
-        <div class="posts-empty">
-          <p>🏈</p>
-          <p>No posts yet — write your first take!</p>
-        </div>`;
+      listEl.innerHTML = '<div class="posts-empty"><p>🏈</p><p>No posts yet — write your first take!</p></div>';
       return;
     }
     listEl.innerHTML = posts.map(p => {
-      const parts   = p.name.replace('.md', '').split('-');
-      const dateStr = parts.length >= 3 ? `${parts[0]}-${parts[1]}-${parts[2]}` : '';
-      const rawLabel = parts.slice(3).join(' ') || p.name;
-      const label   = rawLabel.charAt(0).toUpperCase() + rawLabel.slice(1);
-      const disp    = dateStr
-        ? new Date(dateStr + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-        : '';
-      return `
-        <div class="post-row">
-          <div class="post-info">
-            <div class="post-name">${label}</div>
-            ${disp ? `<div class="post-meta">${disp} &middot; ${p.name}</div>` : `<div class="post-meta">${p.name}</div>`}
-          </div>
-          <button class="btn btn-outline btn-sm" onclick="openEditPost('${p.name}','${p.sha}')">Edit</button>
-          <button class="btn btn-danger btn-sm" onclick="confirmDelete('${p.name}','${p.sha}')">Delete</button>
-        </div>`;
+      const parts  = p.name.replace('.md','').split('-');
+      const ds     = parts.length >= 3 ? `${parts[0]}-${parts[1]}-${parts[2]}` : '';
+      const label  = (parts.slice(3).join(' ') || p.name).replace(/^\w/, c => c.toUpperCase());
+      const disp   = ds ? new Date(ds+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
+      return `<div class="post-row">
+        <div class="post-info">
+          <div class="post-name">${label}</div>
+          <div class="post-meta">${disp ? `${disp} · ` : ''}${p.name}</div>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="openEditPost('${p.name}','${p.sha}')">Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="confirmDelete('${p.name}','${p.sha}')">Delete</button>
+      </div>`;
     }).join('');
   } catch (err) {
     listEl.innerHTML = `<p style="color:#dc2626;font-size:14px;padding:24px 0">Error: ${err.message}</p>`;
@@ -484,129 +471,86 @@ async function loadPostList() {
 
 document.getElementById('btn-new-post').addEventListener('click', () => openEditor(null, null, null));
 document.getElementById('btn-logout').addEventListener('click', logout);
+document.getElementById('btn-manage-ads').addEventListener('click', openAdsView);
 
 function logout() {
   token = null; username = null;
-  localStorage.removeItem('wkr_token');
-  localStorage.removeItem('wkr_user');
+  localStorage.removeItem('wkr_token'); localStorage.removeItem('wkr_user');
   showView('view-login');
 }
-
 async function confirmDelete(filename, sha) {
-  if (!confirm(`Delete "${filename}"?\n\nThis cannot be undone and will trigger a site rebuild.`)) return;
-  try {
-    await api('DELETE', `/api/posts/${filename}?sha=${encodeURIComponent(sha)}`);
-    loadPostList();
-  } catch (err) {
-    alert(`Delete failed: ${err.message}`);
-  }
+  if (!confirm(`Delete "${filename}"?\n\nThis cannot be undone.`)) return;
+  try { await api('DELETE', `/api/posts/${filename}?sha=${encodeURIComponent(sha)}`); loadPostList(); }
+  catch (err) { alert(`Delete failed: ${err.message}`); }
 }
 
-/* ────────────────────────────────────────────────────────────
-   EDITOR — Quill init
-────────────────────────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════
+   EDITOR
+══════════════════════════════════════════════════════ */
 function initQuill() {
   if (quill) return;
   quill = new Quill('#quill-editor', {
     theme: 'snow',
     placeholder: 'Write your take here…',
-    modules: {
-      toolbar: [
-        [{ font: [] }],
-        [{ size: ['small', false, 'large', 'huge'] }],
-        ['bold', 'italic', 'underline', 'strike'],
-        [{ color: [] }, { background: [] }],
-        [{ header: [1, 2, 3, false] }],
-        [{ list: 'ordered' }, { list: 'bullet' }],
-        [{ indent: '-1' }, { indent: '+1' }],
-        [{ align: [] }],
-        ['link', 'blockquote'],
-        ['clean'],
-      ],
-    },
+    modules: { toolbar: [
+      [{ font: [] }],
+      [{ size: ['small', false, 'large', 'huge'] }],
+      ['bold','italic','underline','strike'],
+      [{ color: [] }, { background: [] }],
+      [{ header: [1,2,3,false] }],
+      [{ list:'ordered' }, { list:'bullet' }],
+      [{ indent:'-1' }, { indent:'+1' }],
+      [{ align: [] }],
+      ['link','blockquote'],
+      ['clean'],
+    ]},
   });
 }
 
-/* ── Auto-slug from title (new posts only) ── */
 document.getElementById('f-title').addEventListener('input', () => {
   if (editFile) return;
   document.getElementById('f-slug').value = document.getElementById('f-title').value
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-+|-+$/g, '');
+    .toLowerCase().replace(/[^a-z0-9\s-]/g,'').replace(/\s+/g,'-').replace(/-+/g,'-').replace(/^-+|-+$/g,'');
 });
 
-/* ────────────────────────────────────────────────────────────
-   OPEN / LOAD EDITOR
-────────────────────────────────────────────────────────────── */
 function openEditor(filename, sha, content) {
-  editFile = filename;
-  editSha  = sha;
-  pdfUrl   = null;
-  pdfSha   = null;
-  initQuill();
-  hideBanner();
-
+  editFile = filename; editSha = sha; pdfUrl = null; pdfSha = null;
+  initQuill(); hideBanner();
   const isNew = !filename;
   document.getElementById('editor-toolbar-title').textContent = isNew ? 'New Post' : 'Edit Post';
   const delBtn = document.getElementById('btn-delete-post');
   isNew ? delBtn.classList.add('hidden') : delBtn.classList.remove('hidden');
   delBtn.onclick = () => {
-    if (confirm(`Delete "${editFile}"?\n\nThis cannot be undone.`)) {
+    if (confirm(`Delete "${editFile}"?`)) {
       api('DELETE', `/api/posts/${editFile}?sha=${encodeURIComponent(editSha)}`)
-        .then(() => loadPostList())
-        .catch(err => alert(`Delete failed: ${err.message}`));
+        .then(() => loadPostList()).catch(err => alert(`Delete failed: ${err.message}`));
     }
   };
-
   if (content) {
     const { data, body } = parseFrontmatter(content);
-    document.getElementById('f-title').value    = data.title    || '';
-    document.getElementById('f-slug').value     = data.slug     || '';
-    document.getElementById('f-excerpt').value  = data.excerpt  || '';
+    document.getElementById('f-title').value   = data.title   || '';
+    document.getElementById('f-slug').value    = data.slug    || '';
+    document.getElementById('f-excerpt').value = data.excerpt || '';
     document.getElementById('f-featured').checked = data.featured === 'true' || data.featured === true;
-    document.getElementById('f-week').value     = data.week     !== undefined ? data.week     : 1;
-    document.getElementById('f-year').value     = data.year     !== undefined ? data.year     : 2026;
+    document.getElementById('f-week').value  = data.week  !== undefined ? data.week  : 1;
+    document.getElementById('f-year').value  = data.year  !== undefined ? data.year  : 2026;
     const cats = ['Latest Take','Analysis','Preview','Recap','Culture','Opinion'];
     document.getElementById('f-category').value = cats.includes(data.category) ? data.category : 'Latest Take';
-    if (data.date) {
-      const d = new Date(data.date);
-      document.getElementById('f-date').value = toLocalInput(d);
-    } else {
-      document.getElementById('f-date').value = toLocalInput(new Date());
-    }
-    // Restore PDF reference
+    document.getElementById('f-date').value = data.date ? toLocalInput(new Date(data.date)) : toLocalInput(new Date());
     pdfUrl = data.schedule_pdf || null;
     renderPdfStatus();
-    // Set editor body — handle HTML or plain text
-    const isHtml = body.trim().startsWith('<');
-    if (isHtml) {
-      quill.root.innerHTML = body.trim();
-    } else {
-      // Plain text (legacy Markdown stored as text) — insert as-is
-      quill.setText(body.trim());
-    }
+    body.trim().startsWith('<') ? (quill.root.innerHTML = body.trim()) : quill.setText(body.trim());
   } else {
-    document.getElementById('f-title').value    = '';
-    document.getElementById('f-slug').value     = '';
-    document.getElementById('f-excerpt').value  = '';
+    ['f-title','f-slug','f-excerpt'].forEach(id => { document.getElementById(id).value = ''; });
     document.getElementById('f-featured').checked = false;
-    document.getElementById('f-week').value     = 1;
-    document.getElementById('f-year').value     = new Date().getFullYear();
+    document.getElementById('f-week').value = 1;
+    document.getElementById('f-year').value = new Date().getFullYear();
     document.getElementById('f-category').value = 'Latest Take';
-    document.getElementById('f-date').value     = toLocalInput(new Date());
-    pdfUrl = null;
-    pdfSha = null;
-    renderPdfStatus();
-    quill.setText('');
+    document.getElementById('f-date').value = toLocalInput(new Date());
+    pdfUrl = null; pdfSha = null; renderPdfStatus(); quill.setText('');
   }
-
-  // Reset file input
   document.getElementById('f-pdf-file').value = '';
   document.getElementById('pdf-status').textContent = '';
-
   showView('view-editor');
   document.getElementById('f-title').focus();
 }
@@ -615,91 +559,40 @@ async function openEditPost(filename, sha) {
   try {
     const { content, sha: freshSha } = await api('GET', `/api/posts/${filename}`);
     openEditor(filename, freshSha, content);
-  } catch (err) {
-    alert(`Could not load post: ${err.message}`);
-  }
+  } catch (err) { alert(`Could not load post: ${err.message}`); }
 }
 
 document.getElementById('btn-back').addEventListener('click', () => {
   if (confirm('Go back? Unsaved changes will be lost.')) loadPostList();
 });
 
-/* ────────────────────────────────────────────────────────────
-   PDF UPLOAD
-────────────────────────────────────────────────────────────── */
+/* ── PDF upload ── */
 function renderPdfStatus() {
   const el = document.getElementById('pdf-current');
-  if (pdfUrl) {
-    el.innerHTML = `Current: <a href="${pdfUrl}" target="_blank">${pdfUrl}</a>`;
-  } else {
-    el.textContent = 'No PDF linked yet.';
-  }
+  el.innerHTML = pdfUrl ? `Current: <a href="${pdfUrl}" target="_blank">${pdfUrl}</a>` : 'No PDF linked yet.';
 }
 
 document.getElementById('btn-upload-pdf').addEventListener('click', async () => {
   const fileInput = document.getElementById('f-pdf-file');
   const statusEl  = document.getElementById('pdf-status');
   const btn       = document.getElementById('btn-upload-pdf');
-
-  if (!fileInput.files.length) {
-    statusEl.textContent = 'Choose a PDF file first.';
-    statusEl.className   = 'pdf-status err';
-    return;
-  }
-
+  if (!fileInput.files.length) { statusEl.textContent='Choose a PDF first.'; statusEl.className='pdf-status err'; return; }
   const file = fileInput.files[0];
-  if (!file.name.endsWith('.pdf')) {
-    statusEl.textContent = 'Only PDF files are supported.';
-    statusEl.className   = 'pdf-status err';
-    return;
-  }
-
   const week = parseInt(document.getElementById('f-week').value, 10);
   const year = parseInt(document.getElementById('f-year').value, 10);
-  if (isNaN(week) || isNaN(year)) {
-    statusEl.textContent = 'Set Week # and Year before uploading.';
-    statusEl.className   = 'pdf-status err';
-    return;
-  }
-
-  btn.textContent = 'Uploading…';
-  btn.disabled    = true;
-  statusEl.textContent = '';
-
+  if (isNaN(week)||isNaN(year)) { statusEl.textContent='Set Week # and Year first.'; statusEl.className='pdf-status err'; return; }
+  btn.textContent='Uploading…'; btn.disabled=true; statusEl.textContent='';
   try {
-    // Read file as base64
-    const b64 = await new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload  = () => resolve(reader.result.split(',')[1]); // strip data: prefix
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-
-    const path = `schedules/${year}/week-${week}.pdf`;
-    const result = await api('POST', '/api/upload', {
-      path,
-      content: b64,
-      sha: pdfSha || undefined,
-    });
-
-    pdfUrl = result.url;     // e.g. "/schedules/2026/week-3.pdf"
-    pdfSha = result.sha;
+    const b64 = await fileToBase64(file);
+    const result = await api('POST', '/api/upload', { path:`schedules/${year}/week-${week}.pdf`, content:b64, sha:pdfSha||undefined });
+    pdfUrl = result.url; pdfSha = result.sha;
     renderPdfStatus();
-    statusEl.textContent = '✓ PDF uploaded!';
-    statusEl.className   = 'pdf-status ok';
-    fileInput.value = '';
-  } catch (err) {
-    statusEl.textContent = `Upload failed: ${err.message}`;
-    statusEl.className   = 'pdf-status err';
-  } finally {
-    btn.textContent = 'Upload PDF';
-    btn.disabled    = false;
-  }
+    statusEl.textContent='✓ PDF uploaded!'; statusEl.className='pdf-status ok'; fileInput.value='';
+  } catch (err) { statusEl.textContent=`Upload failed: ${err.message}`; statusEl.className='pdf-status err'; }
+  finally { btn.textContent='Upload PDF'; btn.disabled=false; }
 });
 
-/* ────────────────────────────────────────────────────────────
-   PUBLISH
-────────────────────────────────────────────────────────────── */
+/* ── Publish ── */
 document.getElementById('btn-publish').addEventListener('click', async () => {
   const title    = document.getElementById('f-title').value.trim();
   const slug     = document.getElementById('f-slug').value.trim();
@@ -709,99 +602,301 @@ document.getElementById('btn-publish').addEventListener('click', async () => {
   const dateVal  = document.getElementById('f-date').value;
   const week     = parseInt(document.getElementById('f-week').value, 10);
   const year     = parseInt(document.getElementById('f-year').value, 10);
-
-  // Get HTML body from Quill
-  const body = quill.root.innerHTML.trim();
-  // Treat empty editor as empty
+  const body     = quill.root.innerHTML.trim();
   const bodyIsEmpty = quill.getText().trim() === '';
-
-  if (!title)   { showBanner('error', 'Title is required.'); return; }
-  if (!slug)    { showBanner('error', 'URL Slug is required.'); return; }
-  if (!dateVal) { showBanner('error', 'Publish date is required.'); return; }
-
-  const dateISO  = new Date(dateVal).toISOString();
+  if (!title)   { showBanner('error','Title is required.'); return; }
+  if (!slug)    { showBanner('error','URL Slug is required.'); return; }
+  if (!dateVal) { showBanner('error','Publish date is required.'); return; }
   const filename = editFile || makeFilename(slug, dateVal);
-  const content  = buildFrontmatter({ title, slug, date: dateISO, excerpt, category, featured, week, year, schedulePdf: pdfUrl })
+  const content  = buildFrontmatter({title,slug,date:new Date(dateVal).toISOString(),excerpt,category,featured,week,year,schedulePdf:pdfUrl})
     + (bodyIsEmpty ? '' : body);
-
   const btn = document.getElementById('btn-publish');
-  btn.textContent = 'Publishing…';
-  btn.disabled    = true;
-  hideBanner();
-
+  btn.textContent='Publishing…'; btn.disabled=true; hideBanner();
   try {
-    const result = await api('POST', `/api/posts/${filename}`, {
-      content,
-      sha: editSha || undefined,
-    });
-    editFile = filename;
-    editSha  = result.sha;
+    const result = await api('POST', `/api/posts/${filename}`, { content, sha: editSha||undefined });
+    editFile = filename; editSha = result.sha;
     document.getElementById('editor-toolbar-title').textContent = 'Edit Post';
     document.getElementById('btn-delete-post').classList.remove('hidden');
-    showBanner('success', '✓ Published! Your site will rebuild in about a minute. Roll Tide 🏈');
-  } catch (err) {
-    showBanner('error', `Error: ${err.message}`);
-  } finally {
-    btn.textContent = 'Publish';
-    btn.disabled    = false;
-  }
+    showBanner('success', '✓ Published! Site rebuilds in ~1 minute. Roll Tide 🏈');
+  } catch (err) { showBanner('error', `Error: ${err.message}`); }
+  finally { btn.textContent='Publish'; btn.disabled=false; }
 });
 
-/* ────────────────────────────────────────────────────────────
+/* ══════════════════════════════════════════════════════
+   PREVIEW
+══════════════════════════════════════════════════════ */
+document.getElementById('btn-preview').addEventListener('click', async () => {
+  const title    = document.getElementById('f-title').value.trim() || 'Untitled';
+  const category = document.getElementById('f-category').value;
+  const dateVal  = document.getElementById('f-date').value;
+  const excerpt  = document.getElementById('f-excerpt').value.trim();
+  const body     = quill.root.innerHTML;
+  const dateDisp = dateVal
+    ? new Date(dateVal).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})
+    : new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+
+  // Load current ads if available
+  let previewAds = adsConfig;
+  if (!Object.keys(previewAds).length) {
+    try {
+      const r = await fetch(`${API_URL}/api/ads`);
+      if (r.ok) { const d = await r.json(); previewAds = d.config || {}; }
+    } catch {}
+  }
+
+  const adHtml = (slot) => {
+    const ad = previewAds[slot];
+    if (!ad || !ad.imageUrl) {
+      return `<div class="ad-placeholder"><span>${slot === 'homepage' ? '300 × 250' : '728 × 90'} — Ad Slot</span></div>`;
+    }
+    const img = `<img src="${ad.imageUrl}" alt="Advertisement" style="max-width:100%;display:block;margin:0 auto;">`;
+    return ad.link ? `<a href="${ad.link}" target="_blank" rel="noopener sponsored">${img}</a>` : img;
+  };
+
+  const pdfBanner = pdfUrl ? `
+    <a class="schedule-download" href="${pdfUrl}" download>
+      <span class="sd-icon">📄</span>
+      <span><strong>This Week's TV Schedule</strong><span>Click to download &amp; print</span></span>
+      <span class="sd-cta">DOWNLOAD →</span>
+    </a>` : '';
+
+  const html = buildPreviewDoc({title, category, dateDisp, excerpt, body, pdfBanner, adHtml});
+  const frame = document.getElementById('preview-frame');
+  frame.srcdoc = html;
+  document.getElementById('preview-overlay').classList.remove('hidden');
+});
+
+document.getElementById('btn-close-preview').addEventListener('click', () => {
+  document.getElementById('preview-overlay').classList.add('hidden');
+  document.getElementById('preview-frame').srcdoc = '';
+});
+
+function buildPreviewDoc({title, category, dateDisp, excerpt, body, pdfBanner, adHtml}) {
+  return `<!doctype html><html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Preview — ${title}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--crimson:#8f1224;--deep:#171313;--paper:#f8f6f1;--line:#ded9d0;--muted:#706a64}
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--paper);color:var(--deep);font-family:'Inter',sans-serif;line-height:1.55}
+  a{color:inherit;text-decoration:none}
+  img{display:block;max-width:100%}
+  .preview-notice{background:#166534;color:#fff;text-align:center;padding:10px 20px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+  .eyebrow{margin:0;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+  .crimson{color:var(--crimson)}
+  .lead{font-size:clamp(18px,2.5vw,24px);line-height:1.45}
+  .article{padding-bottom:80px}
+  .article-header{max-width:950px;margin:60px auto 30px;padding:0 24px;text-align:center}
+  .article-header h1{font-family:'Oswald',sans-serif;font-weight:400;font-size:clamp(42px,6vw,86px);line-height:1.08;margin:14px 0}
+  .article-body{max-width:760px;margin:auto;padding:24px 24px 40px;font-size:18px;line-height:1.7}
+  .article-body h1,.article-body h2{font-family:'Oswald',sans-serif;font-weight:400}
+  .article-body h2{font-size:38px}
+  .article-body p{margin-bottom:1em}
+  .schedule-download{display:flex;align-items:center;gap:16px;background:#fff;border:2px solid var(--crimson);border-left:6px solid var(--crimson);padding:14px 20px;margin:24px auto 0;max-width:600px;color:var(--deep)}
+  .schedule-download strong{display:block;font-size:15px;font-weight:700}
+  .schedule-download span>span{font-size:12px;color:var(--muted)}
+  .sd-icon{font-size:28px;line-height:1;flex-shrink:0}
+  .sd-cta{margin-left:auto;font-size:12px;font-weight:800;letter-spacing:.08em;color:var(--crimson)}
+  .ad-slot-wrap{text-align:center;padding:20px 24px;background:#fff;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin:0 0 8px}
+  .ad-slot-wrap + .article-header{margin-top:24px}
+  .ad-label{font-size:9px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin-bottom:8px}
+  .ad-placeholder{width:728px;max-width:100%;height:90px;background:repeating-linear-gradient(-45deg,#f0ede8,#f0ede8 8px,#e8e4de 8px,#e8e4de 16px);display:flex;align-items:center;justify-content:center;margin:0 auto;font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.08em;text-transform:uppercase;border:1px dashed var(--line)}
+</style></head><body>
+<div class="preview-notice">⚠ PREVIEW MODE — This post has not been published yet</div>
+
+<div class="ad-slot-wrap">
+  <div class="ad-label">Advertisement</div>
+  ${adHtml('post-top')}
+</div>
+
+<article class="article">
+  <header class="article-header">
+    <p style="font-size:13px;font-weight:700;color:var(--muted);margin:0 0 20px">← All Takes</p>
+    <p class="eyebrow crimson">${category} · ${dateDisp}</p>
+    <h1>${escHtml(title)}</h1>
+    <p class="lead">${escHtml(excerpt)}</p>
+    ${pdfBanner}
+  </header>
+  <div class="article-body">${body || '<p style="color:var(--muted);font-style:italic">No body content yet.</p>'}</div>
+</article>
+
+<div class="ad-slot-wrap">
+  <div class="ad-label">Advertisement</div>
+  ${adHtml('post-bottom')}
+</div>
+</body></html>`;
+}
+
+function escHtml(s) {
+  return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+}
+
+/* ══════════════════════════════════════════════════════
+   ADS VIEW
+══════════════════════════════════════════════════════ */
+async function openAdsView() {
+  showView('view-ads');
+  // Load current config
+  try {
+    const data = await api('GET', '/api/ads');
+    adsConfig = data.config || {};
+    adsSha    = data.sha || null;
+    renderAllAdPreviews();
+  } catch (err) {
+    console.warn('Could not load ads config:', err.message);
+  }
+}
+
+document.getElementById('btn-ads-back').addEventListener('click', () => loadPostList());
+
+function renderAllAdPreviews() {
+  ['post-top','post-bottom','homepage'].forEach(slot => renderAdPreview(slot));
+}
+
+function renderAdPreview(slot) {
+  const ad  = adsConfig[slot] || {};
+  const el  = document.getElementById(`adprev-${slot}`);
+  if (!el) return;
+  const liveTag = `<span class="ad-preview-live">LIVE</span>`;
+  if (ad.imageUrl) {
+    el.innerHTML = `<img src="${ad.imageUrl}" alt="Ad preview" onerror="this.parentElement.innerHTML='<span class=ad-preview-placeholder>Image not found</span>'">${liveTag}`;
+  } else {
+    const dim = slot === 'homepage' ? '300 × 250 px' : '728 × 90 px';
+    el.innerHTML = `<span class="ad-preview-placeholder">${dim} — No Ad</span>`;
+  }
+  // Restore link URL
+  const linkEl = document.getElementById(`adlink-${slot}`);
+  if (linkEl) linkEl.value = ad.link || '';
+}
+
+window.saveAd = async function(slot) {
+  const fileInput  = document.getElementById(`adfile-${slot}`);
+  const linkInput  = document.getElementById(`adlink-${slot}`);
+  const statusEl   = document.getElementById(`adstatus-${slot}`);
+
+  const link = linkInput.value.trim();
+  const hasFile = fileInput.files.length > 0;
+
+  if (!hasFile && !link && !adsConfig[slot]) {
+    statusEl.textContent = 'Upload an image or enter a link URL.';
+    statusEl.className = 'ad-status err';
+    return;
+  }
+
+  statusEl.textContent = 'Saving…';
+  statusEl.className   = 'ad-status';
+
+  try {
+    let imageUrl = adsConfig[slot]?.imageUrl || null;
+    let imageSha = adsConfig[slot]?.imageSha || null;
+
+    // Upload new image if provided
+    if (hasFile) {
+      const file = fileInput.files[0];
+      const ext  = file.type.includes('png') ? 'png' : file.type.includes('gif') ? 'gif' : file.type.includes('webp') ? 'webp' : 'jpg';
+      const path = `ads/${slot}.${ext}`;
+      const b64  = await fileToBase64(file);
+      const result = await api('POST', '/api/upload', { path, content: b64, sha: imageSha || undefined });
+      imageUrl = result.url;
+      imageSha = result.sha;
+      fileInput.value = '';
+    }
+
+    // Update ads config
+    adsConfig[slot] = { imageUrl, imageSha, link: link || '' };
+    const saved = await api('POST', '/api/ads', { config: adsConfig, sha: adsSha || undefined });
+    adsSha = saved.sha;
+
+    renderAdPreview(slot);
+    statusEl.textContent = '✓ Saved! Site rebuilds in ~1 minute.';
+    statusEl.className   = 'ad-status ok';
+  } catch (err) {
+    statusEl.textContent = `Error: ${err.message}`;
+    statusEl.className   = 'ad-status err';
+  }
+};
+
+// Ad preview (open in new tab with sample article)
+document.getElementById('btn-preview-ads').addEventListener('click', async () => {
+  // Reload ads first
+  try {
+    const d = await api('GET', '/api/ads');
+    adsConfig = d.config || {}; adsSha = d.sha || null;
+  } catch {}
+  const adHtml = (slot) => {
+    const ad = adsConfig[slot];
+    if (!ad || !ad.imageUrl) {
+      const dim = slot === 'homepage' ? '300 × 250' : '728 × 90';
+      return `<div class="ad-placeholder"><span>${dim} — Ad Slot</span></div>`;
+    }
+    const img = `<img src="${ad.imageUrl}" alt="Ad" style="max-width:100%;display:block;margin:0 auto;">`;
+    return ad.link ? `<a href="${ad.link}" target="_blank" rel="noopener sponsored">${img}</a>` : img;
+  };
+  const html = buildPreviewDoc({
+    title:'Sample Article — Alabama Looks Ready to Roll',
+    category:'Latest Take', dateDisp:'September 6, 2026',
+    excerpt:'A quick look at where things stand heading into the 2026 season opener.',
+    body:`<p>This is a sample article body to show you how your ads will look in context. The leaderboard ads appear above and below this text.</p>
+<p>When you upload real ad images and publish, they appear exactly like this — centered, clean, with the "Advertisement" label above. The ad is clickable and links to your sponsor's site.</p>
+<p>Roll Tide!</p>`,
+    pdfBanner:'', adHtml,
+  });
+  const w = window.open('about:blank','_blank');
+  w.document.write(html);
+  w.document.close();
+});
+
+/* ══════════════════════════════════════════════════════
    HELPERS
-────────────────────────────────────────────────────────────── */
+══════════════════════════════════════════════════════ */
 function parseFrontmatter(raw) {
   const m = raw.match(/^---\s*\n([\s\S]*?)\n---\s*\n?([\s\S]*)$/);
-  if (!m) return { data: {}, body: raw };
+  if (!m) return { data:{}, body:raw };
   const data = {};
   m[1].split('\n').forEach(line => {
     const i = line.indexOf(':');
     if (i < 0) return;
-    const key = line.slice(0, i).trim();
-    const val = line.slice(i + 1).trim().replace(/^["']|["']$/g, '');
-    data[key] = val;
+    data[line.slice(0,i).trim()] = line.slice(i+1).trim().replace(/^["']|["']$/g,'');
   });
   return { data, body: m[2].trim() };
 }
 
-function buildFrontmatter({ title, slug, date, excerpt, category, featured, week, year, schedulePdf }) {
-  const q = v => `"${String(v).replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
-  const lines = [
-    '---',
-    `title: ${q(title)}`,
-    `slug: ${q(slug)}`,
-    `date: "${date}"`,
-    `excerpt: ${q(excerpt)}`,
-    `category: "${category}"`,
-    `featured: ${featured}`,
-    `week: ${isNaN(week) ? 1 : week}`,
-    `year: ${isNaN(year) ? 2026 : year}`,
-  ];
+function buildFrontmatter({title,slug,date,excerpt,category,featured,week,year,schedulePdf}) {
+  const q = v => `"${String(v).replace(/\\/g,'\\\\').replace(/"/g,'\\"')}"`;
+  const lines = ['---',`title: ${q(title)}`,`slug: ${q(slug)}`,`date: "${date}"`,
+    `excerpt: ${q(excerpt)}`,`category: "${category}"`,`featured: ${featured}`,
+    `week: ${isNaN(week)?1:week}`,`year: ${isNaN(year)?2026:year}`];
   if (schedulePdf) lines.push(`schedule_pdf: "${schedulePdf}"`);
-  lines.push('---', '', '');
+  lines.push('---','','');
   return lines.join('\n');
 }
 
 function makeFilename(slug, dateVal) {
-  const d   = new Date(dateVal);
-  const y   = d.getFullYear();
-  const mo  = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${mo}-${day}-${slug}.md`;
+  const d = new Date(dateVal);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}-${slug}.md`;
 }
 
 function toLocalInput(date) {
-  return new Date(date - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  return new Date(date - date.getTimezoneOffset()*60000).toISOString().slice(0,16);
 }
 
-/* ────────────────────────────────────────────────────────────
-   INIT
-────────────────────────────────────────────────────────────── */
-if (token) {
-  loadPostList();
-} else {
-  showView('view-login');
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload  = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 }
+
+/* ══════════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════════ */
+if (token) { loadPostList(); } else { showView('view-login'); }
 </script>
 </body>
 </html>

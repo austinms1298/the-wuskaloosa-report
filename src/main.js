@@ -141,7 +141,7 @@ function homePage() {
           ${archive.length ? `<div class="card-grid">${archive.map(postCard).join('')}</div>` : `<p style="color:var(--muted);font-size:14px;margin:8px 0 0">Takes are coming — check back soon.</p>`}
         </section>
 
-        <aside class="sponsor-ad">
+        <aside class="sponsor-ad" id="ad-homepage">
           <p class="eyebrow">SPONSORSHIP</p>
           <h2>Your business could be featured here.</h2>
           <p>Reach Alabama football fans with a homepage sponsorship.</p>
@@ -259,6 +259,7 @@ function postPage() {
   return `
     ${header()}
     <main>
+      <div class="ad-slot-wrap" id="ad-post-top"></div>
       <article class="article">
         <header class="article-header">
           <p style="font-size:13px;font-weight:700;color:var(--muted);margin:0 0 20px">
@@ -271,6 +272,7 @@ function postPage() {
         </header>
         <div class="article-body">${post.html}</div>
       </article>
+      <div class="ad-slot-wrap" id="ad-post-bottom"></div>
     </main>
     ${footer()}`;
 }
@@ -328,3 +330,44 @@ if (nlForm) {
     nlForm.innerHTML = `<p style="font-weight:800;color:#fff;margin:auto;font-size:15px;padding:14px 0">✓ You're on the list! Roll Tide 🏈</p>`;
   });
 }
+
+// ── Ads — load asynchronously after page render ────────────────────────────────
+async function loadAds() {
+  try {
+    const res = await fetch('/ads/config.json');
+    if (!res.ok) return;
+    const cfg = await res.json();
+
+    function injectAd(elId, slot) {
+      const el = document.getElementById(elId);
+      if (!el) return;
+      const ad = cfg[slot];
+      if (!ad || !ad.imageUrl) return;
+      const openTag = ad.link
+        ? `<a href="${escapeHtml(ad.link)}" target="_blank" rel="noopener sponsored">`
+        : '<span>';
+      const closeTag = ad.link ? '</a>' : '</span>';
+      el.innerHTML =
+        `<p class="ad-label">Advertisement</p>` +
+        `${openTag}<img src="${escapeHtml(ad.imageUrl)}" alt="Sponsor" loading="lazy" onerror="this.closest('.ad-slot-wrap').style.display='none'">${closeTag}`;
+    }
+
+    injectAd('ad-post-top', 'post-top');
+    injectAd('ad-post-bottom', 'post-bottom');
+
+    // Homepage box — swap placeholder content for actual ad image
+    const homeEl = document.getElementById('ad-homepage');
+    const homeAd = cfg['homepage'];
+    if (homeEl && homeAd && homeAd.imageUrl) {
+      const openTag = homeAd.link
+        ? `<a href="${escapeHtml(homeAd.link)}" target="_blank" rel="noopener sponsored">`
+        : '<span>';
+      const closeTag = homeAd.link ? '</a>' : '</span>';
+      homeEl.innerHTML =
+        `<p class="eyebrow">SPONSOR</p>` +
+        `${openTag}<img src="${escapeHtml(homeAd.imageUrl)}" alt="Sponsor" loading="lazy" style="max-width:300px;max-height:250px;margin:auto;display:block" onerror="this.closest('.sponsor-ad').style.display='none'">${closeTag}`;
+    }
+  } catch { /* ads are non-critical — fail silently */ }
+}
+
+loadAds();
