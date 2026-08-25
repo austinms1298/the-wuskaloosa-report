@@ -177,31 +177,280 @@ function archivePage() {
 }
 
 function schedulePage() {
-  const today = new Date(); today.setHours(0,0,0,0);
-  const weekEnd = new Date(today); weekEnd.setDate(weekEnd.getDate() + 7);
-  const rows = schedule.map(game => {
-    const gd = game.gameDate ? new Date(game.gameDate) : null;
-    const isThisWeek = gd && gd >= today && gd <= weekEnd;
-    const isPast = gd && gd < today;
-    const status = isThisWeek ? 'THIS WEEK!' : (isPast ? (game.result || 'FINAL') : (game.time || ''));
-    const matchup = game.home === null ? game.opponent : `${game.home ? 'vs' : 'at'} ${game.opponent}`;
-    const isBye = game.home === null;
-    return `<div class="full-schedule-row${isThisWeek ? ' this-week' : ''}${isBye ? ' bye' : ''}">
-      <span class="fs-date">${game.date}<em>${game.day}</em></span>
-      <div class="fs-game">
-        <h2>${matchup}</h2>
-        ${game.city ? `<p class="fs-city">${game.city}</p>` : ''}
+  // ── All 16 SEC teams, alphabetical ──────────────────────────────────────
+  // loc: 'home' | 'away' | 'neutral' | 'bye'
+  const SEC = [
+    { name: 'Alabama', isHome: true, games: [
+      ['Sept. 5',  'East Carolina',      'home'],
+      ['Sept. 12', 'Kentucky',           'away'],
+      ['Sept. 19', 'Florida State',      'home'],
+      ['Sept. 26', 'South Carolina',     'home'],
+      ['Oct. 3',   'Mississippi State',  'away'],
+      ['Oct. 10',  'Georgia',            'home'],
+      ['Oct. 17',  'Tennessee',          'away'],
+      ['Oct. 24',  'Texas A&M',          'home'],
+      ['Oct. 31',  '',                   'bye' ],
+      ['Nov. 7',   'LSU',                'away'],
+      ['Nov. 14',  'Vanderbilt',         'away'],
+      ['Nov. 21',  'UT-Chattanooga',     'home'],
+      ['Nov. 28',  'Auburn',             'home'],
+    ]},
+    { name: 'Arkansas', games: [
+      ['Sept. 5',  'North Alabama',      'home'],
+      ['Sept. 12', 'Utah',               'away'],
+      ['Sept. 19', 'Georgia',            'home'],
+      ['Sept. 26', 'Tulsa',              'home'],
+      ['Oct. 3',   'Texas A&M',          'away'],
+      ['Oct. 10',  'Tennessee',          'home'],
+      ['Oct. 17',  'Vanderbilt',         'away'],
+      ['Oct. 24',  '',                   'bye' ],
+      ['Oct. 31',  'Missouri',           'home'],
+      ['Nov. 7',   'Auburn',             'away'],
+      ['Nov. 14',  'South Carolina',     'home'],
+      ['Nov. 21',  'Texas',              'away'],
+      ['Nov. 28',  'LSU',                'home'],
+    ]},
+    { name: 'Auburn', games: [
+      ['Sept. 5',  'Baylor (Atlanta)',   'neutral'],
+      ['Sept. 12', 'Southern Miss',      'home'],
+      ['Sept. 19', 'Florida',            'home'],
+      ['Sept. 26', 'Vanderbilt',         'home'],
+      ['Oct. 3',   'Tennessee',          'away'],
+      ['Oct. 10',  '',                   'bye' ],
+      ['Oct. 17',  'Georgia',            'away'],
+      ['Oct. 24',  'LSU',                'home'],
+      ['Oct. 31',  'Ole Miss',           'away'],
+      ['Nov. 7',   'Arkansas',           'home'],
+      ['Nov. 14',  'Mississippi State',  'away'],
+      ['Nov. 21',  'Samford',            'home'],
+      ['Nov. 28',  'Alabama',            'away'],
+    ]},
+    { name: 'Florida', games: [
+      ['Sept. 5',  'Florida Atlantic',   'home'],
+      ['Sept. 12', 'Campbell',           'home'],
+      ['Sept. 19', 'Auburn',             'away'],
+      ['Sept. 26', 'Ole Miss',           'home'],
+      ['Oct. 3',   'Missouri',           'away'],
+      ['Oct. 10',  'South Carolina',     'home'],
+      ['Oct. 17',  'Texas',              'away'],
+      ['Oct. 24',  '',                   'bye' ],
+      ['Oct. 31',  'Georgia (Atlanta)',  'neutral'],
+      ['Nov. 7',   'Oklahoma',           'home'],
+      ['Nov. 14',  'Kentucky',           'away'],
+      ['Nov. 21',  'Vanderbilt',         'home'],
+      ['Nov. 28',  'Florida State',      'away'],
+    ]},
+    { name: 'Georgia', games: [
+      ['Sept. 5',  'Tennessee State',    'home'],
+      ['Sept. 12', 'Western Kentucky',   'home'],
+      ['Sept. 19', 'Arkansas',           'away'],
+      ['Sept. 26', 'Oklahoma',           'home'],
+      ['Oct. 3',   'Vanderbilt',         'home'],
+      ['Oct. 10',  'Alabama',            'away'],
+      ['Oct. 17',  'Auburn',             'home'],
+      ['Oct. 24',  '',                   'bye' ],
+      ['Oct. 31',  'Florida (Atlanta)',  'neutral'],
+      ['Nov. 7',   'Ole Miss',           'away'],
+      ['Nov. 14',  'Missouri',           'home'],
+      ['Nov. 21',  'South Carolina',     'away'],
+      ['Nov. 28',  'Georgia Tech',       'home'],
+    ]},
+    { name: 'Kentucky', games: [
+      ['Sept. 5',  'Youngstown State',   'home'],
+      ['Sept. 12', 'Alabama',            'home'],
+      ['Sept. 19', 'Texas A&M',          'away'],
+      ['Sept. 26', 'South Alabama',      'home'],
+      ['Oct. 3',   'South Carolina',     'away'],
+      ['Oct. 10',  'LSU',                'home'],
+      ['Oct. 17',  'Oklahoma',           'away'],
+      ['Oct. 24',  'Vanderbilt',         'home'],
+      ['Oct. 31',  '',                   'bye' ],
+      ['Nov. 7',   'Tennessee',          'away'],
+      ['Nov. 14',  'Florida',            'home'],
+      ['Nov. 21',  'Missouri',           'away'],
+      ['Nov. 28',  'Louisville',         'home'],
+    ]},
+    { name: 'LSU', games: [
+      ['Sept. 5',  'Clemson',            'home'],
+      ['Sept. 12', 'Louisiana Tech',     'home'],
+      ['Sept. 19', 'Ole Miss',           'away'],
+      ['Sept. 26', 'Texas A&M',          'home'],
+      ['Oct. 3',   'McNeese State',      'home'],
+      ['Oct. 10',  'Kentucky',           'away'],
+      ['Oct. 17',  'Mississippi State',  'home'],
+      ['Oct. 24',  'Auburn',             'away'],
+      ['Oct. 31',  '',                   'bye' ],
+      ['Nov. 7',   'Alabama',            'home'],
+      ['Nov. 14',  'Texas',              'home'],
+      ['Nov. 21',  'Tennessee',          'away'],
+      ['Nov. 28',  'Arkansas',           'away'],
+    ]},
+    { name: 'Mississippi State', games: [
+      ['Sept. 5',  'Louisiana-Monroe',   'home'],
+      ['Sept. 12', 'Minnesota',          'away'],
+      ['Sept. 19', 'South Carolina',     'away'],
+      ['Sept. 26', 'Missouri',           'home'],
+      ['Oct. 3',   'Alabama',            'home'],
+      ['Oct. 10',  '',                   'bye' ],
+      ['Oct. 17',  'LSU',                'away'],
+      ['Oct. 24',  'Oklahoma',           'home'],
+      ['Oct. 31',  'Texas',              'away'],
+      ['Nov. 7',   'Vanderbilt',         'home'],
+      ['Nov. 14',  'Auburn',             'home'],
+      ['Nov. 21',  'Tennessee Tech',     'home'],
+      ['Nov. 28',  'Ole Miss',           'away'],
+    ]},
+    { name: 'Missouri', games: [
+      ['Sept. 5',  'Arkansas-Pine Bluff','home'],
+      ['Sept. 12', 'Kansas',             'away'],
+      ['Sept. 19', 'Troy',               'home'],
+      ['Sept. 26', 'Mississippi State',  'away'],
+      ['Oct. 3',   'Florida',            'home'],
+      ['Oct. 10',  'Texas A&M',          'home'],
+      ['Oct. 17',  'Ole Miss',           'away'],
+      ['Oct. 24',  '',                   'bye' ],
+      ['Oct. 31',  'Arkansas',           'away'],
+      ['Nov. 7',   'Texas',              'home'],
+      ['Nov. 14',  'Georgia',            'away'],
+      ['Nov. 21',  'Kentucky',           'home'],
+      ['Nov. 28',  'Oklahoma',           'home'],
+    ]},
+    { name: 'Oklahoma', games: [
+      ['Sept. 5',  'UTEP',               'home'],
+      ['Sept. 12', 'Michigan',           'away'],
+      ['Sept. 19', 'New Mexico',         'home'],
+      ['Sept. 26', 'Georgia',            'away'],
+      ['Oct. 3',   '',                   'bye' ],
+      ['Oct. 10',  'Texas (Dallas)',     'neutral'],
+      ['Oct. 17',  'Kentucky',           'home'],
+      ['Oct. 24',  'Mississippi State',  'away'],
+      ['Oct. 31',  'South Carolina',     'home'],
+      ['Nov. 7',   'Florida',            'away'],
+      ['Nov. 14',  'Ole Miss',           'home'],
+      ['Nov. 21',  'Texas A&M',          'home'],
+      ['Nov. 28',  'Missouri',           'away'],
+    ]},
+    { name: 'Ole Miss', games: [
+      ['Sept. 5',  'Louisville (Nashville)','neutral'],
+      ['Sept. 12', 'Charlotte',          'home'],
+      ['Sept. 19', 'LSU',                'home'],
+      ['Sept. 26', 'Florida',            'away'],
+      ['Oct. 3',   '',                   'bye' ],
+      ['Oct. 10',  'Vanderbilt',         'away'],
+      ['Oct. 17',  'Missouri',           'home'],
+      ['Oct. 24',  'Texas',              'away'],
+      ['Oct. 31',  'Auburn',             'home'],
+      ['Nov. 7',   'Georgia',            'home'],
+      ['Nov. 14',  'Oklahoma',           'away'],
+      ['Nov. 21',  'Wofford',            'home'],
+      ['Nov. 28',  'Mississippi State',  'home'],
+    ]},
+    { name: 'South Carolina', games: [
+      ['Sept. 5',  'Kent State',         'home'],
+      ['Sept. 12', 'Towson',             'home'],
+      ['Sept. 19', 'Mississippi State',  'home'],
+      ['Sept. 26', 'Alabama',            'away'],
+      ['Oct. 3',   'Kentucky',           'home'],
+      ['Oct. 10',  'Florida',            'away'],
+      ['Oct. 17',  '',                   'bye' ],
+      ['Oct. 24',  'Tennessee',          'home'],
+      ['Oct. 31',  'Oklahoma',           'away'],
+      ['Nov. 7',   'Texas A&M',          'home'],
+      ['Nov. 14',  'Arkansas',           'away'],
+      ['Nov. 21',  'Georgia',            'home'],
+      ['Nov. 28',  'Clemson',            'away'],
+    ]},
+    { name: 'Tennessee', games: [
+      ['Sept. 5',  'Furman',             'home'],
+      ['Sept. 12', 'Georgia Tech',       'away'],
+      ['Sept. 19', 'Kennesaw State',     'home'],
+      ['Sept. 26', 'Texas',              'home'],
+      ['Oct. 3',   'Auburn',             'home'],
+      ['Oct. 10',  'Arkansas',           'away'],
+      ['Oct. 17',  'Alabama',            'home'],
+      ['Oct. 24',  'South Carolina',     'away'],
+      ['Oct. 31',  '',                   'bye' ],
+      ['Nov. 7',   'Kentucky',           'home'],
+      ['Nov. 14',  'Texas A&M',          'away'],
+      ['Nov. 21',  'LSU',                'home'],
+      ['Nov. 28',  'Vanderbilt',         'away'],
+    ]},
+    { name: 'Texas', games: [
+      ['Sept. 5',  'Texas State',        'home'],
+      ['Sept. 12', 'Ohio State',         'home'],
+      ['Sept. 19', 'UTSA',               'home'],
+      ['Sept. 26', 'Tennessee',          'away'],
+      ['Oct. 3',   '',                   'bye' ],
+      ['Oct. 10',  'Oklahoma (Dallas)',  'neutral'],
+      ['Oct. 17',  'Florida',            'home'],
+      ['Oct. 24',  'Ole Miss',           'home'],
+      ['Oct. 31',  'Mississippi State',  'home'],
+      ['Nov. 7',   'Missouri',           'away'],
+      ['Nov. 14',  'LSU',                'away'],
+      ['Nov. 21',  'Arkansas',           'home'],
+      ['Nov. 27',  'Texas A&M',          'away'],
+    ]},
+    { name: 'Texas A&M', games: [
+      ['Sept. 5',  'Missouri State',     'home'],
+      ['Sept. 12', 'Arizona State',      'home'],
+      ['Sept. 19', 'Kentucky',           'home'],
+      ['Sept. 26', 'LSU',                'away'],
+      ['Oct. 3',   'Arkansas',           'home'],
+      ['Oct. 10',  'Missouri',           'away'],
+      ['Oct. 17',  'The Citadel',        'home'],
+      ['Oct. 24',  'Alabama',            'away'],
+      ['Oct. 31',  '',                   'bye' ],
+      ['Nov. 7',   'South Carolina',     'away'],
+      ['Nov. 14',  'Tennessee',          'home'],
+      ['Nov. 21',  'Oklahoma',           'away'],
+      ['Nov. 27',  'Texas',              'home'],
+    ]},
+    { name: 'Vanderbilt', games: [
+      ['Sept. 5',  'Austin Peay',        'home'],
+      ['Sept. 12', 'Delaware',           'home'],
+      ['Sept. 19', 'NC State',           'home'],
+      ['Sept. 26', 'Auburn',             'away'],
+      ['Oct. 3',   'Georgia',            'away'],
+      ['Oct. 10',  'Ole Miss',           'home'],
+      ['Oct. 17',  'Arkansas',           'home'],
+      ['Oct. 24',  'Kentucky',           'away'],
+      ['Oct. 31',  '',                   'bye' ],
+      ['Nov. 7',   'Mississippi State',  'away'],
+      ['Nov. 14',  'Alabama',            'home'],
+      ['Nov. 21',  'Florida',            'away'],
+      ['Nov. 28',  'Tennessee',          'home'],
+    ]},
+  ];
+
+  const gameRow = ([date, opp, loc]) => {
+    if (loc === 'bye') {
+      return `<div class="sgr bye"><span class="sgr-date">${date}</span><span class="sgr-opp bye-label">— Bye Week —</span><span class="sgr-loc"></span></div>`;
+    }
+    const label = loc === 'away' ? `<span class="sgr-at">at</span> ${opp}` : loc === 'neutral' ? `<span class="sgr-at">vs.</span> ${opp}` : opp;
+    const locBadge = loc === 'home' ? '<span class="sgr-home">HOME</span>' : loc === 'neutral' ? '<span class="sgr-neutral">NEUTRAL</span>' : '<span class="sgr-away">AWAY</span>';
+    return `<div class="sgr"><span class="sgr-date">${date}</span><span class="sgr-opp">${label}</span>${locBadge}</div>`;
+  };
+
+  const teamBlock = (t) => `
+    <details class="sec-team"${t.isHome ? ' open' : ''}>
+      <summary class="sec-team-hd">
+        <span class="sec-team-name">${t.name}${t.isHome ? ' <span class="sec-home-star">★</span>' : ''}</span>
+        <span class="sec-arrow">▼</span>
+      </summary>
+      <div class="sec-games">
+        ${t.games.map(gameRow).join('')}
       </div>
-      <strong class="fs-status${isThisWeek ? ' crimson' : ''}">${status}</strong>
-    </div>`;
-  }).join('');
+    </details>`;
+
   return `
     ${header('schedule')}
     <main class="page-shell inner-page">
-      <p class="eyebrow crimson">ROLL TIDE</p>
-      <h1 class="page-title">2026 Alabama Football Schedule</h1>
-      <p style="color:var(--muted);font-size:14px;margin:-28px 0 32px">All times CT. Times listed as Flex or Early/Night are TBA. This week's game is highlighted in crimson.</p>
-      <section class="full-schedule">${rows}</section>
+      <p class="eyebrow crimson">2026 SEASON</p>
+      <h1 class="page-title">SEC Schedules</h1>
+      <p style="color:var(--muted);font-size:14px;margin:-28px 0 36px">All 16 SEC teams. Click any team to expand their schedule. <span style="color:var(--crimson);font-weight:700">★</span> marks our team.</p>
+      <div class="sec-accordion">
+        ${SEC.map(teamBlock).join('')}
+      </div>
     </main>
     ${footer()}`;
 }

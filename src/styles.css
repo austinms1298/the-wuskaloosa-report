@@ -8,3 +8,26 @@
 .ad-slot-wrap a,.ad-slot-wrap span{display:block;line-height:0}
 #ad-post-top{margin-bottom:0}
 #ad-post-bottom{margin-top:0}
+
+/* ── SEC schedule accordion ───────────────────────────────────────────────── */
+.sec-accordion{border-top:3px solid var(--deep);margin-top:8px}
+.sec-team{border-bottom:1px solid var(--line)}
+.sec-team-hd{display:flex;justify-content:space-between;align-items:center;padding:18px 4px;cursor:pointer;list-style:none;user-select:none}
+.sec-team-hd::-webkit-details-marker{display:none}
+.sec-team-hd:hover{background:rgba(143,18,36,.04)}
+.sec-team-name{font-family:var(--marker);font-size:22px;font-weight:400;letter-spacing:.02em}
+.sec-home-star{color:var(--crimson);font-size:20px;vertical-align:middle}
+.sec-arrow{font-size:13px;color:var(--muted);transition:transform .2s;display:inline-block}
+.sec-team[open] .sec-arrow{transform:rotate(180deg)}
+.sec-games{padding:0 4px 20px}
+.sgr{display:grid;grid-template-columns:90px 1fr auto;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+.sgr:last-child{border-bottom:none}
+.sgr.bye{opacity:.5}
+.sgr-date{font-size:12px;font-weight:700;color:var(--muted)}
+.sgr-opp{font-weight:600}
+.sgr-at{font-weight:400;color:var(--muted);margin-right:2px}
+.bye-label{font-style:italic;color:var(--muted);font-weight:400}
+.sgr-home{font-size:10px;font-weight:800;letter-spacing:.08em;color:var(--crimson);background:rgba(143,18,36,.1);padding:2px 7px;border-radius:2px;white-space:nowrap}
+.sgr-away{font-size:10px;font-weight:800;letter-spacing:.08em;color:var(--muted);background:rgba(0,0,0,.07);padding:2px 7px;border-radius:2px;white-space:nowrap}
+.sgr-neutral{font-size:10px;font-weight:800;letter-spacing:.08em;color:#1a6e2e;background:rgba(26,110,46,.1);padding:2px 7px;border-radius:2px;white-space:nowrap}
+@media(max-width:680px){.sgr{grid-template-columns:74px 1fr auto;gap:6px;font-size:13px}.sec-team-name{font-size:19px}}
