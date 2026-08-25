@@ -206,7 +206,7 @@
   <div class="toolbar">
     <div class="toolbar-brand">THE WUSKALOOSA REPORT <span>/ ADMIN</span></div>
     <span class="toolbar-user" id="toolbar-user"></span>
-    <button class="btn btn-white" id="btn-manage-ads">📺 Manage Ads</button>
+    <button class="btn btn-white" id="btn-manage-ads">Manage Ads</button>
     <button class="btn btn-white" id="btn-new-post">+ New Post</button>
     <button class="btn btn-ghost btn-sm" id="btn-logout">Log Out</button>
   </div>
@@ -221,7 +221,7 @@
   <div class="toolbar">
     <div class="toolbar-brand" id="editor-toolbar-title">New Post</div>
     <button class="btn btn-ghost btn-sm" id="btn-back">← All Posts</button>
-    <button class="btn btn-preview" id="btn-preview">👁 Preview</button>
+    <button class="btn btn-preview" id="btn-preview">Preview</button>
     <button class="btn btn-white" id="btn-publish">Publish</button>
   </div>
   <div id="status-banner" class="status-banner hidden"></div>
@@ -254,7 +254,7 @@
           <p class="toggle-hint" style="margin-top:6px">Only one post should be featured at a time.</p>
         </div>
         <div class="pdf-section">
-          <h3>📺 TV Schedule PDF</h3>
+          <h3>TV Schedule PDF</h3>
           <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Stored at <code style="font-size:11px">/schedules/{year}/week-{n}.pdf</code></p>
           <div class="pdf-file-row">
             <input type="file" id="f-pdf-file" accept=".pdf">
@@ -277,7 +277,7 @@
 <div id="view-ads">
   <div class="toolbar">
     <div class="toolbar-brand">THE WUSKALOOSA REPORT <span>/ ADS</span></div>
-    <button class="btn btn-ghost btn-sm" id="btn-preview-ads">👁 Preview Ads</button>
+    <button class="btn btn-ghost btn-sm" id="btn-preview-ads">Preview</button>
     <button class="btn btn-ghost btn-sm" id="btn-ads-back">← All Posts</button>
   </div>
   <div class="ads-body">
@@ -285,16 +285,15 @@
     <!-- ── Section 1: Ad Library ── -->
     <div class="ads-section">
       <div class="ads-section-head">
-        <h2>📸 Ad Library</h2>
-        <button class="btn btn-primary btn-sm" id="btn-show-add-ad">+ Upload New Ad</button>
+        <h2>Ad Library</h2>
       </div>
       <p class="ads-section-note">
         Upload your sponsor images here. Each ad gets a name so you can tell sponsors apart and assign the same ad to multiple posts.
         <strong>Post banners: 728 × 90 px · Homepage box: 300 × 250 px</strong>
       </p>
 
-      <!-- Add-ad form (hidden by default) -->
-      <div class="add-ad-panel hidden" id="add-ad-panel">
+      <!-- Add-ad form -->
+      <div class="add-ad-panel" id="add-ad-panel">
         <div class="field-row">
           <div class="field">
             <label class="lbl">Ad / Sponsor Name</label>
@@ -320,20 +319,19 @@
         </div>
         <div style="display:flex;align-items:center;gap:12px;margin-top:4px;">
           <button class="btn btn-primary" id="btn-upload-ad">Upload Ad</button>
-          <button class="btn btn-outline btn-sm" id="btn-cancel-add-ad">Cancel</button>
           <span id="new-ad-status" style="font-size:13px;font-weight:600;"></span>
         </div>
       </div>
 
       <div id="ad-library-grid" class="lib-grid" style="margin-top:16px;">
-        <div class="lib-empty">No ads uploaded yet. Click "Upload New Ad" to add your first sponsor.</div>
+        <div class="lib-empty">No ads uploaded yet. Fill out the form above to add your first sponsor.</div>
       </div>
     </div>
 
     <!-- ── Section 2: Default Slots ── -->
     <div class="ads-section">
       <div class="ads-section-head">
-        <h2>🎯 Default Ads</h2>
+        <h2>Default Ads</h2>
       </div>
       <p class="ads-section-note">
         These ads run on posts that don't have a specific ad assigned. Leave a slot blank to show no ad there by default.
@@ -357,7 +355,7 @@
     <!-- ── Section 3: Per-Post Assignments ── -->
     <div class="ads-section">
       <div class="ads-section-head">
-        <h2>📋 Post Assignments</h2>
+        <h2>Post Assignments</h2>
       </div>
       <p class="ads-section-note">
         Override which ad runs on a specific post. "Default" uses whatever you set above. "None" shows no ad on that post.
@@ -611,7 +609,7 @@ document.getElementById('btn-upload-pdf').addEventListener('click', async () => 
     const result = await api('POST', '/api/upload', { path:`schedules/${year}/week-${week}.pdf`, content:b64, sha:pdfSha||undefined });
     pdfUrl = result.url; pdfSha = result.sha;
     renderPdfStatus();
-    statusEl.textContent='✓ PDF uploaded!'; statusEl.className='pdf-status ok'; fileInput.value='';
+    statusEl.textContent='Uploaded'; statusEl.className='pdf-status ok'; fileInput.value='';
   } catch (err) { statusEl.textContent=`Upload failed: ${err.message}`; statusEl.className='pdf-status err'; }
   finally { btn.textContent='Upload PDF'; btn.disabled=false; }
 });
@@ -641,7 +639,7 @@ document.getElementById('btn-publish').addEventListener('click', async () => {
     editFile = filename; editSha = result.sha;
     document.getElementById('editor-toolbar-title').textContent = 'Edit Post';
     document.getElementById('btn-delete-post').classList.remove('hidden');
-    showBanner('success', '✓ Published! Site rebuilds in ~1 minute. Roll Tide 🏈');
+    showBanner('success', 'Published');
   } catch (err) { showBanner('error', `Error: ${err.message}`); }
   finally { btn.textContent='Publish'; btn.disabled=false; }
 });
@@ -808,7 +806,7 @@ function renderAdLibrary() {
   const lib = adsConfig.library || {};
   const entries = Object.entries(lib);
   if (!entries.length) {
-    el.innerHTML = '<div class="lib-empty">No ads uploaded yet. Click "Upload New Ad" to add your first sponsor.</div>';
+    el.innerHTML = '<div class="lib-empty">No ads uploaded yet. Fill out the form above to add your first sponsor.</div>';
     return;
   }
   el.innerHTML = entries.map(([id, ad]) => {
@@ -897,16 +895,6 @@ async function openAdsView() {
 document.getElementById('btn-ads-back').addEventListener('click', () => loadPostList());
 
 // ── Upload new ad ──
-document.getElementById('btn-show-add-ad').addEventListener('click', () => {
-  document.getElementById('add-ad-panel').classList.remove('hidden');
-  document.getElementById('btn-show-add-ad').classList.add('hidden');
-});
-document.getElementById('btn-cancel-add-ad').addEventListener('click', () => {
-  document.getElementById('add-ad-panel').classList.add('hidden');
-  document.getElementById('btn-show-add-ad').classList.remove('hidden');
-  document.getElementById('new-ad-status').textContent = '';
-});
-
 document.getElementById('btn-upload-ad').addEventListener('click', async () => {
   const name     = document.getElementById('new-ad-name').value.trim();
   const size     = document.getElementById('new-ad-size').value;
@@ -936,10 +924,8 @@ document.getElementById('btn-upload-ad').addEventListener('click', async () => {
     const saved = await api('POST', '/api/ads', { config: adsConfig, sha: adsSha || undefined });
     adsSha = saved.sha;
 
-    statusEl.textContent = '✓ Ad uploaded!'; statusEl.style.color = '#065f46';
+    statusEl.textContent = 'Uploaded'; statusEl.style.color = '#065f46';
     fileInput.value = ''; document.getElementById('new-ad-name').value = ''; document.getElementById('new-ad-link').value = '';
-    document.getElementById('add-ad-panel').classList.add('hidden');
-    document.getElementById('btn-show-add-ad').classList.remove('hidden');
     renderAdLibrary(); renderDefaultSlots(); renderPostAssignments();
     setTimeout(() => { statusEl.textContent = ''; }, 4000);
   } catch (err) {
@@ -1008,7 +994,7 @@ document.getElementById('btn-save-assignments').addEventListener('click', async 
   try {
     const saved = await api('POST', '/api/ads', { config: adsConfig, sha: adsSha || undefined });
     adsSha = saved.sha;
-    statusEl.textContent = '✓ Saved! Site rebuilds in ~1 minute.';
+    statusEl.textContent = 'Saved';
     statusEl.className = 'ads-save-status ok';
     setTimeout(() => { statusEl.textContent = ''; }, 6000);
   } catch (err) {
