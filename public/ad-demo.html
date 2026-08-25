@@ -40,66 +40,120 @@
       font-size: 13px; font-weight: 700; letter-spacing: .05em;
     }
 
+    /* ── Section label ── */
+    .placement-label {
+      text-align: center;
+      padding: 6px 16px 0;
+      font-size: 11px; font-weight: 800; letter-spacing: .14em;
+      text-transform: uppercase; color: var(--crimson);
+    }
+
     /* ── Ad slots ── */
     .ad-slot {
       display: flex; flex-direction: column; align-items: center;
-      padding: 16px 24px;
+      padding: 14px 24px 16px;
       background: #fff; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
     }
     .ad-label { font-size: 10px; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
     .ad-placeholder {
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 8px;
-      background: repeating-linear-gradient(-45deg, #faf8f5, #faf8f5 10px, #f0ede8 10px, #f0ede8 20px);
-      border: 2.5px dashed var(--crimson);
+      gap: 6px;
+      background: repeating-linear-gradient(-45deg, #fff0f2, #fff0f2 10px, #ffe4e8 10px, #ffe4e8 20px);
+      border: 2px solid var(--crimson);
       border-radius: 3px;
       color: var(--crimson); font-weight: 800; font-family: 'Oswald', sans-serif;
-      letter-spacing: .05em;
+      letter-spacing: .06em;
     }
-    .ad-placeholder .dim { font-size: 11px; font-weight: 600; font-family: 'Inter', sans-serif; color: var(--muted); letter-spacing: .08em; margin-top: 2px; }
-    .ad-banner { width: min(728px, 100%); height: 90px; font-size: 22px; }
-    .ad-box    { width: 300px; max-width: 100%; height: 250px; font-size: 20px; }
+    .ad-placeholder .dim { font-size: 11px; font-weight: 600; font-family: 'Inter', sans-serif; color: #9a4454; letter-spacing: .08em; }
+    .ad-banner { width: min(728px, 100%); height: 90px; font-size: 20px; }
+    .ad-box    { width: 300px; max-width: 100%; height: 250px; font-size: 18px; }
 
     /* ── Article ── */
-    .article { padding-bottom: 60px; }
-    .article-header { max-width: 900px; margin: 52px auto 30px; padding: 0 24px; text-align: center; }
+    .article { padding-bottom: 56px; }
+    .article-header { max-width: 900px; margin: 48px auto 28px; padding: 0 24px; text-align: center; }
     .eyebrow { font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; margin: 0 0 10px; color: var(--crimson); }
-    .article-header h1 { font-family: 'Oswald', sans-serif; font-weight: 400; font-size: clamp(38px, 6vw, 78px); line-height: 1.08; margin: 10px 0; }
-    .lead { font-size: clamp(17px, 2.2vw, 22px); line-height: 1.45; color: var(--muted); max-width: 640px; margin: 0 auto; }
-    .article-body { max-width: 720px; margin: 40px auto; padding: 0 24px; font-size: 17px; line-height: 1.75; }
+    .article-header h1 { font-family: 'Oswald', sans-serif; font-weight: 400; font-size: clamp(36px, 6vw, 72px); line-height: 1.08; margin: 10px 0; }
+    .lead { font-size: clamp(16px, 2.2vw, 20px); line-height: 1.45; color: var(--muted); max-width: 620px; margin: 0 auto; }
+    .article-body { max-width: 720px; margin: 36px auto; padding: 0 24px; font-size: 17px; line-height: 1.75; }
     .article-body p { margin-bottom: 1.2em; }
-    .article-body h2 { font-family: 'Oswald', sans-serif; font-weight: 400; font-size: 34px; margin: 1.4em 0 .5em; }
+    .article-body h2 { font-family: 'Oswald', sans-serif; font-weight: 400; font-size: 32px; margin: 1.4em 0 .5em; }
+
+    /* ── Section divider ── */
+    .section-divider {
+      border: none; border-top: 3px solid var(--crimson);
+      margin: 0;
+    }
+    .section-heading {
+      background: var(--deep); color: #fff;
+      text-align: center; padding: 32px 24px 24px;
+      font-family: 'Oswald', sans-serif; font-weight: 400;
+      font-size: clamp(24px, 3vw, 36px); letter-spacing: .03em;
+      margin: 0;
+    }
+    .section-sub {
+      background: var(--deep); color: #888;
+      text-align: center; padding: 0 24px 36px;
+      font-size: 15px; margin: 0;
+    }
+
+    /* ── Homepage mockup ── */
+    .homepage-mockup {
+      background: var(--deep); padding: 0 clamp(24px,5vw,72px) 48px;
+    }
+    .hp-inner {
+      max-width: 1100px; margin: 0 auto;
+      display: grid; grid-template-columns: 1fr 300px; gap: 40px;
+      align-items: start;
+    }
+    .hp-featured { background: var(--paper); border-radius: 3px; overflow: hidden; }
+    .hp-img-placeholder {
+      background: repeating-linear-gradient(-45deg, #2a2020, #2a2020 10px, #222 10px, #222 20px);
+      height: 260px; display: flex; align-items: center; justify-content: center;
+      font-family: 'Oswald', sans-serif; color: #555; font-size: 14px; letter-spacing: .1em; text-transform: uppercase;
+    }
+    .hp-article-info { padding: 20px 22px 24px; }
+    .hp-eyebrow { font-size: 10px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--crimson); margin-bottom: 6px; }
+    .hp-title { font-family: 'Oswald', sans-serif; font-weight: 400; font-size: 26px; line-height: 1.12; margin: 0 0 8px; color: var(--deep); }
+    .hp-excerpt { font-size: 14px; color: var(--muted); line-height: 1.55; margin: 0; }
+    .hp-sidebar {}
+    .hp-sidebar-label {
+      font-size: 10px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase;
+      color: #555; margin-bottom: 10px; text-align: center;
+    }
 
     /* ── Sponsor info section ── */
     .sponsor-info {
-      background: var(--deep); color: #fff;
-      padding: clamp(40px, 8vw, 80px) clamp(24px, 6vw, 80px);
+      background: #111; color: #fff;
+      padding: clamp(40px, 8vw, 72px) clamp(24px, 6vw, 80px);
       text-align: center;
     }
-    .sponsor-info h2 { font-family: 'Oswald', sans-serif; font-weight: 400; font-size: clamp(30px, 4vw, 52px); margin: 0 0 16px; }
-    .sponsor-info p { font-size: 16px; color: #bbb; max-width: 600px; margin: 0 auto 10px; line-height: 1.65; }
-    .slots-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; max-width: 860px; margin: 40px auto; text-align: left; }
-    .slot-card { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); border-radius: 4px; padding: 22px 24px; }
-    .slot-card h3 { font-family: 'Oswald', sans-serif; font-weight: 400; font-size: 18px; margin: 0 0 6px; color: #fff; }
-    .slot-card .sz { font-size: 12px; font-weight: 700; letter-spacing: .08em; color: var(--crimson); background: rgba(143,18,36,.2); display: inline-block; padding: 2px 9px; border-radius: 10px; margin-bottom: 10px; }
-    .slot-card p { font-size: 13px; color: #aaa; margin: 0; line-height: 1.55; }
+    .sponsor-info h2 { font-family: 'Oswald', sans-serif; font-weight: 400; font-size: clamp(28px, 4vw, 48px); margin: 0 0 14px; }
+    .sponsor-info p { font-size: 15px; color: #bbb; max-width: 580px; margin: 0 auto 10px; line-height: 1.65; }
+    .slots-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; max-width: 820px; margin: 36px auto; text-align: left; }
+    .slot-card { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); border-radius: 3px; padding: 20px 22px; }
+    .slot-card h3 { font-family: 'Oswald', sans-serif; font-weight: 400; font-size: 17px; margin: 0 0 6px; color: #fff; }
+    .slot-card .sz { font-size: 11px; font-weight: 700; letter-spacing: .08em; color: #e87e8a; background: rgba(143,18,36,.25); display: inline-block; padding: 2px 9px; border-radius: 10px; margin-bottom: 10px; }
+    .slot-card p { font-size: 13px; color: #999; margin: 0; line-height: 1.55; }
     .cta-btn {
       display: inline-flex; align-items: center; gap: 14px;
       background: var(--crimson); color: #fff;
       font-size: 14px; font-weight: 800; letter-spacing: .05em;
-      padding: 16px 28px; border-radius: 2px; margin-top: 32px;
+      padding: 16px 28px; border-radius: 2px; margin-top: 28px;
     }
+    .cta-btn:hover { opacity: .9; }
 
     /* ── Footer ── */
     .footer {
       display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap;
-      padding: 32px clamp(24px,5vw,72px); background: #191515; color: #fff;
+      padding: 28px clamp(24px,5vw,72px); background: #0e0b0b; color: #fff;
     }
-    .footer p { margin: 4px 0; color: #bbb; font-size: 13px; }
+    .footer p { margin: 4px 0; color: #777; font-size: 13px; }
 
-    @media (max-width: 680px) {
+    @media (max-width: 760px) {
       .site-nav { display: none; }
-      .ad-banner { height: 60px; font-size: 16px; }
+      .ad-banner { height: 64px; font-size: 15px; }
+      .hp-inner { grid-template-columns: 1fr; }
+      .hp-sidebar { display: none; }
     }
   </style>
 </head>
@@ -107,7 +161,7 @@
 
 <!-- Demo notice -->
 <div class="demo-bar">
-  📢 SPONSOR PREVIEW — This page shows exactly where your ad will appear on The Wuskaloosa Report
+  SPONSOR PREVIEW — This page shows exactly where your ad will appear on The Wuskaloosa Report
 </div>
 
 <!-- Header -->
@@ -121,12 +175,14 @@
   </nav>
 </header>
 
+
 <!-- ══ POST TOP BANNER SLOT ══════════════════════════════════════ -->
+<p class="placement-label">Post Top Banner — seen before every article</p>
 <div class="ad-slot">
   <div class="ad-label">Advertisement</div>
   <div class="ad-placeholder ad-banner">
     YOUR AD HERE
-    <span class="dim">728 × 90 px &nbsp;·&nbsp; Post Top Banner</span>
+    <span class="dim">728 × 90 px · Post Top Banner</span>
   </div>
 </div>
 
@@ -154,11 +210,37 @@
 </article>
 
 <!-- ══ POST BOTTOM BANNER SLOT ═══════════════════════════════════ -->
-<div class="ad-slot" style="margin-top:0;">
+<p class="placement-label">Post Bottom Banner — seen by every reader who finishes the article</p>
+<div class="ad-slot">
   <div class="ad-label">Advertisement</div>
   <div class="ad-placeholder ad-banner">
     YOUR AD HERE
-    <span class="dim">728 × 90 px &nbsp;·&nbsp; Post Bottom Banner</span>
+    <span class="dim">728 × 90 px · Post Bottom Banner</span>
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<!-- ══ HOMEPAGE MOCKUP ════════════════════════════════════════════ -->
+<h2 class="section-heading">Homepage Placement</h2>
+<p class="section-sub">The 300 × 250 box runs in the right column alongside the featured article, visible to every visitor.</p>
+<div class="homepage-mockup">
+  <div class="hp-inner">
+    <div class="hp-featured">
+      <div class="hp-img-placeholder">Featured Image</div>
+      <div class="hp-article-info">
+        <div class="hp-eyebrow">Latest Take · September 6, 2026</div>
+        <div class="hp-title">Alabama Opens the Season With a Statement</div>
+        <p class="hp-excerpt">A dominant first half, a secondary that flew around, and an offense that looked exactly like what we hoped it would be in August.</p>
+      </div>
+    </div>
+    <div class="hp-sidebar">
+      <div class="hp-sidebar-label">Sponsor</div>
+      <div class="ad-placeholder ad-box">
+        YOUR AD HERE
+        <span class="dim">300 × 250 px · Homepage Box</span>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -187,7 +269,7 @@
 
   <p style="color:#fff;font-size:15px;">Interested? Reach out and let's talk about what works for your business.</p>
   <a class="cta-btn" href="mailto:wuskaloosareport@gmail.com?subject=Sponsorship%20Inquiry">
-    GET IN TOUCH <span>→</span>
+    GET IN TOUCH →
   </a>
 </section>
 
