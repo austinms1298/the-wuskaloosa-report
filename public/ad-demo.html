@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Advertise on The Wuskaloosa Report</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --crimson: #8f1224; --deep: #171313; --paper: #f8f6f1;
+      --line: #ded9d0; --muted: #706a64; --white: #fff;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: var(--paper); color: var(--deep); font-family: 'Inter', sans-serif; line-height: 1.55; }
+    a { color: inherit; text-decoration: none; }
+    img { display: block; max-width: 100%; }
+
+    /* ── Header ── */
+    .site-header {
+      padding: 14px clamp(20px,5vw,72px);
+      background: #fff;
+      border-top: 5px solid var(--crimson);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+    .brand { font-family: 'Oswald', sans-serif; font-size: 22px; font-weight: 700; letter-spacing: .04em; color: var(--crimson); }
+    .site-nav { display: flex; gap: 36px; }
+    .site-nav a { font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+    .site-nav a:hover { color: var(--crimson); }
+
+    /* ── Demo notice bar ── */
+    .demo-bar {
+      background: var(--crimson); color: #fff;
+      text-align: center; padding: 10px 20px;
+      font-size: 13px; font-weight: 700; letter-spacing: .05em;
+    }
+
+    /* ── Ad slots ── */
+    .ad-slot {
+      display: flex; flex-direction: column; align-items: center;
+      padding: 16px 24px;
+      background: #fff; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+    }
+    .ad-label { font-size: 10px; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+    .ad-placeholder {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 8px;
+      background: repeating-linear-gradient(-45deg, #faf8f5, #faf8f5 10px, #f0ede8 10px, #f0ede8 20px);
+      border: 2.5px dashed var(--crimson);
+      border-radius: 3px;
+      color: var(--crimson); font-weight: 800; font-family: 'Oswald', sans-serif;
+      letter-spacing: .05em;
+    }
+    .ad-placeholder .dim { font-size: 11px; font-weight: 600; font-family: 'Inter', sans-serif; color: var(--muted); letter-spacing: .08em; margin-top: 2px; }
+    .ad-banner { width: min(728px, 100%); height: 90px; font-size: 22px; }
+    .ad-box    { width: 300px; max-width: 100%; height: 250px; font-size: 20px; }
+
+    /* ── Article ── */
+    .article { padding-bottom: 60px; }
+    .article-header { max-width: 900px; margin: 52px auto 30px; padding: 0 24px; text-align: center; }
+    .eyebrow { font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; margin: 0 0 10px; color: var(--crimson); }
+    .article-header h1 { font-family: 'Oswald', sans-serif; font-weight: 400; font-size: clamp(38px, 6vw, 78px); line-height: 1.08; margin: 10px 0; }
+    .lead { font-size: clamp(17px, 2.2vw, 22px); line-height: 1.45; color: var(--muted); max-width: 640px; margin: 0 auto; }
+    .article-body { max-width: 720px; margin: 40px auto; padding: 0 24px; font-size: 17px; line-height: 1.75; }
+    .article-body p { margin-bottom: 1.2em; }
+    .article-body h2 { font-family: 'Oswald', sans-serif; font-weight: 400; font-size: 34px; margin: 1.4em 0 .5em; }
+
+    /* ── Sponsor info section ── */
+    .sponsor-info {
+      background: var(--deep); color: #fff;
+      padding: clamp(40px, 8vw, 80px) clamp(24px, 6vw, 80px);
+      text-align: center;
+    }
+    .sponsor-info h2 { font-family: 'Oswald', sans-serif; font-weight: 400; font-size: clamp(30px, 4vw, 52px); margin: 0 0 16px; }
+    .sponsor-info p { font-size: 16px; color: #bbb; max-width: 600px; margin: 0 auto 10px; line-height: 1.65; }
+    .slots-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; max-width: 860px; margin: 40px auto; text-align: left; }
+    .slot-card { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); border-radius: 4px; padding: 22px 24px; }
+    .slot-card h3 { font-family: 'Oswald', sans-serif; font-weight: 400; font-size: 18px; margin: 0 0 6px; color: #fff; }
+    .slot-card .sz { font-size: 12px; font-weight: 700; letter-spacing: .08em; color: var(--crimson); background: rgba(143,18,36,.2); display: inline-block; padding: 2px 9px; border-radius: 10px; margin-bottom: 10px; }
+    .slot-card p { font-size: 13px; color: #aaa; margin: 0; line-height: 1.55; }
+    .cta-btn {
+      display: inline-flex; align-items: center; gap: 14px;
+      background: var(--crimson); color: #fff;
+      font-size: 14px; font-weight: 800; letter-spacing: .05em;
+      padding: 16px 28px; border-radius: 2px; margin-top: 32px;
+    }
+
+    /* ── Footer ── */
+    .footer {
+      display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap;
+      padding: 32px clamp(24px,5vw,72px); background: #191515; color: #fff;
+    }
+    .footer p { margin: 4px 0; color: #bbb; font-size: 13px; }
+
+    @media (max-width: 680px) {
+      .site-nav { display: none; }
+      .ad-banner { height: 60px; font-size: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Demo notice -->
+<div class="demo-bar">
+  📢 SPONSOR PREVIEW — This page shows exactly where your ad will appear on The Wuskaloosa Report
+</div>
+
+<!-- Header -->
+<header class="site-header">
+  <a class="brand" href="/">THE WUSKALOOSA REPORT</a>
+  <nav class="site-nav">
+    <a href="/">Home</a>
+    <a href="/archive">Past Takes</a>
+    <a href="/schedule">Schedule</a>
+    <a href="/about">About</a>
+  </nav>
+</header>
+
+<!-- ══ POST TOP BANNER SLOT ══════════════════════════════════════ -->
+<div class="ad-slot">
+  <div class="ad-label">Advertisement</div>
+  <div class="ad-placeholder ad-banner">
+    YOUR AD HERE
+    <span class="dim">728 × 90 px &nbsp;·&nbsp; Post Top Banner</span>
+  </div>
+</div>
+
+<!-- Article -->
+<article class="article">
+  <header class="article-header">
+    <p class="eyebrow">Latest Take &middot; September 6, 2026</p>
+    <h1>Alabama Opens the Season With a Statement</h1>
+    <p class="lead">A dominant first half, a secondary that flew around, and an offense that looked exactly like what we hoped it would be in August.</p>
+  </header>
+
+  <div class="article-body">
+    <p>There's a version of this opener where we spend all week talking about what went wrong. This isn't that. Saturday night at Bryant-Denny was as clean a season debut as you're going to see from a program that had real questions coming in — and those questions got answered loud and fast.</p>
+
+    <h2>The Defense Was The Story</h2>
+
+    <p>We came into the year wondering whether the linebackers could cover. We came in wondering whether the corners were ready. Through three-and-a-half quarters, the answer was a resounding yes to both. The pressure packages worked. The zone coverage disguised things well enough that the opposing quarterback never found a rhythm.</p>
+
+    <p>This is a real defense. Not a soft schedule, feel-good defense. The kind that goes on the road in October and wins games you have no business winning on offense alone.</p>
+
+    <h2>A Few Things To Watch Going Forward</h2>
+
+    <p>The run game was serviceable but not dominant — something to keep an eye on before the SEC schedule kicks in. And the kicking situation still feels unsettled. But those are quibbles. This is a team that looks like it knows what it is. Roll Tide.</p>
+  </div>
+</article>
+
+<!-- ══ POST BOTTOM BANNER SLOT ═══════════════════════════════════ -->
+<div class="ad-slot" style="margin-top:0;">
+  <div class="ad-label">Advertisement</div>
+  <div class="ad-placeholder ad-banner">
+    YOUR AD HERE
+    <span class="dim">728 × 90 px &nbsp;·&nbsp; Post Bottom Banner</span>
+  </div>
+</div>
+
+<!-- ══ SPONSOR INFO SECTION ═══════════════════════════════════════ -->
+<section class="sponsor-info">
+  <h2>Reach Alabama Football Fans</h2>
+  <p>The Wuskaloosa Report is an independent Alabama football blog read by fans across Tuscaloosa and beyond — game previews, recaps, and takes published throughout the season.</p>
+
+  <div class="slots-grid">
+    <div class="slot-card">
+      <h3>Post Top Banner</h3>
+      <div class="sz">728 × 90 px</div>
+      <p>Appears above every article before the reader sees a single word. Maximum visibility on every post.</p>
+    </div>
+    <div class="slot-card">
+      <h3>Post Bottom Banner</h3>
+      <div class="sz">728 × 90 px</div>
+      <p>Seen by every reader who finishes an article — a highly engaged audience that read all the way through.</p>
+    </div>
+    <div class="slot-card">
+      <h3>Homepage Box</h3>
+      <div class="sz">300 × 250 px</div>
+      <p>Right column on the home page, alongside the featured article. Seen by every visitor to the site.</p>
+    </div>
+  </div>
+
+  <p style="color:#fff;font-size:15px;">Interested? Reach out and let's talk about what works for your business.</p>
+  <a class="cta-btn" href="mailto:wuskaloosareport@gmail.com?subject=Sponsorship%20Inquiry">
+    GET IN TOUCH <span>→</span>
+  </a>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div><strong>The Wuskaloosa Report</strong><p>Independent Alabama football coverage from inside Tuscaloosa.</p></div>
+  <p>© 2026 The Wuskaloosa Report</p>
+</footer>
+
+</body>
+</html>
