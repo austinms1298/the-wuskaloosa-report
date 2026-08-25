@@ -166,9 +166,14 @@
 
     /* ── Ad checkbox lists ── */
     .ad-check-list { display:flex;flex-direction:column;gap:5px; }
-    .ad-check-item { display:flex;align-items:center;gap:10px;padding:7px 10px;border:1px solid var(--line);border-radius:2px;cursor:pointer;background:#fff;transition:border-color .15s; }
+    .ad-check-item { display:flex;align-items:center;gap:10px;padding:7px 10px;border:1px solid var(--line);border-radius:2px;background:#fff;transition:border-color .15s,opacity .15s; }
     .ad-check-item:hover { border-color:#c9c1bb;background:var(--paper); }
+    .ad-check-item.dragging { opacity:.4; }
+    .ad-check-item.drag-over { border-color:var(--cr);background:rgba(143,18,36,.05); }
+    .ad-drag-handle { font-size:15px;color:#ccc;cursor:grab;flex-shrink:0;padding-right:2px;user-select:none;line-height:1; }
+    .ad-drag-handle:active { cursor:grabbing; }
     .ad-check-item input[type=checkbox] { width:15px;height:15px;accent-color:var(--cr);flex-shrink:0;cursor:pointer; }
+    .ad-check-label-wrap { display:flex;align-items:center;gap:8px;flex:1;cursor:pointer; }
     .ad-check-thumb { width:52px;height:28px;object-fit:contain;border:1px solid var(--line);border-radius:2px;background:var(--paper);flex-shrink:0; }
     .ad-check-label { font-size:13px;font-weight:600;flex:1;line-height:1.3; }
     .ad-check-empty { font-size:12px;color:var(--muted);font-style:italic;margin:0;padding:6px 0; }
@@ -913,6 +918,39 @@ function escHtml(s) {
   return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
 }
 
+/* ── Drag-to-reorder for ad checkbox lists ── */
+function makeSortable(listEl) {
+  let dragged = null;
+  listEl.addEventListener('dragstart', e => {
+    dragged = e.target.closest('.ad-check-item');
+    if (!dragged) return;
+    e.dataTransfer.effectAllowed = 'move';
+    setTimeout(() => dragged && dragged.classList.add('dragging'), 0);
+  });
+  listEl.addEventListener('dragend', () => {
+    if (dragged) dragged.classList.remove('dragging');
+    listEl.querySelectorAll('.ad-check-item').forEach(el => el.classList.remove('drag-over'));
+    dragged = null;
+  });
+  listEl.addEventListener('dragover', e => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    const target = e.target.closest('.ad-check-item');
+    listEl.querySelectorAll('.ad-check-item').forEach(el => el.classList.remove('drag-over'));
+    if (!target || target === dragged) return;
+    target.classList.add('drag-over');
+  });
+  listEl.addEventListener('drop', e => {
+    e.preventDefault();
+    const target = e.target.closest('.ad-check-item');
+    listEl.querySelectorAll('.ad-check-item').forEach(el => el.classList.remove('drag-over'));
+    if (!target || !dragged || target === dragged) return;
+    const rect = target.getBoundingClientRect();
+    const after = e.clientY > rect.top + rect.height / 2;
+    listEl.insertBefore(dragged, after ? target.nextSibling : target);
+  });
+}
+
 /* ══════════════════════════════════════════════════════
    EDITOR ADS
 ══════════════════════════════════════════════════════ */
@@ -944,18 +982,27 @@ async function loadEditorAds(filename) {
     if (!el) return;
     const selected = postAds[field];
     const curIds = Array.isArray(selected) ? selected : (selected ? [selected] : []);
-    const entries = Object.entries(lib);
-    if (!entries.length) {
+    if (!Object.keys(lib).length) {
       el.innerHTML = '<p class="ad-check-empty">No ads uploaded yet — add some in Manage Ads.</p>';
       return;
     }
-    el.innerHTML = entries.map(([id, ad]) =>
-      `<label class="ad-check-item">
-        <input type="checkbox" name="${divId}" value="${escHtml(id)}"${curIds.includes(id) ? ' checked' : ''}>
-        <img class="ad-check-thumb" src="${escHtml(ad.imageUrl)}" alt="" onerror="this.style.display='none'">
-        <span class="ad-check-label">${escHtml(ad.name)}</span>
-      </label>`
-    ).join('');
+    // Render selected first (in stored order), then unselected
+    const orderedEntries = [
+      ...curIds.filter(id => lib[id]).map(id => [id, lib[id]]),
+      ...Object.entries(lib).filter(([id]) => !curIds.includes(id)),
+    ];
+    el.innerHTML = orderedEntries.map(([id, ad]) => {
+      const eid = escHtml(id); const ckId = `ck_${divId}_${id}`.replace(/\W/g,'_');
+      return `<div class="ad-check-item" draggable="true" data-id="${eid}">
+        <span class="ad-drag-handle" title="Drag to reorder">⠿</span>
+        <input type="checkbox" id="${ckId}" name="${divId}" value="${eid}"${curIds.includes(id) ? ' checked' : ''}>
+        <label for="${ckId}" class="ad-check-label-wrap">
+          <img class="ad-check-thumb" src="${escHtml(ad.imageUrl)}" alt="" onerror="this.style.display='none'">
+          <span class="ad-check-label">${escHtml(ad.name)}</span>
+        </label>
+      </div>`;
+    }).join('');
+    makeSortable(el);
   });
 }
 
@@ -1028,18 +1075,28 @@ function renderDefaultSlots() {
     if (!el) return;
     const curVal = d[slot];
     const curIds = Array.isArray(curVal) ? curVal : (curVal ? [curVal] : []);
-    const entries = Object.entries(adsConfig.library || {});
-    if (!entries.length) {
+    const lib2 = adsConfig.library || {};
+    if (!Object.keys(lib2).length) {
       el.innerHTML = '<p class="ad-check-empty">No ads uploaded yet.</p>';
       return;
     }
-    el.innerHTML = entries.map(([id, ad]) =>
-      `<label class="ad-check-item">
-        <input type="checkbox" name="${divId}" value="${escHtml(id)}"${curIds.includes(id) ? ' checked' : ''}>
-        <img class="ad-check-thumb" src="${escHtml(ad.imageUrl)}" alt="" onerror="this.style.display='none'">
-        <span class="ad-check-label">${escHtml(ad.name)}</span>
-      </label>`
-    ).join('');
+    // Render selected first (in stored order), then unselected
+    const ordered = [
+      ...curIds.filter(id => lib2[id]).map(id => [id, lib2[id]]),
+      ...Object.entries(lib2).filter(([id]) => !curIds.includes(id)),
+    ];
+    el.innerHTML = ordered.map(([id, ad]) => {
+      const eid = escHtml(id); const ckId = `ck_${divId}_${id}`.replace(/\W/g,'_');
+      return `<div class="ad-check-item" draggable="true" data-id="${eid}">
+        <span class="ad-drag-handle" title="Drag to reorder">⠿</span>
+        <input type="checkbox" id="${ckId}" name="${divId}" value="${eid}"${curIds.includes(id) ? ' checked' : ''}>
+        <label for="${ckId}" class="ad-check-label-wrap">
+          <img class="ad-check-thumb" src="${escHtml(ad.imageUrl)}" alt="" onerror="this.style.display='none'">
+          <span class="ad-check-label">${escHtml(ad.name)}</span>
+        </label>
+      </div>`;
+    }).join('');
+    makeSortable(el);
   });
   const intervalEl = document.getElementById('rotate-interval');
   if (intervalEl) intervalEl.value = adsConfig.rotate?.interval || 6;
