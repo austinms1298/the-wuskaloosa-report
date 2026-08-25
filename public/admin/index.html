@@ -258,11 +258,6 @@
           <div class="field" style="margin-bottom:0"><label class="lbl" for="f-excerpt">Excerpt</label><textarea id="f-excerpt" rows="4" placeholder="One or two lines shown in post previews…"></textarea></div>
         </div>
         <div class="sidebar-section">
-          <h3>Homepage</h3>
-          <div class="toggle-row"><input type="checkbox" id="f-featured"><label for="f-featured">Feature on Homepage</label></div>
-          <p class="toggle-hint" style="margin-top:6px">Only one post should be featured at a time.</p>
-        </div>
-        <div class="sidebar-section">
           <h3>Ads</h3>
           <div class="field"><label class="lbl">Top Banner</label>
             <select id="f-ad-top"><option value="">— None —</option></select>
@@ -273,11 +268,10 @@
         </div>
         <div class="pdf-section">
           <h3>TV Schedule PDF</h3>
-          <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Stored at <code style="font-size:11px">/schedules/{year}/week-{n}.pdf</code></p>
           <div class="pdf-file-row">
             <input type="file" id="f-pdf-file" accept=".pdf">
-            <button class="btn btn-navy btn-sm" id="btn-upload-pdf">Upload PDF</button>
           </div>
+          <button class="btn btn-navy btn-sm" id="btn-upload-pdf" style="margin-top:10px;width:100%;justify-content:center">Upload PDF</button>
           <div class="pdf-status" id="pdf-status"></div>
           <div class="pdf-current" id="pdf-current"></div>
         </div>
@@ -553,7 +547,6 @@ function openEditor(filename, sha, content) {
     document.getElementById('f-title').value   = data.title   || '';
     document.getElementById('f-slug').value    = data.slug    || '';
     document.getElementById('f-excerpt').value = data.excerpt || '';
-    document.getElementById('f-featured').checked = data.featured === 'true' || data.featured === true;
     document.getElementById('f-week').value  = data.week  !== undefined ? data.week  : 1;
     document.getElementById('f-year').value  = data.year  !== undefined ? data.year  : 2026;
     const cats = ['Latest Take','Analysis','Preview','Recap','Culture','Opinion'];
@@ -564,7 +557,6 @@ function openEditor(filename, sha, content) {
     body.trim().startsWith('<') ? (quill.root.innerHTML = body.trim()) : quill.setText(body.trim());
   } else {
     ['f-title','f-slug','f-excerpt'].forEach(id => { document.getElementById(id).value = ''; });
-    document.getElementById('f-featured').checked = false;
     document.getElementById('f-week').value = 1;
     document.getElementById('f-year').value = new Date().getFullYear();
     document.getElementById('f-category').value = 'Latest Take';
@@ -597,7 +589,7 @@ document.getElementById('btn-back').addEventListener('click', () => {
 /* ── PDF upload ── */
 function renderPdfStatus() {
   const el = document.getElementById('pdf-current');
-  el.innerHTML = pdfUrl ? `Current: <a href="${pdfUrl}" target="_blank">${pdfUrl}</a>` : 'No PDF linked yet.';
+  el.textContent = pdfUrl ? 'PDF uploaded.' : 'No PDF linked yet.';
 }
 
 document.getElementById('btn-upload-pdf').addEventListener('click', async () => {
@@ -626,7 +618,6 @@ document.getElementById('btn-publish').addEventListener('click', async () => {
   const slug     = document.getElementById('f-slug').value.trim();
   const excerpt  = document.getElementById('f-excerpt').value.trim();
   const category = document.getElementById('f-category').value;
-  const featured = document.getElementById('f-featured').checked;
   const dateVal  = document.getElementById('f-date').value;
   const week     = parseInt(document.getElementById('f-week').value, 10);
   const year     = parseInt(document.getElementById('f-year').value, 10);
@@ -636,7 +627,7 @@ document.getElementById('btn-publish').addEventListener('click', async () => {
   if (!slug)    { showBanner('error','URL Slug is required.'); return; }
   if (!dateVal) { showBanner('error','Publish date is required.'); return; }
   const filename = editFile || makeFilename(slug, dateVal);
-  const content  = buildFrontmatter({title,slug,date:new Date(dateVal).toISOString(),excerpt,category,featured,week,year,schedulePdf:pdfUrl})
+  const content  = buildFrontmatter({title,slug,date:new Date(dateVal).toISOString(),excerpt,category,week,year,schedulePdf:pdfUrl})
     + (bodyIsEmpty ? '' : body);
   const btn = document.getElementById('btn-publish');
   btn.textContent='Publishing…'; btn.disabled=true; hideBanner();
@@ -654,9 +645,9 @@ document.getElementById('btn-publish').addEventListener('click', async () => {
         const pa = {};
         if (adTop)    pa.top    = adTop;
         if (adBottom) pa.bottom = adBottom;
-        adsConfig.posts[filename] = pa;
+        adsConfig.posts[slug] = pa;
       } else {
-        delete adsConfig.posts[filename];
+        delete adsConfig.posts[slug];
       }
       api('POST', '/api/ads', { config: adsConfig, sha: adsSha||undefined })
         .then(s => { adsSha = s.sha; }).catch(() => {});
@@ -898,18 +889,26 @@ async function renderPostAssignments() {
   }
   const assigned = adsConfig.posts || {};
   const rows = posts.map(p => {
-    const pa = assigned[p.name] || {};
-    const parts = p.name.replace('.md','').split('-');
-    const ds = parts.length >= 3 ? `${parts[0]}-${parts[1]}-${parts[2]}` : '';
-    const label = (parts.slice(3).join(' ') || p.name).replace(/^\w/, c => c.toUpperCase());
-    const disp = ds ? new Date(ds+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
+    const postSlug = slugFromFilename(p.name);
+    const pa = assigned[postSlug] || {};
+    const weekMatch = p.name.match(/^(\d{4})-(week(\d+))\.md$/);
+    let label, disp;
+    if (weekMatch) {
+      label = `Week ${weekMatch[3]} (${weekMatch[1]})`;
+      disp = '';
+    } else {
+      const parts = p.name.replace('.md','').split('-');
+      const ds = parts.length >= 3 ? `${parts[0]}-${parts[1]}-${parts[2]}` : '';
+      label = (parts.slice(3).join(' ') || p.name).replace(/^\w/, c => c.toUpperCase());
+      disp = ds ? new Date(ds+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
+    }
     const mkOpts = (selected) => {
       const lib = adsConfig.library || {};
       return `<option value="__default__"${!selected||selected==='__default__'?' selected':''}>Default</option>` +
         Object.entries(lib).map(([id,ad]) => `<option value="${id}"${selected===id?' selected':''}>${escHtml(ad.name)}</option>`).join('') +
         `<option value="__none__"${selected==='__none__'?' selected':''}>None (no ad)</option>`;
     };
-    return `<div class="assign-row" data-post="${p.name}">
+    return `<div class="assign-row" data-post="${escHtml(postSlug)}">
       <div>
         <div class="assign-post-name">${escHtml(label)}</div>
         ${disp ? `<div class="assign-post-date">${disp}</div>` : ''}
@@ -1059,17 +1058,17 @@ document.getElementById('btn-save-assignments').addEventListener('click', async 
   // Collect post assignments
   adsConfig.posts = {};
   document.querySelectorAll('.assign-row[data-post]').forEach(row => {
-    const postName = row.dataset.post;
+    const postSlug = row.dataset.post;
     const top    = row.querySelector('.assign-top').value;
     const bottom = row.querySelector('.assign-bottom').value;
-    adsConfig.posts[postName] = {
+    adsConfig.posts[postSlug] = {
       top:    top    === '__default__' ? undefined : (top    === '__none__' ? null : top),
       bottom: bottom === '__default__' ? undefined : (bottom === '__none__' ? null : bottom),
     };
     // Clean up undefined entries
-    if (adsConfig.posts[postName].top === undefined)    delete adsConfig.posts[postName].top;
-    if (adsConfig.posts[postName].bottom === undefined) delete adsConfig.posts[postName].bottom;
-    if (!Object.keys(adsConfig.posts[postName]).length) delete adsConfig.posts[postName];
+    if (adsConfig.posts[postSlug].top === undefined)    delete adsConfig.posts[postSlug].top;
+    if (adsConfig.posts[postSlug].bottom === undefined) delete adsConfig.posts[postSlug].bottom;
+    if (!Object.keys(adsConfig.posts[postSlug]).length) delete adsConfig.posts[postSlug];
   });
 
   try {
@@ -1131,10 +1130,11 @@ function parseFrontmatter(raw) {
   return { data, body: m[2].trim() };
 }
 
-function buildFrontmatter({title,slug,date,excerpt,category,featured,week,year,schedulePdf}) {
+function buildFrontmatter({title,slug,date,excerpt,category,week,year,schedulePdf}) {
   const q = v => `"${String(v).replace(/\\/g,'\\\\').replace(/"/g,'\\"')}"`;
   const lines = ['---',`title: ${q(title)}`,`slug: ${q(slug)}`,`date: "${date}"`,
-    `excerpt: ${q(excerpt)}`,`category: "${category}"`,`featured: ${featured}`,
+    `excerpt: ${q(excerpt)}`,`category: "${category}"`,
+    
     `week: ${isNaN(week)?1:week}`,`year: ${isNaN(year)?2026:year}`];
   if (schedulePdf) lines.push(`schedule_pdf: "${schedulePdf}"`);
   lines.push('---','','');
@@ -1142,8 +1142,21 @@ function buildFrontmatter({title,slug,date,excerpt,category,featured,week,year,s
 }
 
 function makeFilename(slug, dateVal) {
+  if (/^\d{4}\/week\d+$/.test(slug)) {
+    const [year, week] = slug.split('/');
+    return `${year}-${week}.md`;
+  }
   const d = new Date(dateVal);
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}-${slug}.md`;
+}
+
+function slugFromFilename(filename) {
+  const base = filename.replace(/\.md$/, '');
+  const m1 = base.match(/^(\d{4})-(week\d+)$/);
+  if (m1) return `${m1[1]}/${m1[2]}`;
+  const m2 = base.match(/^\d{4}-\d{2}-\d{2}-(.+)$/);
+  if (m2) return m2[1];
+  return base;
 }
 
 function toLocalInput(date) {

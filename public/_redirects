@@ -1,5 +1,1 @@
-# Cloudflare Pages routing — SPA mode
-# All routes serve index.html; the JS router reads the URL and renders the right page.
-# Admin panel gets its own static file.
-/admin    /admin/index.html  200
-/*        /index.html        200
+/20??/week* /post.html 200

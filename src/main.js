@@ -40,12 +40,18 @@ const formatDate = date => new Intl.DateTimeFormat('en-US', {
   month: 'short', day: 'numeric', year: 'numeric'
 }).format(date);
 
+function postUrl(post) {
+  return /^\d{4}\/week\d+$/.test(post.slug)
+    ? `/${post.slug}`
+    : `/post?slug=${encodeURIComponent(post.slug)}`;
+}
+
 function postCard(post) {
   return `
     <article class="post-card">
       <div class="post-card__body">
         <p class="eyebrow">${formatDate(post.date)} &middot; ${escapeHtml(post.category)}</p>
-        <h3><a href="/post?slug=${encodeURIComponent(post.slug)}">${escapeHtml(post.title)}</a></h3>
+        <h3><a href="${postUrl(post)}">${escapeHtml(post.title)}</a></h3>
         <p>${escapeHtml(post.excerpt)}</p>
       </div>
     </article>`;
@@ -98,7 +104,7 @@ function newsletter() {
 }
 
 function homePage() {
-  const featured = posts.find(post => post.featured) || posts[0];
+  const featured = posts[0];
   const archive = posts.filter(post => post.slug !== featured?.slug).slice(0, 3);
   return `
     ${header('home')}
@@ -112,7 +118,7 @@ function homePage() {
           <div class="latest-copy">
             <p class="eyebrow crimson">LATEST TAKE</p>
             <h1>${escapeHtml(featured?.title || 'The Latest Wuskaloosa Report')}</h1>
-            ${featured ? `<p>${escapeHtml(featured.excerpt)}</p><a class="button" href="/post?slug=${encodeURIComponent(featured.slug)}">READ THE TAKE <span>→</span></a>` : '<p style="color:var(--muted);font-size:15px;margin:10px 0">The first take drops before kickoff. Check back soon.</p>'}
+            ${featured ? `<p>${escapeHtml(featured.excerpt)}</p><a class="button" href="${postUrl(featured)}">READ THE TAKE <span>→</span></a>` : '<p style="color:var(--muted);font-size:15px;margin:10px 0">The first take drops before kickoff. Check back soon.</p>'}
           </div>
         </section>
 
@@ -234,7 +240,8 @@ function notFoundPage() {
 }
 
 function postPage() {
-  const slug = new URLSearchParams(window.location.search).get('slug');
+  let slug = new URLSearchParams(window.location.search).get('slug');
+  if (!slug) slug = window.location.pathname.replace(/^\//, '');
   const post = posts.find(item => item.slug === slug);
   if (!post) return `
     ${header()}
@@ -286,6 +293,7 @@ if (path === '/archive')  page = archivePage();
 if (path === '/schedule') page = schedulePage();
 if (path === '/about')    page = aboutPage();
 if (path === '/post')     page = postPage();
+if (/^\/\d{4}\/week\d+$/.test(path)) page = postPage();
 if (path === '/404')      page = notFoundPage();
 
 document.querySelector('#app').innerHTML = page;
@@ -342,9 +350,9 @@ async function loadAds() {
     function resolveAd(slotKey) {
       if (cfg.library) {
         // New format: resolve via slug→filename→post override or default
-        const slug = new URLSearchParams(window.location.search).get('slug');
-        const filename = slug ? slug + '.md' : null;
-        const postConfig = filename ? cfg.posts?.[filename] : null;
+        let slug = new URLSearchParams(window.location.search).get('slug');
+        if (!slug) slug = window.location.pathname.replace(/^\//, '');
+        const postConfig = slug ? cfg.posts?.[slug] : null;
         const field = slotKey === 'post-top' ? 'top' : slotKey === 'post-bottom' ? 'bottom' : 'homepage';
         const adId = postConfig?.[field] !== undefined
           ? postConfig[field]
