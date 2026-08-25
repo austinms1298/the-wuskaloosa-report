@@ -74,7 +74,7 @@ function header(active = 'home', hideBrand = false) {
       <nav id="site-nav" class="site-nav" aria-label="Primary navigation">
         ${links.map(([id, href, label]) => `<a class="${active === id ? 'active' : ''}" href="${href}">${label}</a>`).join('')}
       </nav>
-      <div class="header-icons"><span aria-hidden="true">⌕</span><a href="mailto:${site.email}" aria-label="Email us">✉</a></div>
+
     </header>`;
 }
 
