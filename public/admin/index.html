@@ -112,35 +112,50 @@
        ADS VIEW
     ════════════════════════════════════════════════ */
     #view-ads { display:none; }
-    .ads-body { padding:36px;max-width:1000px;margin:0 auto; }
-    .ads-header { display:flex;align-items:center;gap:12px;margin-bottom:8px; }
-    .ads-header h2 { font-family:'Oswald',sans-serif;font-weight:400;font-size:26px;flex:1; }
-    .ads-intro { font-size:14px;color:var(--muted);margin-bottom:32px;max-width:700px;line-height:1.6; }
-    .ads-grid { display:grid;grid-template-columns:1fr 1fr;gap:24px; }
-    .ads-grid .full-width { grid-column:1/-1; }
+    .ads-body { padding:32px 36px;max-width:1060px;margin:0 auto; }
+    .ads-section { margin-bottom:40px; }
+    .ads-section-head { display:flex;align-items:center;gap:14px;margin-bottom:16px;padding-bottom:10px;border-bottom:2px solid var(--line); }
+    .ads-section-head h2 { font-family:'Oswald',sans-serif;font-weight:400;font-size:22px;flex:1;margin:0; }
+    .ads-section-note { font-size:13px;color:var(--muted);margin:-8px 0 20px;line-height:1.5; }
 
-    .ad-card { background:#fff;border:1px solid var(--line);border-radius:3px;overflow:hidden; }
-    .ad-card-header { padding:16px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px; }
-    .ad-card-header h3 { font-family:'Oswald',sans-serif;font-weight:400;font-size:17px;flex:1; }
-    .ad-dim-badge { background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:3px 10px;font-size:11px;font-weight:700;color:var(--muted);white-space:nowrap; }
-    .ad-card-body { padding:20px; }
+    /* Library grid */
+    .lib-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px; }
+    .lib-card { background:#fff;border:1px solid var(--line);border-radius:3px;overflow:hidden; }
+    .lib-card-thumb { position:relative;background:repeating-linear-gradient(-45deg,#faf8f5,#faf8f5 8px,#f0ede8 8px,#f0ede8 16px);display:flex;align-items:center;justify-content:center;padding:12px; }
+    .lib-card-thumb img { max-width:100%;max-height:80px;object-fit:contain;display:block; }
+    .lib-card-thumb.is-leaderboard { aspect-ratio:728/90; }
+    .lib-card-thumb.is-medium-rect { aspect-ratio:3/2.5;max-height:120px; }
+    .lib-card-body { padding:12px 14px; }
+    .lib-card-name { font-weight:700;font-size:14px;margin-bottom:2px; }
+    .lib-card-meta { font-size:11px;color:var(--muted);margin-bottom:10px; }
+    .lib-card-actions { display:flex;gap:8px; }
 
-    /* Ad preview boxes */
-    .ad-preview-area { position:relative;margin-bottom:16px;border:2px dashed var(--line);border-radius:2px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:repeating-linear-gradient(-45deg,#faf8f5,#faf8f5 8px,#f0ede8 8px,#f0ede8 16px); }
-    .ad-preview-area.leaderboard { width:100%;aspect-ratio:728/90;max-height:110px; }
-    .ad-preview-area.medium-rect { width:300px;aspect-ratio:300/250;max-width:100%; }
-    .ad-preview-area img { position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#fff; }
-    .ad-preview-placeholder { font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);user-select:none; }
-    .ad-preview-live { position:absolute;top:6px;right:8px;font-size:10px;font-weight:800;letter-spacing:.08em;color:#065f46;background:#d1fae5;padding:2px 7px;border-radius:10px; }
+    /* Add-ad form */
+    .add-ad-panel { background:#fff;border:1px solid var(--line);border-radius:3px;padding:20px;margin-top:12px; }
 
-    .ad-upload-row { display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;margin-top:4px; }
-    .ad-upload-row input[type=file] { font-size:12px;padding:7px 10px;border:1px solid var(--line);border-radius:2px;background:#fff;cursor:pointer;width:100%; }
-    .ad-status { font-size:12px;margin-top:8px;min-height:16px;font-weight:600; }
-    .ad-status.ok  { color:#065f46; }
-    .ad-status.err { color:#991b1b; }
+    /* Defaults table */
+    .slot-table { background:#fff;border:1px solid var(--line);border-radius:3px;overflow:hidden; }
+    .slot-row { display:grid;grid-template-columns:180px 1fr;align-items:center;gap:16px;padding:14px 18px;border-bottom:1px solid var(--line); }
+    .slot-row:last-child { border-bottom:none; }
+    .slot-label { font-size:13px;font-weight:700; }
+    .slot-dim { font-size:11px;color:var(--muted);display:block;margin-top:2px; }
+    .slot-row select { padding:8px 10px;border:1px solid var(--line);border-radius:2px;font-size:13px;font-family:'Inter',sans-serif;background:#fff; }
 
-    .ad-fields { display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:16px; }
-    .ad-fields .field { margin-bottom:0; }
+    /* Post assignment table */
+    .assign-table { background:#fff;border:1px solid var(--line);border-radius:3px;overflow:hidden; }
+    .assign-header { display:grid;grid-template-columns:1fr 200px 200px;gap:12px;padding:10px 18px;background:var(--paper);border-bottom:1px solid var(--line);font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted); }
+    .assign-row { display:grid;grid-template-columns:1fr 200px 200px;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid var(--line); }
+    .assign-row:last-child { border-bottom:none; }
+    .assign-post-name { font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+    .assign-post-date { font-size:11px;color:var(--muted); }
+    .assign-row select { padding:7px 9px;border:1px solid var(--line);border-radius:2px;font-size:12px;font-family:'Inter',sans-serif;background:#fff;width:100%; }
+
+    .ads-save-bar { display:flex;align-items:center;gap:14px;padding-top:8px; }
+    .ads-save-status { font-size:13px;font-weight:600; }
+    .ads-save-status.ok  { color:#065f46; }
+    .ads-save-status.err { color:#991b1b; }
+
+    .lib-empty { padding:32px;text-align:center;color:var(--muted);font-size:14px;background:#fff;border:1px solid var(--line);border-radius:3px; }
 
     /* ════════════════════════════════════════════════
        PREVIEW OVERLAY
@@ -262,93 +277,102 @@
 <div id="view-ads">
   <div class="toolbar">
     <div class="toolbar-brand">THE WUSKALOOSA REPORT <span>/ ADS</span></div>
+    <button class="btn btn-ghost btn-sm" id="btn-preview-ads">👁 Preview Ads</button>
     <button class="btn btn-ghost btn-sm" id="btn-ads-back">← All Posts</button>
   </div>
   <div class="ads-body">
-    <div class="ads-header"><h2>Ad Management</h2></div>
-    <p class="ads-intro">
-      Upload ad images for each slot below and add a click-through URL. When an ad slot is empty the space disappears on the live site — no blank boxes. After uploading, the site rebuilds in about a minute.
-      <br><br>
-      <strong>Dimensions:</strong> Post ads are <strong>728 × 90 px</strong> (leaderboard — industry standard, easy to source from sponsors). Homepage box is <strong>300 × 250 px</strong> (medium rectangle — premium, commands higher rates).
-    </p>
 
-    <div class="ads-grid">
-      <!-- Post Top -->
-      <div class="ad-card full-width" id="adcard-post-top">
-        <div class="ad-card-header">
-          <h3>📰 Post Top Banner</h3>
-          <span class="ad-dim-badge">728 × 90 px</span>
-          <span style="font-size:12px;color:var(--muted)">Appears above every article</span>
+    <!-- ── Section 1: Ad Library ── -->
+    <div class="ads-section">
+      <div class="ads-section-head">
+        <h2>📸 Ad Library</h2>
+        <button class="btn btn-primary btn-sm" id="btn-show-add-ad">+ Upload New Ad</button>
+      </div>
+      <p class="ads-section-note">
+        Upload your sponsor images here. Each ad gets a name so you can tell sponsors apart and assign the same ad to multiple posts.
+        <strong>Post banners: 728 × 90 px · Homepage box: 300 × 250 px</strong>
+      </p>
+
+      <!-- Add-ad form (hidden by default) -->
+      <div class="add-ad-panel hidden" id="add-ad-panel">
+        <div class="field-row">
+          <div class="field">
+            <label class="lbl">Ad / Sponsor Name</label>
+            <input type="text" id="new-ad-name" placeholder="e.g. Tuscaloosa Toyota">
+          </div>
+          <div class="field">
+            <label class="lbl">Ad Size</label>
+            <select id="new-ad-size">
+              <option value="leaderboard">Post Banner — 728 × 90 px</option>
+              <option value="medium-rect">Homepage Box — 300 × 250 px</option>
+            </select>
+          </div>
         </div>
-        <div class="ad-card-body">
-          <div class="ad-preview-area leaderboard" id="adprev-post-top">
-            <span class="ad-preview-placeholder">728 × 90 px — No Ad</span>
+        <div class="field-row">
+          <div class="field">
+            <label class="lbl">Image File (JPG, PNG, GIF, WebP)</label>
+            <input type="file" id="new-ad-file" accept="image/*" style="padding:8px 10px;border:1px solid var(--line);border-radius:2px;background:#fff;width:100%;cursor:pointer;font-size:13px;">
           </div>
-          <div class="ad-fields">
-            <div class="field"><label class="lbl">Click-Through URL</label><input type="url" id="adlink-post-top" placeholder="https://sponsor.com"></div>
+          <div class="field">
+            <label class="lbl">Click-Through URL</label>
+            <input type="url" id="new-ad-link" placeholder="https://sponsor.com">
           </div>
-          <div class="ad-upload-row">
-            <input type="file" id="adfile-post-top" accept="image/*">
-            <button class="btn btn-navy btn-sm" onclick="saveAd('post-top')">Save Ad</button>
-          </div>
-          <div class="ad-status" id="adstatus-post-top"></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;margin-top:4px;">
+          <button class="btn btn-primary" id="btn-upload-ad">Upload Ad</button>
+          <button class="btn btn-outline btn-sm" id="btn-cancel-add-ad">Cancel</button>
+          <span id="new-ad-status" style="font-size:13px;font-weight:600;"></span>
         </div>
       </div>
 
-      <!-- Post Bottom -->
-      <div class="ad-card full-width" id="adcard-post-bottom">
-        <div class="ad-card-header">
-          <h3>📰 Post Bottom Banner</h3>
-          <span class="ad-dim-badge">728 × 90 px</span>
-          <span style="font-size:12px;color:var(--muted)">Appears below every article</span>
-        </div>
-        <div class="ad-card-body">
-          <div class="ad-preview-area leaderboard" id="adprev-post-bottom">
-            <span class="ad-preview-placeholder">728 × 90 px — No Ad</span>
-          </div>
-          <div class="ad-fields">
-            <div class="field"><label class="lbl">Click-Through URL</label><input type="url" id="adlink-post-bottom" placeholder="https://sponsor.com"></div>
-          </div>
-          <div class="ad-upload-row">
-            <input type="file" id="adfile-post-bottom" accept="image/*">
-            <button class="btn btn-navy btn-sm" onclick="saveAd('post-bottom')">Save Ad</button>
-          </div>
-          <div class="ad-status" id="adstatus-post-bottom"></div>
-        </div>
+      <div id="ad-library-grid" class="lib-grid" style="margin-top:16px;">
+        <div class="lib-empty">No ads uploaded yet. Click "Upload New Ad" to add your first sponsor.</div>
       </div>
+    </div>
 
-      <!-- Homepage -->
-      <div class="ad-card" id="adcard-homepage">
-        <div class="ad-card-header">
-          <h3>🏠 Homepage Box</h3>
-          <span class="ad-dim-badge">300 × 250 px</span>
-        </div>
-        <div class="ad-card-body">
-          <div class="ad-preview-area medium-rect" id="adprev-homepage">
-            <span class="ad-preview-placeholder">300 × 250</span>
-          </div>
-          <div class="ad-fields" style="margin-top:16px">
-            <div class="field"><label class="lbl">Click-Through URL</label><input type="url" id="adlink-homepage" placeholder="https://sponsor.com"></div>
-          </div>
-          <div class="ad-upload-row">
-            <input type="file" id="adfile-homepage" accept="image/*">
-            <button class="btn btn-navy btn-sm" onclick="saveAd('homepage')">Save Ad</button>
-          </div>
-          <div class="ad-status" id="adstatus-homepage"></div>
-        </div>
+    <!-- ── Section 2: Default Slots ── -->
+    <div class="ads-section">
+      <div class="ads-section-head">
+        <h2>🎯 Default Ads</h2>
       </div>
-
-      <!-- Preview panel -->
-      <div class="ad-card" style="display:flex;flex-direction:column">
-        <div class="ad-card-header"><h3>👁 Ad Preview</h3></div>
-        <div class="ad-card-body" style="flex:1;display:flex;flex-direction:column;gap:16px">
-          <p style="font-size:13px;color:var(--muted);line-height:1.6">
-            See how the post-top ad looks on an article before going live. The preview opens a new tab showing a sample article with your current ads in place.
-          </p>
-          <button class="btn btn-preview" id="btn-preview-ads" style="width:100%;justify-content:center">Open Ad Preview →</button>
+      <p class="ads-section-note">
+        These ads run on posts that don't have a specific ad assigned. Leave a slot blank to show no ad there by default.
+      </p>
+      <div class="slot-table">
+        <div class="slot-row">
+          <div class="slot-label">Post Top Banner<span class="slot-dim">728 × 90 px · Above every article</span></div>
+          <select id="default-post-top"><option value="">— No default ad —</option></select>
+        </div>
+        <div class="slot-row">
+          <div class="slot-label">Post Bottom Banner<span class="slot-dim">728 × 90 px · Below every article</span></div>
+          <select id="default-post-bottom"><option value="">— No default ad —</option></select>
+        </div>
+        <div class="slot-row">
+          <div class="slot-label">Homepage Box<span class="slot-dim">300 × 250 px · Right column on home page</span></div>
+          <select id="default-homepage"><option value="">— No default ad —</option></select>
         </div>
       </div>
     </div>
+
+    <!-- ── Section 3: Per-Post Assignments ── -->
+    <div class="ads-section">
+      <div class="ads-section-head">
+        <h2>📋 Post Assignments</h2>
+      </div>
+      <p class="ads-section-note">
+        Override which ad runs on a specific post. "Default" uses whatever you set above. "None" shows no ad on that post.
+      </p>
+      <div id="post-assignments-wrap">
+        <div class="lib-empty">Loading posts…</div>
+      </div>
+    </div>
+
+    <!-- Save bar -->
+    <div class="ads-save-bar">
+      <button class="btn btn-primary" id="btn-save-assignments">Save All Changes</button>
+      <span id="assignments-status" class="ads-save-status"></span>
+    </div>
+
   </div>
 </div>
 
@@ -635,17 +659,27 @@ document.getElementById('btn-preview').addEventListener('click', async () => {
     ? new Date(dateVal).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})
     : new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
 
-  // Load current ads if available
-  let previewAds = adsConfig;
-  if (!Object.keys(previewAds).length) {
+  // Load current ads if not already loaded
+  if (!adsConfig.library && !adsConfig['post-top']) {
     try {
       const r = await fetch(`${API_URL}/api/ads`);
-      if (r.ok) { const d = await r.json(); previewAds = d.config || {}; }
+      if (r.ok) { const d = await r.json(); adsConfig = d.config || {}; adsSha = d.sha || null; }
     } catch {}
   }
 
   const adHtml = (slot) => {
-    const ad = previewAds[slot];
+    // Resolve ad from library format or old flat format
+    let ad = null;
+    if (adsConfig.library) {
+      const key = slot === 'post-top' ? 'post-top' : slot === 'post-bottom' ? 'post-bottom' : 'homepage';
+      const postOverrides = editFile ? adsConfig.posts?.[editFile] : null;
+      const slotKey = slot === 'post-top' ? 'top' : slot === 'post-bottom' ? 'bottom' : 'homepage';
+      const adId = postOverrides?.[slotKey] !== undefined ? postOverrides[slotKey]
+                 : adsConfig.defaults?.[key] || null;
+      ad = adId ? adsConfig.library[adId] : null;
+    } else {
+      ad = adsConfig[slot] || null;
+    }
     if (!ad || !ad.imageUrl) {
       return `<div class="ad-placeholder"><span>${slot === 'homepage' ? '300 × 250' : '728 × 90'} — Ad Slot</span></div>`;
     }
@@ -736,118 +770,283 @@ function escHtml(s) {
 }
 
 /* ══════════════════════════════════════════════════════
-   ADS VIEW
+   ADS VIEW — library + per-post assignments
 ══════════════════════════════════════════════════════ */
+
+// Normalise config to new library format
+function normAdsConfig(raw) {
+  if (!raw) return { library:{}, defaults:{}, posts:{} };
+  // Already new format
+  if (raw.library) return raw;
+  // Old flat format → migrate to new
+  const library = {}; const defaults = {};
+  ['post-top','post-bottom','homepage'].forEach(slot => {
+    const ad = raw[slot];
+    if (ad && ad.imageUrl) {
+      const id = 'ad_' + slot.replace('-','_');
+      library[id] = { name: slot, imageUrl: ad.imageUrl, imageSha: ad.imageSha || null, link: ad.link || '', size: slot === 'homepage' ? 'medium-rect' : 'leaderboard' };
+      defaults[slot] = id;
+    }
+  });
+  return { library, defaults, posts: {} };
+}
+
+function adOptionsHtml(selectedId, includeDefault) {
+  const lib = adsConfig.library || {};
+  let opts = includeDefault
+    ? `<option value="__default__"${!selectedId || selectedId==='__default__' ? ' selected':''}>— Default —</option>`
+    : `<option value=""${!selectedId ? ' selected':''}>— None —</option>`;
+  Object.entries(lib).forEach(([id, ad]) => {
+    opts += `<option value="${id}"${selectedId===id?' selected':''}>${escHtml(ad.name)}</option>`;
+  });
+  if (!includeDefault) opts += `<option value=""${selectedId==='' ? ' selected':''}>— None —</option>`;
+  return opts;
+}
+
+function renderAdLibrary() {
+  const el = document.getElementById('ad-library-grid');
+  const lib = adsConfig.library || {};
+  const entries = Object.entries(lib);
+  if (!entries.length) {
+    el.innerHTML = '<div class="lib-empty">No ads uploaded yet. Click "Upload New Ad" to add your first sponsor.</div>';
+    return;
+  }
+  el.innerHTML = entries.map(([id, ad]) => {
+    const isRect = ad.size === 'medium-rect';
+    const thumbClass = isRect ? 'is-medium-rect' : 'is-leaderboard';
+    return `<div class="lib-card" id="libcard-${id}">
+      <div class="lib-card-thumb ${thumbClass}">
+        <img src="${escHtml(ad.imageUrl)}" alt="${escHtml(ad.name)}" onerror="this.src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'">
+      </div>
+      <div class="lib-card-body">
+        <div class="lib-card-name">${escHtml(ad.name)}</div>
+        <div class="lib-card-meta">${isRect ? '300 × 250 px' : '728 × 90 px'}${ad.link ? ' · <a href="'+escHtml(ad.link)+'" target="_blank" style="color:var(--cr)">Link ↗</a>' : ''}</div>
+        <div class="lib-card-actions">
+          <button class="btn btn-outline btn-sm" onclick="editAdLink('${id}')">Edit Link</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteAd('${id}')">Delete</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderDefaultSlots() {
+  const d = adsConfig.defaults || {};
+  ['post-top','post-bottom','homepage'].forEach(slot => {
+    const sel = document.getElementById(`default-${slot}`);
+    if (!sel) return;
+    sel.innerHTML = `<option value="">— No default ad —</option>` +
+      Object.entries(adsConfig.library||{}).map(([id,ad]) =>
+        `<option value="${id}"${d[slot]===id?' selected':''}>${escHtml(ad.name)}</option>`
+      ).join('');
+  });
+}
+
+async function renderPostAssignments() {
+  const wrap = document.getElementById('post-assignments-wrap');
+  let posts;
+  try { posts = await api('GET', '/api/posts'); }
+  catch { wrap.innerHTML = '<div class="lib-empty">Could not load posts.</div>'; return; }
+  if (!posts.length) {
+    wrap.innerHTML = '<div class="lib-empty">No posts yet — write some takes first!</div>';
+    return;
+  }
+  const assigned = adsConfig.posts || {};
+  const rows = posts.map(p => {
+    const pa = assigned[p.name] || {};
+    const parts = p.name.replace('.md','').split('-');
+    const ds = parts.length >= 3 ? `${parts[0]}-${parts[1]}-${parts[2]}` : '';
+    const label = (parts.slice(3).join(' ') || p.name).replace(/^\w/, c => c.toUpperCase());
+    const disp = ds ? new Date(ds+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
+    const mkOpts = (selected) => {
+      const lib = adsConfig.library || {};
+      return `<option value="__default__"${!selected||selected==='__default__'?' selected':''}>Default</option>` +
+        Object.entries(lib).map(([id,ad]) => `<option value="${id}"${selected===id?' selected':''}>${escHtml(ad.name)}</option>`).join('') +
+        `<option value="__none__"${selected==='__none__'?' selected':''}>None (no ad)</option>`;
+    };
+    return `<div class="assign-row" data-post="${p.name}">
+      <div>
+        <div class="assign-post-name">${escHtml(label)}</div>
+        ${disp ? `<div class="assign-post-date">${disp}</div>` : ''}
+      </div>
+      <select class="assign-top">${mkOpts(pa.top)}</select>
+      <select class="assign-bottom">${mkOpts(pa.bottom)}</select>
+    </div>`;
+  }).join('');
+  wrap.innerHTML = `<div class="assign-table">
+    <div class="assign-header"><span>Post</span><span>Top Banner</span><span>Bottom Banner</span></div>
+    ${rows}
+  </div>`;
+}
+
 async function openAdsView() {
   showView('view-ads');
-  // Load current config
   try {
     const data = await api('GET', '/api/ads');
-    adsConfig = data.config || {};
+    adsConfig = normAdsConfig(data.config);
     adsSha    = data.sha || null;
-    renderAllAdPreviews();
   } catch (err) {
+    adsConfig = normAdsConfig({});
     console.warn('Could not load ads config:', err.message);
   }
+  renderAdLibrary();
+  renderDefaultSlots();
+  renderPostAssignments();
 }
 
 document.getElementById('btn-ads-back').addEventListener('click', () => loadPostList());
 
-function renderAllAdPreviews() {
-  ['post-top','post-bottom','homepage'].forEach(slot => renderAdPreview(slot));
-}
+// ── Upload new ad ──
+document.getElementById('btn-show-add-ad').addEventListener('click', () => {
+  document.getElementById('add-ad-panel').classList.remove('hidden');
+  document.getElementById('btn-show-add-ad').classList.add('hidden');
+});
+document.getElementById('btn-cancel-add-ad').addEventListener('click', () => {
+  document.getElementById('add-ad-panel').classList.add('hidden');
+  document.getElementById('btn-show-add-ad').classList.remove('hidden');
+  document.getElementById('new-ad-status').textContent = '';
+});
 
-function renderAdPreview(slot) {
-  const ad  = adsConfig[slot] || {};
-  const el  = document.getElementById(`adprev-${slot}`);
-  if (!el) return;
-  const liveTag = `<span class="ad-preview-live">LIVE</span>`;
-  if (ad.imageUrl) {
-    el.innerHTML = `<img src="${ad.imageUrl}" alt="Ad preview" onerror="this.parentElement.innerHTML='<span class=ad-preview-placeholder>Image not found</span>'">${liveTag}`;
-  } else {
-    const dim = slot === 'homepage' ? '300 × 250 px' : '728 × 90 px';
-    el.innerHTML = `<span class="ad-preview-placeholder">${dim} — No Ad</span>`;
-  }
-  // Restore link URL
-  const linkEl = document.getElementById(`adlink-${slot}`);
-  if (linkEl) linkEl.value = ad.link || '';
-}
+document.getElementById('btn-upload-ad').addEventListener('click', async () => {
+  const name     = document.getElementById('new-ad-name').value.trim();
+  const size     = document.getElementById('new-ad-size').value;
+  const fileInput= document.getElementById('new-ad-file');
+  const link     = document.getElementById('new-ad-link').value.trim();
+  const statusEl = document.getElementById('new-ad-status');
 
-window.saveAd = async function(slot) {
-  const fileInput  = document.getElementById(`adfile-${slot}`);
-  const linkInput  = document.getElementById(`adlink-${slot}`);
-  const statusEl   = document.getElementById(`adstatus-${slot}`);
+  if (!name) { statusEl.textContent = 'Please enter a sponsor name.'; statusEl.style.color = '#991b1b'; return; }
+  if (!fileInput.files.length) { statusEl.textContent = 'Please choose an image file.'; statusEl.style.color = '#991b1b'; return; }
 
-  const link = linkInput.value.trim();
-  const hasFile = fileInput.files.length > 0;
+  const file = fileInput.files[0];
+  const ext  = file.type.includes('png') ? 'png' : file.type.includes('gif') ? 'gif' : file.type.includes('webp') ? 'webp' : 'jpg';
+  const id   = 'ad_' + Date.now();
+  const path = `ads/${id}.${ext}`;
 
-  if (!hasFile && !link && !adsConfig[slot]) {
-    statusEl.textContent = 'Upload an image or enter a link URL.';
-    statusEl.className = 'ad-status err';
-    return;
-  }
-
-  statusEl.textContent = 'Saving…';
-  statusEl.className   = 'ad-status';
+  statusEl.textContent = 'Uploading…'; statusEl.style.color = '#706a64';
+  const btn = document.getElementById('btn-upload-ad');
+  btn.disabled = true;
 
   try {
-    let imageUrl = adsConfig[slot]?.imageUrl || null;
-    let imageSha = adsConfig[slot]?.imageSha || null;
+    const b64 = await fileToBase64(file);
+    const result = await api('POST', '/api/upload', { path, content: b64 });
 
-    // Upload new image if provided
-    if (hasFile) {
-      const file = fileInput.files[0];
-      const ext  = file.type.includes('png') ? 'png' : file.type.includes('gif') ? 'gif' : file.type.includes('webp') ? 'webp' : 'jpg';
-      const path = `ads/${slot}.${ext}`;
-      const b64  = await fileToBase64(file);
-      const result = await api('POST', '/api/upload', { path, content: b64, sha: imageSha || undefined });
-      imageUrl = result.url;
-      imageSha = result.sha;
-      fileInput.value = '';
-    }
+    if (!adsConfig.library) adsConfig = normAdsConfig(adsConfig);
+    adsConfig.library[id] = { name, imageUrl: result.url, imageSha: result.sha, link: link || '', size };
 
-    // Update ads config
-    adsConfig[slot] = { imageUrl, imageSha, link: link || '' };
     const saved = await api('POST', '/api/ads', { config: adsConfig, sha: adsSha || undefined });
     adsSha = saved.sha;
 
-    renderAdPreview(slot);
-    statusEl.textContent = '✓ Saved! Site rebuilds in ~1 minute.';
-    statusEl.className   = 'ad-status ok';
+    statusEl.textContent = '✓ Ad uploaded!'; statusEl.style.color = '#065f46';
+    fileInput.value = ''; document.getElementById('new-ad-name').value = ''; document.getElementById('new-ad-link').value = '';
+    document.getElementById('add-ad-panel').classList.add('hidden');
+    document.getElementById('btn-show-add-ad').classList.remove('hidden');
+    renderAdLibrary(); renderDefaultSlots(); renderPostAssignments();
+    setTimeout(() => { statusEl.textContent = ''; }, 4000);
   } catch (err) {
-    statusEl.textContent = `Error: ${err.message}`;
-    statusEl.className   = 'ad-status err';
+    statusEl.textContent = `Error: ${err.message}`; statusEl.style.color = '#991b1b';
   }
+  btn.disabled = false;
+});
+
+// ── Delete ad ──
+window.deleteAd = async function(id) {
+  const ad = adsConfig.library?.[id];
+  if (!ad || !confirm(`Delete "${ad.name}"? This won't remove the image file from GitHub — just removes it from the library and any assignments.`)) return;
+  delete adsConfig.library[id];
+  // Remove from defaults and post assignments
+  ['post-top','post-bottom','homepage'].forEach(k => { if (adsConfig.defaults?.[k] === id) delete adsConfig.defaults[k]; });
+  Object.values(adsConfig.posts || {}).forEach(pa => {
+    if (pa.top === id) delete pa.top;
+    if (pa.bottom === id) delete pa.bottom;
+  });
+  try {
+    const saved = await api('POST', '/api/ads', { config: adsConfig, sha: adsSha || undefined });
+    adsSha = saved.sha;
+    renderAdLibrary(); renderDefaultSlots(); renderPostAssignments();
+  } catch (err) { alert(`Error: ${err.message}`); }
 };
 
-// Ad preview (open in new tab with sample article)
-document.getElementById('btn-preview-ads').addEventListener('click', async () => {
-  // Reload ads first
+// ── Edit ad link ──
+window.editAdLink = function(id) {
+  const ad = adsConfig.library?.[id];
+  if (!ad) return;
+  const newLink = prompt('Click-through URL for this ad:', ad.link || '');
+  if (newLink === null) return;
+  adsConfig.library[id].link = newLink.trim();
+  api('POST', '/api/ads', { config: adsConfig, sha: adsSha || undefined })
+    .then(s => { adsSha = s.sha; renderAdLibrary(); })
+    .catch(err => alert(`Error: ${err.message}`));
+};
+
+// ── Save assignments ──
+document.getElementById('btn-save-assignments').addEventListener('click', async () => {
+  const statusEl = document.getElementById('assignments-status');
+  statusEl.textContent = 'Saving…'; statusEl.className = 'ads-save-status';
+
+  // Collect defaults
+  adsConfig.defaults = {
+    'post-top':    document.getElementById('default-post-top').value    || null,
+    'post-bottom': document.getElementById('default-post-bottom').value  || null,
+    'homepage':    document.getElementById('default-homepage').value     || null,
+  };
+  // Collect post assignments
+  adsConfig.posts = {};
+  document.querySelectorAll('.assign-row[data-post]').forEach(row => {
+    const postName = row.dataset.post;
+    const top    = row.querySelector('.assign-top').value;
+    const bottom = row.querySelector('.assign-bottom').value;
+    adsConfig.posts[postName] = {
+      top:    top    === '__default__' ? undefined : (top    === '__none__' ? null : top),
+      bottom: bottom === '__default__' ? undefined : (bottom === '__none__' ? null : bottom),
+    };
+    // Clean up undefined entries
+    if (adsConfig.posts[postName].top === undefined)    delete adsConfig.posts[postName].top;
+    if (adsConfig.posts[postName].bottom === undefined) delete adsConfig.posts[postName].bottom;
+    if (!Object.keys(adsConfig.posts[postName]).length) delete adsConfig.posts[postName];
+  });
+
   try {
-    const d = await api('GET', '/api/ads');
-    adsConfig = d.config || {}; adsSha = d.sha || null;
-  } catch {}
+    const saved = await api('POST', '/api/ads', { config: adsConfig, sha: adsSha || undefined });
+    adsSha = saved.sha;
+    statusEl.textContent = '✓ Saved! Site rebuilds in ~1 minute.';
+    statusEl.className = 'ads-save-status ok';
+    setTimeout(() => { statusEl.textContent = ''; }, 6000);
+  } catch (err) {
+    statusEl.textContent = `Error: ${err.message}`;
+    statusEl.className = 'ads-save-status err';
+  }
+});
+
+// ── Ad preview (open sample article in new tab) ──
+document.getElementById('btn-preview-ads').addEventListener('click', async () => {
+  if (!adsConfig.library) {
+    try { const d = await api('GET','/api/ads'); adsConfig = normAdsConfig(d.config); adsSha = d.sha||null; } catch {}
+  }
+  const resolveAd = (slotKey, postFile) => {
+    const pa = postFile ? adsConfig.posts?.[postFile] : null;
+    const field = slotKey === 'post-top' ? 'top' : 'bottom';
+    const adId = pa?.[field] !== undefined ? pa[field] : (adsConfig.defaults?.[slotKey] || null);
+    return adId ? adsConfig.library?.[adId] : null;
+  };
   const adHtml = (slot) => {
-    const ad = adsConfig[slot];
+    const ad = resolveAd(slot, null);
     if (!ad || !ad.imageUrl) {
-      const dim = slot === 'homepage' ? '300 × 250' : '728 × 90';
-      return `<div class="ad-placeholder"><span>${dim} — Ad Slot</span></div>`;
+      return `<div class="ad-placeholder"><span>728 × 90 — Ad Slot</span></div>`;
     }
-    const img = `<img src="${ad.imageUrl}" alt="Ad" style="max-width:100%;display:block;margin:0 auto;">`;
-    return ad.link ? `<a href="${ad.link}" target="_blank" rel="noopener sponsored">${img}</a>` : img;
+    const img = `<img src="${escHtml(ad.imageUrl)}" alt="Ad" style="max-width:100%;display:block;margin:0 auto;">`;
+    return ad.link ? `<a href="${escHtml(ad.link)}" target="_blank" rel="noopener sponsored">${img}</a>` : img;
   };
   const html = buildPreviewDoc({
-    title:'Sample Article — Alabama Looks Ready to Roll',
-    category:'Latest Take', dateDisp:'September 6, 2026',
-    excerpt:'A quick look at where things stand heading into the 2026 season opener.',
-    body:`<p>This is a sample article body to show you how your ads will look in context. The leaderboard ads appear above and below this text.</p>
-<p>When you upload real ad images and publish, they appear exactly like this — centered, clean, with the "Advertisement" label above. The ad is clickable and links to your sponsor's site.</p>
+    title: 'Sample Article — Alabama Looks Ready to Roll',
+    category: 'Latest Take', dateDisp: 'September 6, 2026',
+    excerpt: 'A quick look at where things stand heading into the 2026 season opener.',
+    body: `<p>This is a sample article body to show you how your ads will look in context. The leaderboard ads appear above and below this text.</p>
+<p>When you upload real ad images, they appear exactly like this — centered, clean, with the "Advertisement" label above. The ad is clickable and links to your sponsor's site.</p>
 <p>Roll Tide!</p>`,
-    pdfBanner:'', adHtml,
+    pdfBanner: '', adHtml,
   });
-  const w = window.open('about:blank','_blank');
-  w.document.write(html);
-  w.document.close();
+  const w = window.open('about:blank', '_blank');
+  w.document.write(html); w.document.close();
 });
 
 /* ══════════════════════════════════════════════════════

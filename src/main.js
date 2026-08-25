@@ -338,10 +338,27 @@ async function loadAds() {
     if (!res.ok) return;
     const cfg = await res.json();
 
-    function injectAd(elId, slot) {
+    // Support both new library format and old flat format
+    function resolveAd(slotKey) {
+      if (cfg.library) {
+        // New format: resolve via slug→filename→post override or default
+        const slug = new URLSearchParams(window.location.search).get('slug');
+        const filename = slug ? slug + '.md' : null;
+        const postConfig = filename ? cfg.posts?.[filename] : null;
+        const field = slotKey === 'post-top' ? 'top' : slotKey === 'post-bottom' ? 'bottom' : 'homepage';
+        const adId = postConfig?.[field] !== undefined
+          ? postConfig[field]
+          : (cfg.defaults?.[slotKey] || null);
+        return adId ? cfg.library[adId] : null;
+      }
+      // Old flat format
+      return cfg[slotKey] || null;
+    }
+
+    function injectAd(elId, slotKey) {
       const el = document.getElementById(elId);
       if (!el) return;
-      const ad = cfg[slot];
+      const ad = resolveAd(slotKey);
       if (!ad || !ad.imageUrl) return;
       const openTag = ad.link
         ? `<a href="${escapeHtml(ad.link)}" target="_blank" rel="noopener sponsored">`
@@ -355,9 +372,9 @@ async function loadAds() {
     injectAd('ad-post-top', 'post-top');
     injectAd('ad-post-bottom', 'post-bottom');
 
-    // Homepage box — swap placeholder content for actual ad image
+    // Homepage box
     const homeEl = document.getElementById('ad-homepage');
-    const homeAd = cfg['homepage'];
+    const homeAd = resolveAd('homepage');
     if (homeEl && homeAd && homeAd.imageUrl) {
       const openTag = homeAd.link
         ? `<a href="${escapeHtml(homeAd.link)}" target="_blank" rel="noopener sponsored">`
