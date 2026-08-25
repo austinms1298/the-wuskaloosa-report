@@ -16,9 +16,17 @@
     }
   },
   "defaults": {
-    "post-top": null,
-    "post-bottom": null,
+    "post-top": "ad_1787673057444_0",
+    "post-bottom": "ad_1787673057444_0",
     "homepage": null
   },
-  "posts": {}
+  "posts": {
+    "draft-2026-08-25-week-12-college-football-schedule": {
+      "top": "ad_1787673057444_0",
+      "bottom": "ad_1787673072668_0"
+    }
+  },
+  "rotate": {
+    "interval": 6
+  }
 }
