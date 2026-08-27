@@ -13,6 +13,20 @@
       "imageSha": "c86778d6e212708133bfd00936b93b01c714574c",
       "link": "https://www.princelaw.net",
       "size": "leaderboard"
+    },
+    "ad_1787861318928_0": {
+      "name": "Pepsi",
+      "imageUrl": "/ads/ad_1787861318928_0.png",
+      "imageSha": "fa50eddfccdf07bc6504a24d5846083b64bd2055",
+      "link": "https://www.pepsi.com/",
+      "size": "medium-rect"
+    },
+    "ad_1787861320301_1": {
+      "name": "PGH",
+      "imageUrl": "/ads/ad_1787861320301_1.png",
+      "imageSha": "ef4080e6eb50f0402b722eb5fe175b49a76097ed",
+      "link": "https://www.princelaw.net/",
+      "size": "medium-rect"
     }
   },
   "defaults": {
