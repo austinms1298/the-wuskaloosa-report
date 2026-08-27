@@ -77,6 +77,42 @@
     .article-body { max-width: 720px; margin: 36px auto; padding: 0 24px; font-size: 17px; line-height: 1.75; }
     .article-body p { margin-bottom: 1.2em; }
     .article-body h2 { font-family: 'Oswald', sans-serif; font-weight: 400; font-size: 32px; margin: 1.4em 0 .5em; }
+    .article-sig { font-style: italic; font-weight: 700; margin-top: 2em; }
+    .article-body a { color: var(--crimson); text-decoration: underline; text-underline-offset: 3px; }
+
+    /* ── Schedule download box ── */
+    .schedule-download {
+      display: flex; align-items: center; gap: 20px;
+      background: #fff; border: 2px solid var(--line);
+      border-left: 5px solid var(--crimson);
+      border-radius: 3px; padding: 18px 22px;
+      margin: 0 0 32px;
+    }
+    .schedule-download-icon {
+      flex-shrink: 0;
+      width: 48px; height: 56px;
+      background: var(--crimson); border-radius: 3px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 2px;
+    }
+    .schedule-download-icon span { display: block; font-size: 9px; font-weight: 900; letter-spacing: .08em; color: #fff; }
+    .schedule-download-icon svg { width: 22px; height: 22px; fill: #fff; }
+    .schedule-download-info { flex: 1; }
+    .schedule-download-info strong { display: block; font-size: 15px; font-weight: 700; color: var(--deep); margin-bottom: 2px; }
+    .schedule-download-info span { font-size: 13px; color: var(--muted); }
+    .schedule-download-btn {
+      flex-shrink: 0;
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--crimson); color: #fff;
+      font-size: 13px; font-weight: 800; letter-spacing: .04em;
+      padding: 10px 18px; border-radius: 2px; white-space: nowrap;
+      text-decoration: none;
+    }
+    .schedule-download-btn:hover { opacity: .88; }
+    @media (max-width: 540px) {
+      .schedule-download { flex-wrap: wrap; }
+      .schedule-download-btn { width: 100%; justify-content: center; }
+    }
 
     /* ── Section divider ── */
     .section-divider {
@@ -189,23 +225,56 @@
 <!-- Article -->
 <article class="article">
   <header class="article-header">
-    <p class="eyebrow">Latest Take &middot; September 6, 2026</p>
-    <h1>Alabama Opens the Season With a Statement</h1>
-    <p class="lead">A dominant first half, a secondary that flew around, and an offense that looked exactly like what we hoped it would be in August.</p>
+    <p class="eyebrow">Week 12 &middot; 2025</p>
+    <h1>Week 12 College Football Schedule</h1>
+    <p class="lead">Feel that chill in the air? It's not just the arctic blast — Homecoming week has arrived at the Capstone, and Alabama's got a revenge game on deck.</p>
   </header>
 
   <div class="article-body">
-    <p>There's a version of this opener where we spend all week talking about what went wrong. This isn't that. Saturday night at Bryant-Denny was as clean a season debut as you're going to see from a program that had real questions coming in — and those questions got answered loud and fast.</p>
 
-    <h2>The Defense Was The Story</h2>
+    <!-- Schedule Download Box -->
+    <div class="schedule-download">
+      <div class="schedule-download-icon">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 7V3.5L18.5 9H13zM8 17l4 4 4-4h-3v-4H11v4H8z"/></svg>
+      </div>
+      <div class="schedule-download-info">
+        <strong>Week 12 Schedule — 2025</strong>
+        <span>Full TV times, channels &amp; matchups · PDF</span>
+      </div>
+      <a class="schedule-download-btn" href="/schedules/2025/week-12.pdf" target="_blank" rel="noopener">
+        ↓ Download
+      </a>
+    </div>
 
-    <p>We came into the year wondering whether the linebackers could cover. We came in wondering whether the corners were ready. Through three-and-a-half quarters, the answer was a resounding yes to both. The pressure packages worked. The zone coverage disguised things well enough that the opposing quarterback never found a rhythm.</p>
+    <p>Feel that chill in the air? It's not just the arctic blast…it's cool enough that Homecoming week has arrived at the Capstone! And although I almost waited too late this year (election is today) at the request of many, I have finally given in and decided to run for Homecoming Queen!</p>
 
-    <p>This is a real defense. Not a soft schedule, feel-good defense. The kind that goes on the road in October and wins games you have no business winning on offense alone.</p>
+    <p>As you may recall, many of my past platforms fell short…just did not resonate with today's student body…though they did address critical societal issues that would make a difference in the world such as: <em>Done with the man bun!</em> and followed by <em>Cut out the mullet!</em>…both important matters but perhaps a little too follicle-focused for this generation.</p>
 
-    <h2>A Few Things To Watch Going Forward</h2>
+    <p>But, alas, pursuit of more global issues such as <em>Public thrashings for computer hackers!</em> only got me close to the crown, yet still did not result in a victory.</p>
 
-    <p>The run game was serviceable but not dominant — something to keep an eye on before the SEC schedule kicks in. And the kicking situation still feels unsettled. But those are quibbles. This is a team that looks like it knows what it is. Roll Tide.</p>
+    <p>Even <em>Slow cars stay in the right lane!</em> ("Right Lane Slow! Left Lane GO!" as Michael Kirkpatrick — an Auburn friend — perfected with this catchy slogan) did not bring forth the crown?!</p>
+
+    <p>So, seeing the knowledge in seeking the wisdom of others (Thank you, Michael!), I asked you knowledgeable college football fans for Homecoming Queen platform suggestions and now have platforms for years to come!</p>
+
+    <p>I really thought Susan Haynes came up with the 2023 winner to vow that if I won HC Queen to Bring Taylor Swift and Travis Kelce to Homecoming! But people threw shade at Taylor and Travis which resulted in a loss for me.</p>
+
+    <p>Last year's platform had great potential from Tuscaloosa's own Will Grimsley (who is under 40 and speaking my language): <em>Bring back paper tickets!</em> Will, we just didn't count on the hippy vote turning out to save the trees in protest against paper tickets.</p>
+
+    <p>However, if I don't win UA HC Queen with this year's brilliant platform, I am going to have to face the fact that I am just never going to win…it's that good. Thank you to the one and only Jimmy Bank for my 2025 Homecoming Queen Platform…<strong>Alabama goes to Natty regardless of any or how many losses!</strong></p>
+
+    <p>It's clean, it's simple, it may be copying Notre Dame's football team's polling strategy, but we deserve it more than they do! We are in the toughest conference there is, and they are in a conference of themselves…they are so selfish?! (But ND playing a ranked Pittsburgh for the early kick Saturday…maybe they will only go up a spot or two in the polls if Pitt wins.)</p>
+
+    <p>I have to admit, I'm a little nervous about the Homecoming Queen race…especially considering the court was announced two weeks ago, and I was not included. BUT I'm a lot nervous about the homecoming football game. Joey Galloway on ESPN Game Day Final picked our game as the game to watch, and it's all because the Tide's stellar record is on the line and the Okie quarterback John Mateer — who played three quarters against the Aubs in September with a broken hand — has almost healed two months later!? And that demonstration of tenacity in September makes Mateer a taller and better-looking Diego Pavia in my book, and we know how Diego has given us fits.</p>
+
+    <p>BUT this is the third of Alabama's revenge games (already delivered payback to UT and Vandy for last year's anomaly games). According to Ian Fleming, author of <em>Goldfinger</em>: "Once is happenstance. Twice is coincidence. Three times is enemy action." Bring on the enemy action call — and maybe some Krispy (Kadyn Proctor) calls as well please, Crimson Tide!</p>
+
+    <p>Real quick…speaking of enemy action — congrats to the loveliest village on the plains as they rightfully celebrate their close call loss to Vandy. Truly they should all be proud of this progress, and this almost-victory reestablishes the standard of almost-great football that has become synonymous with booger ball. And there is no chance of the Aubs losing this weekend so the streak is alive! Congrats Aubs…you're back!</p>
+
+    <p><a href="https://x.com/burnerljohnson/status/1987577809011933301?s=10" target="_blank" rel="noopener">https://x.com/burnerljohnson/status/1987577809011933301?s=10</a></p>
+
+    <p>I don't know about you, but I cannot wait for the weekend to get here…ready to take off my crown Saturday night after Alabama's victory and watch either Texas's or Georgia's playoff hopes come to an end…enemy action at its finest. Enjoy Week 12, vote for me (today), beat the Okies and RTR!</p>
+
+    <p class="article-sig">Jackie</p>
   </div>
 </article>
 
@@ -229,9 +298,9 @@
     <div class="hp-featured">
       <div class="hp-img-placeholder">Featured Image</div>
       <div class="hp-article-info">
-        <div class="hp-eyebrow">Latest Take · September 6, 2026</div>
-        <div class="hp-title">Alabama Opens the Season With a Statement</div>
-        <p class="hp-excerpt">A dominant first half, a secondary that flew around, and an offense that looked exactly like what we hoped it would be in August.</p>
+        <div class="hp-eyebrow">Week 12 · 2025</div>
+        <div class="hp-title">Week 12 College Football Schedule</div>
+        <p class="hp-excerpt">Feel that chill in the air? It's Homecoming week at the Capstone — Jackie's running for queen again, Alabama's got a revenge game on deck, and she's got a new platform that just might work this time.</p>
       </div>
     </div>
     <div class="hp-sidebar">
