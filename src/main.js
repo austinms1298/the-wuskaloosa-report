@@ -38,6 +38,14 @@ const escapeHtml = (value = '') => String(value).replace(/[&<>'"]/g, char => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#039;', '"': '&quot;'
 }[char]));
 
+// Strip HTML tags and return up to maxLen plain-text characters from article body
+function bodyPreview(html, maxLen = 300) {
+  const plain = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+  if (plain.length <= maxLen) return plain;
+  const cut = plain.lastIndexOf(' ', maxLen);
+  return plain.slice(0, cut > 0 ? cut : maxLen) + '…';
+}
+
 const formatDate = date => new Intl.DateTimeFormat('en-US', {
   month: 'short', day: 'numeric', year: 'numeric'
 }).format(date);
@@ -118,7 +126,12 @@ function homePage() {
           <div class="latest-copy">
             <p class="eyebrow crimson">LATEST TAKE</p>
             <h1>${escapeHtml(featured?.title || 'The Latest Wuskaloosa Report')}</h1>
-            ${featured ? `<p style="white-space:pre-wrap">${escapeHtml(featured.excerpt)}</p><a class="button" href="${postUrl(featured)}">READ THE TAKE <span>→</span></a>` : '<p style="color:var(--muted);font-size:15px;margin:10px 0">The first take drops before kickoff. Check back soon.</p>'}
+            ${featured
+              ? `${featured.excerpt ? `<p style="white-space:pre-wrap;margin-bottom:12px">${escapeHtml(featured.excerpt)}</p>` : ''}
+                 <p style="color:var(--muted);font-size:15px;line-height:1.65;margin-bottom:18px">${escapeHtml(bodyPreview(featured.html, 300))}</p>
+                 <a class="button" href="${postUrl(featured)}">Read More and Download your TV Schedule <span>→</span></a>`
+              : '<p style="color:var(--muted);font-size:15px;margin:10px 0">The first take drops before kickoff. Check back soon.</p>'
+            }
           </div>
         </section>
 
