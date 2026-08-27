@@ -182,13 +182,24 @@ async function handleDeleteFile(req, env, ch) {
 }
 
 async function handleUpload(req, env, ch) {
-  const { path, content, sha } = await req.json().catch(() => ({}));
+  const { path, content, sha: clientSha } = await req.json().catch(() => ({}));
   if (!path || typeof path !== 'string')      return respond({ error: 'Missing or invalid path' }, 400, ch);
   if (path.startsWith('/'))                   return respond({ error: 'path must not start with /' }, 400, ch);
   if (path.split('/').some(s => s === '..'))  return respond({ error: 'path must not contain ..' }, 400, ch);
   if (!content || typeof content !== 'string') return respond({ error: 'Missing content' }, 400, ch);
 
   const repoPath = `public/${path}`;
+
+  // If no SHA supplied by the client, fetch the existing file's SHA so we can
+  // update it without a 422 "sha wasn't supplied" error from GitHub.
+  let sha = clientSha;
+  if (!sha) {
+    try {
+      const existing = await ghRequest('GET', `/repos/${REPO}/contents/${repoPath}?ref=${BRANCH}`, env.GITHUB_PAT);
+      if (existing.sha) sha = existing.sha;
+    } catch {} // 404 = new file, no SHA needed
+  }
+
   await ghRequest('PUT', `/repos/${REPO}/contents/${repoPath}`, env.GITHUB_PAT, {
     message: `Upload: ${repoPath}`,
     content,
