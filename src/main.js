@@ -127,8 +127,10 @@ function homePage() {
             <p class="eyebrow crimson">LATEST TAKE</p>
             <h1>${escapeHtml(featured?.title || 'The Latest Wuskaloosa Report')}</h1>
             ${featured
-              ? `${featured.excerpt ? `<p style="white-space:pre-wrap;margin-bottom:12px">${escapeHtml(featured.excerpt)}</p>` : ''}
-                 <p style="color:var(--muted);font-size:15px;line-height:1.65;margin-bottom:18px">${escapeHtml(bodyPreview(featured.html, 300))}</p>
+              ? `<p style="font-size:12px;font-weight:800;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin:0 0 16px">${formatDate(featured.date)} &nbsp;&middot;&nbsp; ${escapeHtml(featured.category)}</p>
+                 ${featured.excerpt ? `<p style="font-size:17px;line-height:1.55;font-style:italic;border-left:3px solid var(--crimson);padding-left:14px;margin:0 0 18px;white-space:pre-wrap;color:var(--deep)">${escapeHtml(featured.excerpt)}</p>` : ''}
+                 <div style="border-top:1px solid var(--line);margin-bottom:18px"></div>
+                 <p style="font-size:15px;line-height:1.75;color:var(--muted);margin:0 0 24px">${escapeHtml(bodyPreview(featured.html, 480))}</p>
                  <a class="button" href="${postUrl(featured)}">Read More and Download your TV Schedule <span>→</span></a>`
               : '<p style="color:var(--muted);font-size:15px;margin:10px 0">The first take drops before kickoff. Check back soon.</p>'
             }
