@@ -471,10 +471,15 @@
       </div>
     </div>
 
-    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center">
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
       <button class="btn btn-navy btn-sm" id="ml-copy-all">Copy All Emails</button>
       <button class="btn btn-white btn-sm" id="ml-refresh">Refresh</button>
       <button class="btn btn-white btn-sm" id="ml-toggle-import">+ Import Emails</button>
+      <button class="btn btn-sm" id="ml-wipe" style="background:#dc2626;color:#fff;border:none;margin-left:auto">Wipe List</button>
+    </div>
+
+    <div style="margin-bottom:12px">
+      <input id="ml-search" type="search" placeholder="Search emails…" style="width:100%;box-sizing:border-box;padding:8px 12px;font-size:13px;border:1px solid var(--line);border-radius:2px;font-family:'Inter',sans-serif">
     </div>
 
     <div id="ml-import-panel" style="display:none;background:#fff;border:1px solid var(--line);border-radius:2px;padding:16px;margin-bottom:16px">
@@ -1491,6 +1496,9 @@ function fileToBase64(file) {
    MAILING LIST
 ══════════════════════════════════════════════════════ */
 let mlEmails = [];
+let mlPage   = 0;
+let mlSearch = '';
+const ML_PER_PAGE = 100;
 
 async function openMailingList() {
   document.getElementById('ml-toolbar-user').textContent = username || '';
@@ -1521,11 +1529,23 @@ function renderEmailStats() {
 
 function renderEmailTable() {
   const table = document.getElementById('ml-email-table');
+  const q = mlSearch.trim().toLowerCase();
+  const filtered = q ? mlEmails.filter(e => e.email.toLowerCase().includes(q)) : mlEmails;
+  const totalPages = Math.max(1, Math.ceil(filtered.length / ML_PER_PAGE));
+  if (mlPage >= totalPages) mlPage = totalPages - 1;
+  const slice = filtered.slice(mlPage * ML_PER_PAGE, (mlPage + 1) * ML_PER_PAGE);
+
   if (!mlEmails.length) {
     table.innerHTML = '<div style="padding:24px;text-align:center;color:var(--muted);font-size:14px">No emails yet — list will grow as people subscribe.</div>';
     return;
   }
-  table.innerHTML = mlEmails.map((e, i) => {
+  if (!filtered.length) {
+    table.innerHTML = '<div style="padding:24px;text-align:center;color:var(--muted);font-size:14px">No emails match your search.</div>';
+    return;
+  }
+
+  const rows = slice.map((e, si) => {
+    const i = mlEmails.indexOf(e);
     const date = new Date(e.timestamp).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
     const badge = e.source === 'import'
       ? `<span style="font-size:10px;background:#f3f4f6;color:#6b7280;padding:2px 7px;border-radius:8px;font-weight:700;letter-spacing:.05em">IMPORTED</span>`
@@ -1539,6 +1559,21 @@ function renderEmailTable() {
       <button class="btn btn-sm" style="padding:3px 10px;font-size:11px;background:#dc2626;color:#fff;border:none" onclick="deleteEmail('${e.email}')">✕</button>
     </div>`;
   }).join('');
+
+  const pager = totalPages > 1 ? `
+    <div style="display:flex;align-items:center;justify-content:center;gap:12px;padding:14px;font-size:13px;border-top:1px solid var(--line)">
+      <button class="btn btn-white btn-sm" onclick="mlChangePage(-1)" ${mlPage === 0 ? 'disabled' : ''}>← Prev</button>
+      <span style="color:var(--muted)">Page ${mlPage + 1} of ${totalPages} &nbsp;·&nbsp; ${filtered.length} result${filtered.length !== 1 ? 's' : ''}</span>
+      <button class="btn btn-white btn-sm" onclick="mlChangePage(1)" ${mlPage >= totalPages - 1 ? 'disabled' : ''}>Next →</button>
+    </div>` : '';
+
+  table.innerHTML = rows + pager;
+}
+
+function mlChangePage(dir) {
+  mlPage += dir;
+  renderEmailTable();
+  document.getElementById('ml-email-table').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 function startEditEmail(i) {
@@ -1567,11 +1602,17 @@ async function saveEditEmail(i, oldEmail, newEmail) {
 
 async function deleteEmail(email) {
   if (!confirm('Remove ' + email + ' from the list?')) return;
+  // Instant optimistic removal
+  const idx = mlEmails.findIndex(e => e.email === email);
+  if (idx !== -1) mlEmails.splice(idx, 1);
+  renderEmailStats();
+  renderEmailTable();
   try {
     await api('DELETE', '/api/emails/' + encodeURIComponent(email));
-    await loadEmails();
   } catch(err) {
+    // Roll back on error
     alert('Error: ' + err.message);
+    await loadEmails();
   }
 }
 
@@ -1595,15 +1636,47 @@ document.getElementById('ml-toggle-import').addEventListener('click', () => {
   panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
 });
 
+document.getElementById('ml-search').addEventListener('input', e => {
+  mlSearch = e.target.value;
+  mlPage = 0;
+  renderEmailTable();
+});
+
+document.getElementById('ml-wipe').addEventListener('click', async () => {
+  if (!confirm(`Permanently delete ALL ${mlEmails.length} emails from the mailing list? This cannot be undone.`)) return;
+  const btn = document.getElementById('ml-wipe');
+  btn.textContent = 'Wiping…'; btn.disabled = true;
+  try {
+    const res = await api('DELETE', '/api/emails');
+    mlEmails = [];
+    mlPage = 0;
+    renderEmailStats();
+    renderEmailTable();
+    showBanner('success', `Mailing list cleared — ${res.deleted} emails removed.`);
+  } catch(err) {
+    alert('Error: ' + err.message);
+  } finally {
+    btn.textContent = 'Wipe List'; btn.disabled = false;
+  }
+});
+
 document.getElementById('ml-do-import').addEventListener('click', async () => {
   const raw = document.getElementById('ml-import-text').value;
-  const emails = raw.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
-  if (!emails.length) return;
+  const allEmails = raw.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
+  if (!allEmails.length) return;
   const statusEl = document.getElementById('ml-import-status');
-  statusEl.textContent = 'Importing…';
+  const CHUNK = 500;
+  let totalAdded = 0, totalSkipped = 0;
+  statusEl.textContent = `Importing 0 / ${allEmails.length}…`;
   try {
-    const res = await api('POST', '/api/emails/import', { emails });
-    statusEl.textContent = `Added ${res.added}, skipped ${res.skipped} (duplicates/invalid).`;
+    for (let i = 0; i < allEmails.length; i += CHUNK) {
+      const chunk = allEmails.slice(i, i + CHUNK);
+      const res = await api('POST', '/api/emails/import', { emails: chunk });
+      totalAdded += res.added;
+      totalSkipped += res.skipped;
+      statusEl.textContent = `Importing ${Math.min(i + CHUNK, allEmails.length)} / ${allEmails.length}…`;
+    }
+    statusEl.textContent = `Done — added ${totalAdded}, skipped ${totalSkipped} (duplicates/invalid).`;
     document.getElementById('ml-import-text').value = '';
     await loadEmails();
   } catch(err) {

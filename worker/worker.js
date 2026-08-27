@@ -259,11 +259,22 @@ async function handleSubscribe(req, env, ch) {
 
 async function handleListEmails(env, ch) {
   if (!env.EMAIL_LIST) return respond({ emails: [], total: 0 }, 200, ch);
-  const list = await env.EMAIL_LIST.list({ prefix: 'sub:' });
+  // Collect all keys across KV pages (1000 max per list call)
+  const allKeys = [];
+  let cursor;
+  do {
+    const result = await env.EMAIL_LIST.list({ prefix: 'sub:', limit: 1000, ...(cursor ? { cursor } : {}) });
+    allKeys.push(...result.keys);
+    cursor = result.list_complete ? undefined : result.cursor;
+  } while (cursor);
+  // Fetch values in parallel batches of 50
   const emails = [];
-  for (const key of list.keys) {
-    const val = await env.EMAIL_LIST.get(key.name);
-    if (val) { try { emails.push(JSON.parse(val)); } catch {} }
+  const BATCH = 50;
+  for (let i = 0; i < allKeys.length; i += BATCH) {
+    const vals = await Promise.all(allKeys.slice(i, i + BATCH).map(k => env.EMAIL_LIST.get(k.name)));
+    for (const val of vals) {
+      if (val) { try { emails.push(JSON.parse(val)); } catch {} }
+    }
   }
   emails.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
   return respond({ emails, total: emails.length }, 200, ch);
@@ -274,19 +285,46 @@ async function handleImportEmails(req, env, ch) {
   const { emails } = await req.json().catch(() => ({}));
   if (!Array.isArray(emails)) return respond({ error: 'emails must be an array' }, 400, ch);
   let added = 0, skipped = 0;
+  // Validate first
+  const valid = [];
   for (const email of emails) {
-    if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(email).trim())) { skipped++; continue; }
-    const key = 'sub:' + String(email).trim().toLowerCase();
-    const existing = await env.EMAIL_LIST.get(key);
-    if (existing) { skipped++; continue; }
-    await env.EMAIL_LIST.put(key, JSON.stringify({
-      email: String(email).trim().toLowerCase(),
-      timestamp: new Date().toISOString(),
-      source: 'import',
-    }));
-    added++;
+    const e = String(email || '').trim().toLowerCase();
+    if (!e || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)) { skipped++; continue; }
+    valid.push(e);
+  }
+  // Parallel batches: check duplicates then put
+  const BATCH = 25;
+  const now = new Date().toISOString();
+  for (let i = 0; i < valid.length; i += BATCH) {
+    const batch = valid.slice(i, i + BATCH);
+    const existing = await Promise.all(batch.map(e => env.EMAIL_LIST.get('sub:' + e)));
+    const puts = [];
+    for (let j = 0; j < batch.length; j++) {
+      if (existing[j]) { skipped++; continue; }
+      puts.push(env.EMAIL_LIST.put('sub:' + batch[j], JSON.stringify({
+        email: batch[j], timestamp: now, source: 'import',
+      })));
+      added++;
+    }
+    await Promise.all(puts);
   }
   return respond({ ok: true, added, skipped }, 200, ch);
+}
+
+async function handleWipeEmails(env, ch) {
+  if (!env.EMAIL_LIST) return respond({ error: 'Email list not configured' }, 503, ch);
+  const allKeys = [];
+  let cursor;
+  do {
+    const result = await env.EMAIL_LIST.list({ prefix: 'sub:', limit: 1000, ...(cursor ? { cursor } : {}) });
+    allKeys.push(...result.keys.map(k => k.name));
+    cursor = result.list_complete ? undefined : result.cursor;
+  } while (cursor);
+  const BATCH = 25;
+  for (let i = 0; i < allKeys.length; i += BATCH) {
+    await Promise.all(allKeys.slice(i, i + BATCH).map(k => env.EMAIL_LIST.delete(k)));
+  }
+  return respond({ ok: true, deleted: allKeys.length }, 200, ch);
 }
 
 async function handleDeleteEmail(email, env, ch) {
@@ -332,6 +370,8 @@ export default {
       // ── Protected: email list ──
       if (url.pathname === '/api/emails' && method === 'GET')
         return await handleListEmails(env, ch);
+      if (url.pathname === '/api/emails' && method === 'DELETE')
+        return await handleWipeEmails(env, ch);
       if (url.pathname === '/api/emails/import' && method === 'POST')
         return await handleImportEmails(request, env, ch);
       const emailDel = url.pathname.match(/^\/api\/emails\/(.+)$/);
