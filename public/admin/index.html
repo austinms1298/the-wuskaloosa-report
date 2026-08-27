@@ -710,7 +710,16 @@ document.getElementById('btn-back').addEventListener('click', () => {
 /* ── PDF upload ── */
 function renderPdfStatus() {
   const el = document.getElementById('pdf-current');
-  el.textContent = pdfUrl ? 'PDF uploaded.' : 'No PDF linked yet.';
+  const statusEl = document.getElementById('pdf-status');
+  if (pdfUrl) {
+    el.textContent = 'PDF uploaded.';
+    statusEl.textContent = '✓ Uploaded';
+    statusEl.className = 'pdf-status ok';
+  } else {
+    el.textContent = 'No PDF linked yet.';
+    statusEl.textContent = '';
+    statusEl.className = 'pdf-status';
+  }
 }
 
 document.getElementById('btn-upload-pdf').addEventListener('click', async () => {
@@ -895,7 +904,7 @@ document.getElementById('btn-preview').addEventListener('click', async () => {
   const pdfBanner = pdfUrl ? `
     <a class="schedule-download" href="${pdfUrl}" download>
       <span class="sd-icon">📄</span>
-      <span><strong>This Week's TV Schedule</strong><span>Click to download &amp; print</span></span>
+      <span><strong>This Week's Televised Schedule</strong><span>Click to download &amp; print</span></span>
       <span class="sd-cta">DOWNLOAD →</span>
     </a>` : '';
 
@@ -908,6 +917,7 @@ document.getElementById('btn-preview').addEventListener('click', async () => {
 document.getElementById('btn-close-preview').addEventListener('click', () => {
   document.getElementById('preview-overlay').classList.add('hidden');
   document.getElementById('preview-frame').srcdoc = '';
+  renderPdfStatus(); // restore PDF indicator in case browser cleared it
 });
 
 function buildPreviewDoc({title, category, dateDisp, excerpt, body, pdfBanner, adHtml}) {

@@ -54,7 +54,7 @@ function postCard(post) {
       <div class="post-card__body">
         <p class="eyebrow">${formatDate(post.date)} &middot; ${escapeHtml(post.category)}</p>
         <h3><a href="${postUrl(post)}">${escapeHtml(post.title)}</a></h3>
-        <p>${escapeHtml(post.excerpt)}</p>
+        <p style="white-space:pre-wrap">${escapeHtml(post.excerpt)}</p>
       </div>
     </article>`;
 }
@@ -118,7 +118,7 @@ function homePage() {
           <div class="latest-copy">
             <p class="eyebrow crimson">LATEST TAKE</p>
             <h1>${escapeHtml(featured?.title || 'The Latest Wuskaloosa Report')}</h1>
-            ${featured ? `<p>${escapeHtml(featured.excerpt)}</p><a class="button" href="${postUrl(featured)}">READ THE TAKE <span>→</span></a>` : '<p style="color:var(--muted);font-size:15px;margin:10px 0">The first take drops before kickoff. Check back soon.</p>'}
+            ${featured ? `<p style="white-space:pre-wrap">${escapeHtml(featured.excerpt)}</p><a class="button" href="${postUrl(featured)}">READ THE TAKE <span>→</span></a>` : '<p style="color:var(--muted);font-size:15px;margin:10px 0">The first take drops before kickoff. Check back soon.</p>'}
           </div>
         </section>
 
@@ -500,7 +500,7 @@ function postPage() {
     ? `<a class="schedule-download" href="${escapeHtml(post.schedulePdf)}" download>
         <span class="schedule-download__icon">📄</span>
         <span>
-          <strong>This Week's TV Schedule</strong>
+          <strong>This Week's Televised Schedule</strong>
           <span>Click to download &amp; print</span>
         </span>
         <span class="schedule-download__cta">DOWNLOAD →</span>
@@ -518,7 +518,7 @@ function postPage() {
           </p>
           <p class="eyebrow crimson">${escapeHtml(post.category)} &middot; ${formatDate(post.date)}</p>
           <h1>${escapeHtml(post.title)}</h1>
-          <p class="lead">${escapeHtml(post.excerpt)}</p>
+          <p class="lead" style="white-space:pre-wrap">${escapeHtml(post.excerpt)}</p>
           ${pdfBanner}
         </header>
         <div class="article-body">${post.html}</div>
