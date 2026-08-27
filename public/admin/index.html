@@ -212,6 +212,16 @@
       .posts-body,.editor-wrap,.ads-body { padding:16px; }
       .login-card { padding:36px 24px; }
     }
+
+    /* ── Insert bar ── */
+    .insert-bar { display:flex;align-items:center;gap:8px;padding:10px 0 8px; }
+    .insert-bar-label { font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-right:4px;white-space:nowrap; }
+    .img-upload-status { font-size:12px;color:var(--muted);min-height:18px; }
+    .embed-panel { background:var(--paper);border:1px solid var(--line);border-radius:2px;padding:12px 14px;margin-bottom:10px;display:none; }
+    .embed-panel-row { display:flex;gap:8px;align-items:center; }
+    .embed-panel-row input { flex:1;padding:9px 12px;border:1px solid var(--line);border-radius:2px;font-size:14px;font-family:'Inter',sans-serif;background:#fff; }
+    .embed-panel-row input:focus { outline:none;border-color:var(--cr); }
+    .embed-hint { font-size:11px;color:var(--muted);margin-top:6px; }
   </style>
 </head>
 <body>
@@ -316,6 +326,20 @@
       </div>
       <div class="editor-main">
         <h3>Article Body</h3>
+        <div class="insert-bar">
+          <span class="insert-bar-label">Insert:</span>
+          <button class="btn btn-outline btn-sm" id="btn-insert-img" type="button">📷 Photo</button>
+          <button class="btn btn-outline btn-sm" id="btn-insert-embed" type="button">🔗 Embed Post</button>
+          <span id="img-upload-status" class="img-upload-status"></span>
+        </div>
+        <div class="embed-panel" id="embed-panel">
+          <div class="embed-panel-row">
+            <input type="url" id="embed-url-input" placeholder="Paste a tweet, YouTube, or other URL…" autocomplete="off">
+            <button class="btn btn-primary btn-sm" id="btn-do-embed" type="button">Insert</button>
+            <button class="btn btn-outline btn-sm" id="btn-cancel-embed" type="button">Cancel</button>
+          </div>
+          <p class="embed-hint">Supports: Twitter / X · YouTube · any URL</p>
+        </div>
         <div id="quill-editor"></div>
       </div>
     </div>
@@ -628,6 +652,8 @@ function openEditor(filename, sha, content) {
   initQuill(); hideBanner();
   const isNew = !filename;
   document.getElementById('editor-toolbar-title').textContent = isNew ? 'New Post' : 'Edit Post';
+  const isLive = filename && !filename.startsWith('draft-');
+  document.getElementById('btn-publish').textContent = isLive ? 'Save Changes' : 'Publish';
   const delBtn = document.getElementById('btn-delete-post');
   isNew ? delBtn.classList.add('hidden') : delBtn.classList.remove('hidden');
   delBtn.onclick = () => {
@@ -739,6 +765,7 @@ document.getElementById('btn-publish').addEventListener('click', async () => {
       api('DELETE', `/api/posts/${oldDraftFile}?sha=${encodeURIComponent(oldDraftSha)}`).catch(() => {});
     }
     document.getElementById('editor-toolbar-title').textContent = 'Edit Post';
+    document.getElementById('btn-publish').textContent = 'Save Changes';
     document.getElementById('btn-delete-post').classList.remove('hidden');
     // Save ad assignments for this post
     const getCheckedIds = (divId) => Array.from(document.querySelectorAll(`#${divId} input[type=checkbox]:checked`)).map(c => c.value).filter(Boolean);
@@ -930,6 +957,7 @@ function buildPreviewDoc({title, category, dateDisp, excerpt, body, pdfBanner, a
   <div class="ad-label">Advertisement</div>
   ${adHtml('post-bottom')}
 </div>
+${body.includes('twitter-tweet') ? '<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"><\/script>' : ''}
 </body></html>`;
 }
 
@@ -1564,9 +1592,90 @@ document.getElementById('ml-do-import').addEventListener('click', async () => {
 });
 
 /* ══════════════════════════════════════════════════════
+   INLINE IMAGE INSERT
+══════════════════════════════════════════════════════ */
+document.getElementById('btn-insert-img').addEventListener('click', () => {
+  document.getElementById('inline-img-file').click();
+});
+
+document.getElementById('inline-img-file').addEventListener('change', async e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const statusEl = document.getElementById('img-upload-status');
+  statusEl.textContent = 'Uploading…';
+  try {
+    const ext = file.type.includes('png') ? 'png' : file.type.includes('gif') ? 'gif' : file.type.includes('webp') ? 'webp' : 'jpg';
+    const safeName = file.name.replace(/[^a-z0-9.]/gi, '_').toLowerCase();
+    const path = `uploads/inline/${Date.now()}_${safeName}`;
+    const b64 = await fileToBase64(file);
+    const result = await api('POST', '/api/upload', { path, content: b64 });
+    const range = quill.getSelection(true);
+    quill.insertEmbed(range ? range.index : quill.getLength(), 'image', result.url);
+    quill.setSelection((range ? range.index : quill.getLength()) + 1);
+    statusEl.textContent = '✓ Inserted';
+    setTimeout(() => { statusEl.textContent = ''; }, 3000);
+  } catch (err) {
+    statusEl.textContent = `Upload failed: ${err.message}`;
+    setTimeout(() => { statusEl.textContent = ''; }, 6000);
+  }
+  e.target.value = '';
+});
+
+/* ══════════════════════════════════════════════════════
+   EMBED POST INSERT
+══════════════════════════════════════════════════════ */
+document.getElementById('btn-insert-embed').addEventListener('click', () => {
+  const panel = document.getElementById('embed-panel');
+  const isVisible = panel.style.display !== 'none';
+  panel.style.display = isVisible ? 'none' : 'block';
+  if (!isVisible) document.getElementById('embed-url-input').focus();
+});
+
+document.getElementById('btn-cancel-embed').addEventListener('click', () => {
+  document.getElementById('embed-panel').style.display = 'none';
+  document.getElementById('embed-url-input').value = '';
+});
+
+document.getElementById('btn-do-embed').addEventListener('click', doInsertEmbed);
+document.getElementById('embed-url-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); doInsertEmbed(); }
+  if (e.key === 'Escape') { document.getElementById('embed-panel').style.display = 'none'; document.getElementById('embed-url-input').value = ''; }
+});
+
+function doInsertEmbed() {
+  const url = document.getElementById('embed-url-input').value.trim();
+  if (!url) return;
+  let html = '';
+
+  // Twitter / X
+  const twitterM = url.match(/(?:twitter\.com|x\.com)\/\w+\/status\/(\d+)/);
+  if (twitterM) {
+    html = `<blockquote class="twitter-tweet" data-dnt="true"><a href="${url}">View tweet</a></blockquote>`;
+  }
+  // YouTube
+  else {
+    const ytM = url.match(/(?:youtube\.com\/watch\?(?:.*&)?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+    if (ytM) {
+      html = `<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;margin:1em 0"><iframe src="https://www.youtube.com/embed/${ytM[1]}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" allowfullscreen loading="lazy" title="YouTube video"></iframe></div>`;
+    }
+    // Generic link
+    else {
+      html = `<p><a href="${url}" target="_blank" rel="noopener">${url}</a></p>`;
+    }
+  }
+
+  const range = quill.getSelection(true);
+  const idx = range ? range.index : quill.getLength();
+  quill.clipboard.dangerouslyPasteHTML(idx, html);
+  document.getElementById('embed-panel').style.display = 'none';
+  document.getElementById('embed-url-input').value = '';
+}
+
+/* ══════════════════════════════════════════════════════
    INIT
 ══════════════════════════════════════════════════════ */
 if (token) { loadPostList(); } else { showView('view-login'); }
 </script>
+<input type="file" id="inline-img-file" accept="image/*" style="display:none">
 </body>
 </html>
