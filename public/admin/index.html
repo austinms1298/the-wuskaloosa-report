@@ -791,8 +791,8 @@ document.getElementById('btn-publish').addEventListener('click', async () => {
 
 /* ── Save Draft ── */
 document.getElementById('btn-save-draft').addEventListener('click', async () => {
-  const title    = document.getElementById('f-title').value.trim();
-  const slug     = document.getElementById('f-slug').value.trim();
+  let title    = document.getElementById('f-title').value.trim();
+  let slug     = document.getElementById('f-slug').value.trim();
   const excerpt  = document.getElementById('f-excerpt').value.trim();
   const category = document.getElementById('f-category').value;
   const dateVal  = document.getElementById('f-date').value;
@@ -800,7 +800,16 @@ document.getElementById('btn-save-draft').addEventListener('click', async () => 
   const year     = parseInt(document.getElementById('f-year').value, 10);
   const body     = quill.root.innerHTML.trim();
   const bodyIsEmpty = quill.getText().trim() === '';
-  if (!title) { showBanner('error', 'Title is required.'); return; }
+  if (!title) {
+    // Auto-generate "Untitled N" — scan the rendered post list for existing untitled drafts
+    const existing = [...document.querySelectorAll('#posts-list .post-meta')]
+      .map(el => el.textContent).join(' ');
+    const nums = [...existing.matchAll(/draft-untitled-(\d+)\.md/g)].map(m => parseInt(m[1], 10));
+    const n = nums.length ? Math.max(...nums) + 1 : 1;
+    title = `Untitled ${n}`;
+    document.getElementById('f-title').value = title;
+    if (!slug) { slug = `untitled-${n}`; document.getElementById('f-slug').value = slug; }
+  }
   // Reuse existing draft filename or create a new one with draft- prefix
   const draftFilename = (editFile && editFile.startsWith('draft-'))
     ? editFile

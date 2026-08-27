@@ -608,13 +608,22 @@ async function loadAds() {
       return `${openTag}<img src="${escapeHtml(ad.imageUrl)}" alt="Sponsor" loading="lazy" onerror="this.closest('.ad-slot-wrap').style.display='none'">${closeTag}`;
     }
 
+    // Fade-transition rotation — avoids jitter from raw innerHTML swaps
     function startRotation(el, ads, prefix) {
-      el.innerHTML = prefix + adMarkup(ads[0]);
+      const inner = document.createElement('div');
+      inner.style.cssText = 'transition:opacity 0.35s ease';
+      inner.innerHTML = prefix + adMarkup(ads[0]);
+      el.innerHTML = '';
+      el.appendChild(inner);
       if (ads.length < 2) return;
       let idx = 0;
       setInterval(() => {
         idx = (idx + 1) % ads.length;
-        el.innerHTML = prefix + adMarkup(ads[idx]);
+        inner.style.opacity = '0';
+        setTimeout(() => {
+          inner.innerHTML = prefix + adMarkup(ads[idx]);
+          inner.style.opacity = '1';
+        }, 350);
       }, intervalMs);
     }
 
@@ -634,19 +643,35 @@ async function loadAds() {
     if (homeEl) {
       const homeAds = resolveAds('homepage');
       if (homeAds.length) {
+        // Strip placeholder styling so the image fills the box cleanly
+        homeEl.style.background = 'none';
+        homeEl.style.border = '1px solid var(--line)';
+        homeEl.style.padding = '0';
+
         const homeMarkup = (ad) => {
           const openTag = ad.link
-            ? `<a href="${escapeHtml(ad.link)}" target="_blank" rel="noopener sponsored">`
-            : '<span>';
+            ? `<a href="${escapeHtml(ad.link)}" target="_blank" rel="noopener sponsored" style="display:block;line-height:0">`
+            : '<span style="display:block;line-height:0">';
           const closeTag = ad.link ? '</a>' : '</span>';
-          return `<p class="eyebrow">SPONSOR</p>${openTag}<img src="${escapeHtml(ad.imageUrl)}" alt="Sponsor" loading="lazy" style="max-width:300px;max-height:250px;margin:auto;display:block" onerror="this.closest('.sponsor-ad').style.display='none'">${closeTag}`;
+          return `${openTag}<img src="${escapeHtml(ad.imageUrl)}" alt="Sponsor" loading="lazy" style="width:100%;height:auto;display:block" onerror="this.closest('.sponsor-ad').style.display='none'">${closeTag}`;
         };
-        homeEl.innerHTML = homeMarkup(homeAds[0]);
+
+        // Inner wrapper for smooth fade between rotating ads
+        const homeInner = document.createElement('div');
+        homeInner.style.cssText = 'transition:opacity 0.35s ease';
+        homeInner.innerHTML = homeMarkup(homeAds[0]);
+        homeEl.innerHTML = '';
+        homeEl.appendChild(homeInner);
+
         if (homeAds.length > 1) {
           let idx = 0;
           setInterval(() => {
             idx = (idx + 1) % homeAds.length;
-            homeEl.innerHTML = homeMarkup(homeAds[idx]);
+            homeInner.style.opacity = '0';
+            setTimeout(() => {
+              homeInner.innerHTML = homeMarkup(homeAds[idx]);
+              homeInner.style.opacity = '1';
+            }, 350);
           }, intervalMs);
         }
       }
