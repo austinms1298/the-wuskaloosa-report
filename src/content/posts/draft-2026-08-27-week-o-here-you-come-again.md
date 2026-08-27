@@ -2,7 +2,9 @@
 title: "Week 0, Here You Come Again!"
 slug: "week-o-here-you-come-again"
 date: "2026-08-27T22:07:00.000Z"
-excerpt: "“All you gotta do is smile and smile, and there go all my defenses. Just leave it up to you, and, in a little while, you’re messing with my mind and filling up my senses.”"
+excerpt: "“All you gotta do is smile and smile, and there go all my defenses. Just leave it up to you, and, in a little while, you’re messing with my mind and filling up my senses.”
+
+Here You Come Again, Dolly Parton's First #1 Hit"
 category: "Latest Take"
 week: 0
 year: 2026
