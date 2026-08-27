@@ -1,0 +1,15 @@
+---
+title: "Week O, Here You Come Again!"
+slug: "week-o-here-you-come-again"
+date: "2026-08-27T22:07:00.000Z"
+excerpt: "“All you gotta do is smile and smile, and there go all my defenses. Just leave it up to you, and, in a little while, you’re messing with my mind and filling up my senses.”  
+
+Here You Come Again, Dolly Parton’s first #1 hit"
+category: "Latest Take"
+week: 0
+year: 2026
+schedule_pdf: "/schedules/2026/week-0.pdf"
+draft: true
+---
+
+<p class="ql-indent-1">“All you gotta do is smile and smile, and there go all my defenses. Just leave it up to you, and, in a little while, you’re messing with my mind and filling up my senses.”&nbsp;&nbsp;</p><p class="ql-indent-1"><em>Here You Come Again, </em>Dolly Parton’s first #1 hit</p><p>Week Zero of college football has come again, and it’s hard to get excited, because, well, it’s just Week Zero games being played, but, mostly, the Leading Lady of Country…representing all that is good and right with the world…Dolly Parton passed away this week. And now, as if the term “Week Zero” in college football is not degrading enough to all the teams who play this weekend (but do not credit a positive numeral in performing their first game) this week will go forward annually as a reminder of the death of our beloved Dolly.&nbsp;</p><p>However, to quote my husband and editor in chief Jason, “When you’ve gone nine months without college football, any football is good football.” Right?! That’s the spirit!&nbsp;</p><p>So, as we mourn the passing of Dolly Parton, we must appreciate all she has given the world as a great prelude to the college football season …remembering that many of the things we love about Dolly are the same things we love about college football. Maybe not every song or aspect of the game is our favorite, but the heart and display of talent is undeniable. And while maintaining a certain standard and appearance has gotten much more expensive for both with the passage of time, they continue to inspire and give us lasting joy.&nbsp;</p><p>So, to all of you really terrible football programs kicking off your season without a positive number ahead of your first week of play, don’t let the thought that you’re <em>not</em> a <em>real</em> football team get in your head. Take a note from Dolly and be proud of who you are, “I look totally artificial, but I’m totally real, as a writer, as a professional, and as a human being. A rhinestone shines just as good as a diamond.”</p><p>What an incredible example of a servant’s heart and champion for others Dolly was to us all. Encouraging each and every one of us to “find out who you are and do it on purpose.” RIP Dolly! We will always love you despite your being a vols fan…no one is perfect, but you sure came real close.&nbsp;</p><p>But, oh my…aren’t we so glad the Crimson Tide is a DIAMOND and not a rhinestone having to play football this weekend?! The best is yet to come – next weekend when the <em>real</em> season starts in Week One with all the good teams! RTR!</p><p>Jackie</p>
