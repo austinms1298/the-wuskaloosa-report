@@ -216,7 +216,7 @@
 <p class="placement-label">Post Top Banner — seen before every article</p>
 <div class="ad-slot">
   <div class="ad-label">Advertisement</div>
-  <div class="ad-placeholder ad-banner">
+  <div class="ad-placeholder ad-banner" id="slot-post-top">
     YOUR AD HERE
     <span class="dim">728 × 90 px · Post Top Banner</span>
   </div>
@@ -282,7 +282,7 @@
 <p class="placement-label">Post Bottom Banner — seen by every reader who finishes the article</p>
 <div class="ad-slot">
   <div class="ad-label">Advertisement</div>
-  <div class="ad-placeholder ad-banner">
+  <div class="ad-placeholder ad-banner" id="slot-post-bottom">
     YOUR AD HERE
     <span class="dim">728 × 90 px · Post Bottom Banner</span>
   </div>
@@ -305,7 +305,7 @@
     </div>
     <div class="hp-sidebar">
       <div class="hp-sidebar-label">Sponsor</div>
-      <div class="ad-placeholder ad-box">
+      <div class="ad-placeholder ad-box" id="slot-homepage">
         YOUR AD HERE
         <span class="dim">300 × 250 px · Homepage Box</span>
       </div>
@@ -349,5 +349,44 @@
 </footer>
 
 <script async src="https://platform.x.com/widgets.js" charset="utf-8"></script>
+<script>
+(async function () {
+  try {
+    const r = await fetch('/ads/config.json');
+    if (!r.ok) return;
+    const cfg = await r.json();
+    const lib  = cfg.library || {};
+    const defs = cfg.defaults || {};
+
+    function resolveAd(slot) {
+      const val = defs[slot];
+      if (!val) return null;
+      const ids = Array.isArray(val) ? val : [val];
+      for (const id of ids) { if (lib[id]) return lib[id]; }
+      return null;
+    }
+
+    function fillSlot(elId, slot, isBanner) {
+      const el = document.getElementById(elId);
+      if (!el) return;
+      const ad = resolveAd(slot);
+      if (!ad) return;
+      const imgStyle = isBanner
+        ? 'width:min(728px,100%);height:90px;object-fit:contain;display:block;margin:0 auto;'
+        : 'width:300px;max-width:100%;height:250px;object-fit:contain;display:block;margin:0 auto;';
+      el.style.background = 'none';
+      el.style.border = 'none';
+      el.style.borderRadius = '0';
+      el.innerHTML = ad.link
+        ? `<a href="${ad.link}" target="_blank" rel="noopener sponsored"><img src="${ad.imageUrl}" alt="${ad.name}" style="${imgStyle}"></a>`
+        : `<img src="${ad.imageUrl}" alt="${ad.name}" style="${imgStyle}">`;
+    }
+
+    fillSlot('slot-post-top',    'post-top',    true);
+    fillSlot('slot-post-bottom', 'post-bottom', true);
+    fillSlot('slot-homepage',    'homepage',    false);
+  } catch (_) { /* keep placeholders if anything fails */ }
+})();
+</script>
 </body>
 </html>
