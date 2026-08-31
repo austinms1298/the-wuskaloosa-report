@@ -1,7 +1,7 @@
 ---
 title: "I'm Dreaming of an Amazing Football Team..."
 slug: "im-dreaming-of-an-amazing-football-team"
-date: "2025-08-28T23:03:00.000Z"
+date: "2026-08-28T23:03:00.000Z"
 excerpt: "To the tune of I’m Dreaming of a White Christmas..."
 category: "Latest Take"
 week: 1
