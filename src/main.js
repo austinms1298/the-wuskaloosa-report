@@ -497,7 +497,51 @@ function aboutPage() {
     <main class="page-shell inner-page narrow">
       <p class="eyebrow crimson">ABOUT THE REPORT</p>
       <h1 class="page-title">Smart takes. Sassy opinions. Some football.</h1>
-      <hr style="border:none;border-top:1px solid var(--line);margin:48px 0">
+
+      <p style="font-size:18px;line-height:1.7;margin-bottom:0">
+        Jackie Wuska Wear is a native of Birmingham and resides in Tuscaloosa with her husband Jason Wear
+        and four-legged children Albert, Chas, Lola and Vivvy — who often make appearances in her football commentary.
+        Jackie attended The University of Alabama for undergraduate and grad school, where a few friends
+        deemed the nickname <strong>"Wuskaloosa"</strong> upon her.
+      </p>
+
+      <p style="font-size:18px;line-height:1.7">
+        Jackie proudly works for United Way of West Alabama. However, 12 years ago she began sharing college
+        football television schedules with other avid football fans. At first, the football schedule would be
+        delivered with a simple, <em>"Enjoy! RTR!"</em>
+      </p>
+
+      <p style="font-size:18px;line-height:1.7">
+        But with the success of the Coach Saban Era of Alabama Football, Jackie — along with the majority of
+        Alabama fans — caught a severe case of <em>"getting the big head."</em> As a result, a direct link
+        may be seen between the intensity and growth in Alabama's football superiority and the increase in
+        the length of Jackie's commentary in her delivery of football schedules. The delusion of grandeur
+        got so out of hand that Jackie began unsuccessfully (despite championing some very pertinent campaign
+        platforms) running for Homecoming Queen annually for the past eight years (and counting)…decades
+        after graduating from UA.
+      </p>
+
+      <blockquote style="border-left:4px solid var(--crimson);margin:36px 0;padding:16px 24px;background:rgba(143,18,36,.05);font-family:var(--marker);font-size:26px;font-weight:400;line-height:1.3;color:var(--deep)">
+        This website is both a direct result of the cockiness that has become… <span class="crimson">ALABAMA FOOTBALL</span>
+        as well as an effort for Alabama fans to channel our inner Jedi so that we may play the necessary
+        Jedi mind tricks to fully restore Alabama's football dominance.
+      </blockquote>
+
+      <p style="font-size:18px;line-height:1.7">
+        Jackie understands some folks were not raised to love UA and tries not to judge them or their parents —
+        and is actually even more appreciative of their visiting WuskaloosaReport.com, realizing the experience
+        may be very much like a <em>"Eww, smell this…"</em> encounter…requiring curiosity and courage on their part.
+      </p>
+
+      <p style="font-size:18px;line-height:1.7">
+        While you may not learn anything from the posts when you visit WuskaloosaReport.com, by doing so,
+        you are helping fulfill Jackie's childhood dream to ensure each and every man, woman and child has
+        access to the times and channels for all college football games.
+      </p>
+
+      <p style="font-size:20px;font-weight:700;margin:40px 0 48px">Thank you, enjoy and RTR!</p>
+
+      <hr style="border:none;border-top:1px solid var(--line);margin:0 0 48px">
       <p class="eyebrow crimson">GET IN TOUCH</p>
       <p style="font-size:17px;line-height:1.7">Questions, corrections, sponsorship inquiries, or just want to argue about the offensive line? We're here for all of it.</p>
       <a class="button" href="mailto:${site.email}" style="margin-bottom:48px">EMAIL US <span>→</span></a>
