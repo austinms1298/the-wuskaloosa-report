@@ -62,7 +62,40 @@
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   </head>
   <body>
-    <div id="app"></div>
+    <!-- Static header — paints immediately, eliminates #site-nav CLS -->
+    <header class="site-header">
+      <a class="brand" href="/" aria-label="The Wuskaloosa Report home">
+        <img src="/images/logo.png" alt="The Wuskaloosa Report" class="brand-logo">
+      </a>
+      <button class="menu-toggle" aria-expanded="false" aria-controls="site-nav" aria-label="Open menu">&#9776;</button>
+      <nav id="site-nav" class="site-nav" aria-label="Primary navigation">
+        <a href="/" data-nav="home">Home</a>
+        <a href="/archive" data-nav="archive">Past Takes</a>
+        <a href="/schedule" data-nav="schedule">SEC Schedules</a>
+        <a href="/about" data-nav="about">About</a>
+      </nav>
+    </header>
+
+    <!-- Main content — JS injects here; min-height reduces blank-flash shift -->
+    <div id="app" style="min-height:60vh"></div>
+
+    <!-- Static newsletter + footer — paint immediately, eliminating #subscribe CLS -->
+    <section class="newsletter" id="subscribe">
+      <div>
+        <p class="marker-label">DON'T MISS A TAKE!</p>
+        <h2>Get the newest thoughts, analysis and opinions in your inbox.</h2>
+      </div>
+      <form class="newsletter-form" id="newsletter-form">
+        <label class="sr-only" for="nl-email">Email address</label>
+        <input id="nl-email" type="email" name="email" placeholder="Enter your email" required>
+        <button type="submit">LET'S GO!</button>
+      </form>
+    </section>
+    <footer class="footer">
+      <div><strong>The Wuskaloosa Report</strong><p>Smart Takes, Sassy Opinions and some football! Roll Tide!</p></div>
+      <p>&copy; <span id="footer-year"></span> The Wuskaloosa Report &mdash; <a href="mailto:hello@wuskaloosareport.com" style="color:#bbb">hello@wuskaloosareport.com</a></p>
+    </footer>
+    <script>document.getElementById('footer-year').textContent = new Date().getFullYear();</script>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

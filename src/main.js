@@ -124,7 +124,7 @@ function homePage() {
   const archive = posts.filter(post => post.slug !== featured?.slug).slice(0, 3);
   const featuredHeadings = featured ? articleHeadings(featured.html) : [];
   return `
-    ${header('home')}
+
     <main>
       <section class="hero">
         <img src="/images/hero-panel.png" alt="A colorful caricature-style football broadcast panel seated on the University of Alabama campus" width="1520" height="400" fetchpriority="high" loading="eager" decoding="async">
@@ -189,8 +189,7 @@ function homePage() {
         </aside>
 
       </div>
-    </main>
-    ${footer()}`;
+    </main>`;
 }
 
 function archivePage() {
@@ -200,7 +199,7 @@ function archivePage() {
       <p style="margin:12px 0 0;font-size:15px">The takes are loading — check back before kickoff.</p>
     </div>`;
   return `
-    ${header('archive')}
+
     <main class="page-shell inner-page">
       <p class="eyebrow crimson">EVERY TAKE</p>
       <h1 class="page-title">Past Takes</h1>
@@ -208,8 +207,7 @@ function archivePage() {
         ? `<div class="card-grid archive-grid">${posts.map(postCard).join('')}</div>`
         : emptyState
       }
-    </main>
-    ${footer()}`;
+    </main>`;
 }
 
 function schedulePage() {
@@ -479,7 +477,7 @@ function schedulePage() {
     </details>`;
 
   return `
-    ${header('schedule')}
+
     <main class="page-shell inner-page">
       <p class="eyebrow crimson">2026 SEASON</p>
       <h1 class="page-title">SEC Schedules</h1>
@@ -487,13 +485,12 @@ function schedulePage() {
       <div class="sec-accordion">
         ${SEC.map(teamBlock).join('')}
       </div>
-    </main>
-    ${footer()}`;
+    </main>`;
 }
 
 function aboutPage() {
   return `
-    ${header('about')}
+
     <main class="page-shell inner-page narrow">
       <p class="eyebrow crimson">ABOUT THE REPORT</p>
       <h1 class="page-title">Smart takes. Sassy opinions. Some football.</h1>
@@ -545,20 +542,18 @@ function aboutPage() {
       <p class="eyebrow crimson">GET IN TOUCH</p>
       <p style="font-size:17px;line-height:1.7">Questions, corrections, sponsorship inquiries, or just want to argue about the offensive line? We're here for all of it.</p>
       <a class="button" href="mailto:${site.email}" style="margin-bottom:48px">EMAIL US <span>→</span></a>
-    </main>
-    ${footer()}`;
+    </main>`;
 }
 
 function notFoundPage() {
   return `
-    ${header('home')}
+
     <main class="page-shell inner-page narrow" style="text-align:center">
       <p class="eyebrow crimson">404</p>
       <h1 class="page-title" style="font-size:clamp(60px,10vw,120px)">OUT of Bounds.</h1>
       <p class="lead">That page ran the wrong route. Let's get you back on the field.</p>
       <a class="button" href="/" style="margin-top:28px">BACK TO THE HOME FIELD <span>→</span></a>
-    </main>
-    ${footer()}`;
+    </main>`;
 }
 
 function postPage() {
@@ -566,13 +561,12 @@ function postPage() {
   if (!slug) slug = window.location.pathname.replace(/^\//, '');
   const post = posts.find(item => item.slug === slug);
   if (!post) return `
-    ${header('home')}
+
     <main class="page-shell inner-page narrow">
       <p class="eyebrow crimson">404</p>
       <h1>Take not found.</h1>
       <p><a href="/archive" style="color:var(--crimson);font-weight:700">← Back</a></p>
-    </main>
-    ${footer()}`;
+    </main>`;
 
   const pdfBanner = post.schedulePdf
     ? `<a class="schedule-download" href="${escapeHtml(post.schedulePdf)}" download>
@@ -586,7 +580,7 @@ function postPage() {
     : '';
 
   return `
-    ${header('home')}
+
     <main>
       <div class="ad-slot-wrap" id="ad-post-top"></div>
       <article class="article">
@@ -602,8 +596,7 @@ function postPage() {
         <div class="article-body">${post.html}</div>
       </article>
       <div class="ad-slot-wrap" id="ad-post-bottom"></div>
-    </main>
-    ${footer()}`;
+    </main>`;
 }
 
 // Router — handles both clean URLs (/archive) and .html URLs (/archive.html)
@@ -619,6 +612,12 @@ if (/^\/\d{4}\/week\d+$/.test(path)) page = postPage();
 if (path === '/404')      page = notFoundPage();
 
 document.querySelector('#app').innerHTML = page;
+// Update active nav link
+const _navSection = path === '/archive' ? 'archive' : path === '/schedule' ? 'schedule' : path === '/about' ? 'about' : 'home';
+document.querySelectorAll('#site-nav a').forEach(a => a.classList.remove('active'));
+const _navActive = document.querySelector(`#site-nav a[data-nav="${_navSection}"]`);
+if (_navActive) _navActive.classList.add('active');
+
 
 // Mobile menu toggle
 const toggle = document.querySelector('.menu-toggle');
