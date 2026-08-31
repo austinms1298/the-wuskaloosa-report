@@ -127,7 +127,7 @@ function homePage() {
     ${header('home')}
     <main>
       <section class="hero">
-        <img src="/images/hero-panel.png" alt="A colorful caricature-style football broadcast panel seated on the University of Alabama campus">
+        <img src="/images/hero-panel.png" alt="A colorful caricature-style football broadcast panel seated on the University of Alabama campus" width="1520" height="400" fetchpriority="high" loading="eager" decoding="async">
       </section>
 
       <div class="home-grid page-shell">
@@ -659,7 +659,6 @@ async function loadAds() {
     const cfg = await res.json();
     const intervalMs = ((cfg.rotate && cfg.rotate.interval) || 6) * 1000;
 
-    // Returns an array of ad objects for the given slot
     function resolveAds(slotKey) {
       if (cfg.library) {
         let slug = new URLSearchParams(window.location.search).get('slug');
@@ -673,36 +672,84 @@ async function loadAds() {
         const ids = Array.isArray(raw) ? raw : [raw];
         return ids.map(id => cfg.library[id]).filter(Boolean);
       }
-      // Old flat format
       const ad = cfg[slotKey] || null;
       return ad ? [ad] : [];
     }
 
-    function adMarkup(ad) {
+    function adLayerHTML(ad) {
       const openTag = ad.link
         ? `<a href="${escapeHtml(ad.link)}" target="_blank" rel="noopener sponsored">`
         : '<span>';
       const closeTag = ad.link ? '</a>' : '</span>';
-      return `${openTag}<img src="${escapeHtml(ad.imageUrl)}" alt="Sponsor" loading="lazy" onerror="this.closest('.ad-slot-wrap').style.display='none'">${closeTag}`;
+      return `${openTag}<img src="${escapeHtml(ad.imageUrl)}" alt="Sponsor" loading="eager"
+        onerror="this.closest('.ad-layer').style.display='none'">${closeTag}`;
     }
 
-    // Fade-transition rotation — avoids jitter from raw innerHTML swaps
-    function startRotation(el, ads, prefix) {
-      const inner = document.createElement('div');
-      inner.style.cssText = 'transition:opacity 0.35s ease';
-      inner.innerHTML = prefix + adMarkup(ads[0]);
+    // Pre-decode an ad image before making it visible
+    function preloadAd(ad) {
+      if (!ad || !ad.imageUrl) return Promise.resolve();
+      const img = new Image();
+      img.src = ad.imageUrl;
+      if (img.decode) return img.decode().catch(() => {});
+      return new Promise(r => { img.onload = img.onerror = r; });
+    }
+
+    // Two-layer crossfade rotator — container size NEVER changes
+    function startRotation(el, ads, isRect) {
+      // Label
+      const label = document.createElement('p');
+      label.className = 'ad-label';
+      label.textContent = 'Advertisement';
+
+      // Fixed-size rotator container
+      const rotator = document.createElement('div');
+      rotator.className = isRect
+        ? 'ad-rotator ad-rotator--rect'
+        : 'ad-rotator ad-rotator--leader';
+
+      // Layer A (initially visible) and Layer B (hidden)
+      const layerA = document.createElement('div');
+      layerA.className = 'ad-layer';
+      layerA.style.opacity = '1';
+      layerA.innerHTML = adLayerHTML(ads[0]);
+
+      const layerB = document.createElement('div');
+      layerB.className = 'ad-layer';
+      layerB.style.opacity = '0';
+      layerB.innerHTML = adLayerHTML(ads[1] || ads[0]);
+
+      rotator.appendChild(layerA);
+      rotator.appendChild(layerB);
       el.innerHTML = '';
-      el.appendChild(inner);
+      el.appendChild(label);
+      el.appendChild(rotator);
+
       if (ads.length < 2) return;
+
       let idx = 0;
-      setInterval(() => {
+      let front = 0; // 0 = A on top, 1 = B on top
+      const layers = [layerA, layerB];
+
+      async function tick() {
         idx = (idx + 1) % ads.length;
-        inner.style.opacity = '0';
-        setTimeout(() => {
-          inner.innerHTML = prefix + adMarkup(ads[idx]);
-          inner.style.opacity = '1';
-        }, 350);
-      }, intervalMs);
+        const nextAd = ads[idx];
+        const back = 1 - front;
+        // Swap content into the hidden layer while it's invisible, then decode
+        layers[back].innerHTML = adLayerHTML(nextAd);
+        await preloadAd(nextAd);
+        // Crossfade
+        layers[back].style.opacity = '1';
+        layers[front].style.opacity = '0';
+        front = back;
+      }
+
+      // Delay rotation start until after the page has settled
+      const startTimer = () => { setInterval(tick, intervalMs); };
+      if (document.readyState === 'complete') {
+        setTimeout(startTimer, 500);
+      } else {
+        window.addEventListener('load', () => setTimeout(startTimer, 500), { once: true });
+      }
     }
 
     function injectAd(elId, slotKey) {
@@ -710,7 +757,7 @@ async function loadAds() {
       if (!el) return;
       const ads = resolveAds(slotKey);
       if (!ads.length) return;
-      startRotation(el, ads, '<p class="ad-label">Advertisement</p>');
+      startRotation(el, ads, false);
     }
 
     injectAd('ad-post-top', 'post-top');
@@ -721,37 +768,10 @@ async function loadAds() {
     if (homeEl) {
       const homeAds = resolveAds('homepage');
       if (homeAds.length) {
-        // Strip placeholder styling so the image fills the box cleanly
         homeEl.style.background = 'none';
         homeEl.style.border = '1px solid var(--line)';
         homeEl.style.padding = '0';
-
-        const homeMarkup = (ad) => {
-          const openTag = ad.link
-            ? `<a href="${escapeHtml(ad.link)}" target="_blank" rel="noopener sponsored" style="display:block;line-height:0">`
-            : '<span style="display:block;line-height:0">';
-          const closeTag = ad.link ? '</a>' : '</span>';
-          return `${openTag}<img src="${escapeHtml(ad.imageUrl)}" alt="Sponsor" loading="lazy" style="width:100%;height:auto;display:block" onerror="this.closest('.sponsor-ad').style.display='none'">${closeTag}`;
-        };
-
-        // Inner wrapper for smooth fade between rotating ads
-        const homeInner = document.createElement('div');
-        homeInner.style.cssText = 'transition:opacity 0.35s ease';
-        homeInner.innerHTML = homeMarkup(homeAds[0]);
-        homeEl.innerHTML = '';
-        homeEl.appendChild(homeInner);
-
-        if (homeAds.length > 1) {
-          let idx = 0;
-          setInterval(() => {
-            idx = (idx + 1) % homeAds.length;
-            homeInner.style.opacity = '0';
-            setTimeout(() => {
-              homeInner.innerHTML = homeMarkup(homeAds[idx]);
-              homeInner.style.opacity = '1';
-            }, 350);
-          }, intervalMs);
-        }
+        startRotation(homeEl, homeAds, true);
       }
     }
   } catch { /* ads are non-critical — fail silently */ }
