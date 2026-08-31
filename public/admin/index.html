@@ -289,7 +289,7 @@
         </div>
         <div class="sidebar-section">
           <h3>Summary</h3>
-          <div class="field" style="margin-bottom:0"><label class="lbl" for="f-excerpt">Excerpt</label><textarea id="f-excerpt" rows="4" placeholder="One or two lines shown in post previews…"></textarea></div>
+          <div class="field" style="margin-bottom:0"><label class="lbl" for="f-excerpt">Excerpt</label><textarea id="f-excerpt" rows="4" placeholder="One or two lines shown in post previews…" maxlength="500"></textarea><div style="text-align:right;font-size:11px;color:var(--muted);margin-top:3px"><span id="excerpt-count">0</span> / 500</div></div>
         </div>
         <div class="sidebar-section">
           <h3>Ads</h3>
@@ -673,6 +673,7 @@ function openEditor(filename, sha, content) {
     document.getElementById('f-title').value   = data.title   || '';
     document.getElementById('f-slug').value    = data.slug    || '';
     document.getElementById('f-excerpt').value = data.excerpt || '';
+    updateExcerptCount();
     document.getElementById('f-week').value  = data.week  !== undefined ? data.week  : 1;
     document.getElementById('f-year').value  = data.year  !== undefined ? data.year  : 2026;
     const cats = ['Latest Take','Analysis','Preview','Recap','Culture','Opinion'];
@@ -682,7 +683,7 @@ function openEditor(filename, sha, content) {
     renderPdfStatus();
     body.trim().startsWith('<') ? (quill.root.innerHTML = body.trim()) : quill.setText(body.trim());
   } else {
-    ['f-title','f-slug','f-excerpt'].forEach(id => { document.getElementById(id).value = ''; });
+    ['f-title','f-slug','f-excerpt'].forEach(id => { document.getElementById(id).value = ''; }); updateExcerptCount();
     document.getElementById('f-week').value = 1;
     document.getElementById('f-year').value = new Date().getFullYear();
     document.getElementById('f-category').value = 'Latest Take';
@@ -972,7 +973,7 @@ function buildPreviewDoc({title, category, dateDisp, excerpt, body, pdfBanner, a
     <p style="font-size:13px;font-weight:700;color:var(--muted);margin:0 0 20px">← All Takes</p>
     <p class="eyebrow crimson">${category} · ${dateDisp}</p>
     <h1>${escHtml(title)}</h1>
-    <p class="lead">${escHtml(excerpt)}</p>
+    <p class="lead" style="white-space:pre-wrap">${escHtml(excerpt)}</p>
     ${pdfBanner}
   </header>
   <div class="article-body">${body || '<p style="color:var(--muted);font-style:italic">No body content yet.</p>'}</div>
@@ -1449,7 +1450,7 @@ function parseFrontmatter(raw) {
 }
 
 function buildFrontmatter({title,slug,date,excerpt,category,week,year,schedulePdf,draft}) {
-  const q = v => `"${String(v).replace(/\\/g,'\\\\').replace(/"/g,'\\"')}"`;
+  const q = v => `"${String(v).replace(/\\/g,'\\\\').replace(/"/g,'\\"').replace(/\n/g,'\\n')}"`;
   const lines = ['---',`title: ${q(title)}`,`slug: ${q(slug)}`,`date: "${date}"`,
     `excerpt: ${q(excerpt)}`,`category: "${category}"`,
 
@@ -1768,6 +1769,14 @@ function doInsertEmbed() {
    INIT
 ══════════════════════════════════════════════════════ */
 if (token) { loadPostList(); } else { showView('view-login'); }
+
+// Excerpt character counter
+function updateExcerptCount() {
+  const ta = document.getElementById('f-excerpt');
+  const el = document.getElementById('excerpt-count');
+  if (ta && el) el.textContent = ta.value.length;
+}
+document.getElementById('f-excerpt').addEventListener('input', updateExcerptCount);
 </script>
 </body>
 </html>
