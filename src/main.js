@@ -46,6 +46,14 @@ function bodyPreview(html, maxLen = 300) {
   return plain.slice(0, cut > 0 ? cut : maxLen) + '…';
 }
 
+// Extract h2/h3 section headings from article HTML for the outline block
+function articleHeadings(html, max = 5) {
+  return [...html.matchAll(/<h[23][^>]*>([\s\S]*?)<\/h[23]>/gi)]
+    .slice(0, max)
+    .map(m => m[1].replace(/<[^>]+>/g, '').trim())
+    .filter(Boolean);
+}
+
 const formatDate = date => new Intl.DateTimeFormat('en-US', {
   month: 'short', day: 'numeric', year: 'numeric'
 }).format(date);
@@ -114,6 +122,7 @@ function newsletter() {
 function homePage() {
   const featured = posts[0];
   const archive = posts.filter(post => post.slug !== featured?.slug).slice(0, 3);
+  const featuredHeadings = featured ? articleHeadings(featured.html) : [];
   return `
     ${header('home')}
     <main>
@@ -128,9 +137,19 @@ function homePage() {
             <h1>${escapeHtml(featured?.title || 'The Latest Wuskaloosa Report')}</h1>
             ${featured
               ? `<p style="font-size:12px;font-weight:800;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin:0 0 16px">${formatDate(featured.date)} &nbsp;&middot;&nbsp; ${escapeHtml(featured.category)}</p>
-                 ${featured.excerpt ? `<p style="font-size:17px;line-height:1.55;font-style:italic;border-left:3px solid var(--crimson);padding-left:14px;margin:0 0 18px;white-space:pre-wrap;color:var(--deep)">${escapeHtml(featured.excerpt)}</p>` : ''}
+                 ${featured.excerpt
+                   ? `<p style="font-size:18px;line-height:1.55;font-style:italic;border-left:3px solid var(--crimson);padding-left:14px;margin:0 0 18px;white-space:pre-wrap;color:var(--deep)">${escapeHtml(featured.excerpt)}</p>`
+                   : ''}
                  <div style="border-top:1px solid var(--line);margin-bottom:18px"></div>
-                 <p style="font-size:15px;line-height:1.75;color:var(--muted);margin:0 0 24px">${escapeHtml(bodyPreview(featured.html, 480))}</p>
+                 <p style="font-size:17px;line-height:1.75;color:var(--deep);margin:0 0 22px">${escapeHtml(bodyPreview(featured.html, 420))}</p>
+                 ${featuredHeadings.length >= 2
+                   ? `<div style="background:#fff;border:1px solid var(--line);border-left:3px solid var(--crimson);padding:14px 18px;margin-bottom:24px">
+                        <p style="font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 10px">In this take</p>
+                        <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px">
+                          ${featuredHeadings.map(h => `<li style="font-size:14px;font-weight:700;color:var(--deep);padding-left:16px;position:relative"><span style="position:absolute;left:0;color:var(--crimson)">›</span>${escapeHtml(h)}</li>`).join('')}
+                        </ul>
+                      </div>`
+                   : ''}
                  <a class="button" href="${postUrl(featured)}">Read More and Download your TV Schedule <span>→</span></a>`
               : '<p style="color:var(--muted);font-size:15px;margin:10px 0">The first take drops before kickoff. Check back soon.</p>'
             }

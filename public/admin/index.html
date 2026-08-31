@@ -1060,8 +1060,8 @@ async function loadEditorAds(filename) {
     }
     // Render selected first (in stored order), then unselected
     const orderedEntries = [
-      ...curIds.filter(id => lib[id]).map(id => [id, lib[id]]),
-      ...Object.entries(lib).filter(([id]) => !curIds.includes(id)),
+      ...curIds.filter(id => lib[id] && lib[id].size !== 'medium-rect').map(id => [id, lib[id]]),
+      ...Object.entries(lib).filter(([id, ad]) => !curIds.includes(id) && ad.size !== 'medium-rect'),
     ];
     el.innerHTML = orderedEntries.map(([id, ad]) => {
       const eid = escHtml(id); const ckId = `ck_${divId}_${id}`.replace(/\W/g,'_');
