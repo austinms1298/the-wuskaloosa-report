@@ -1002,6 +1002,7 @@ function reorderAdItem(input) {
   if (newPos >= siblings.length) { list.appendChild(item); }
   else { list.insertBefore(item, siblings[newPos]); }
   Array.from(list.querySelectorAll('.ad-order-num')).forEach((inp, i) => { inp.value = i + 1; });
+}
 
 /* ══════════════════════════════════════════════════════
    EDITOR ADS
