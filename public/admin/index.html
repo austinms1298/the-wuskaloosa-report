@@ -1348,7 +1348,8 @@ window.renameAd = async function(id) {
   if (!newName || newName.trim() === ad.name) return;
   adsConfig.library[id].name = newName.trim();
   try {
-    await saveAdsConfig();
+    const s = await api('POST', '/api/ads', { config: adsConfig, sha: adsSha || undefined });
+    adsSha = s.sha;
     renderAdLibrary();
     renderDefaultSlots();
     renderPostAssignments();
