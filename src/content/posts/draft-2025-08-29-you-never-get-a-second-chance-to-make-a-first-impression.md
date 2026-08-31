@@ -1,11 +1,11 @@
 ---
 title: "You never get a second chance to make a first impression."
 slug: "you-never-get-a-second-chance-to-make-a-first-impression"
-date: "2025-08-29T23:12:00.000Z"
+date: "2026-08-31T23:12:00.000Z"
 excerpt: "- Will Rogers/some attribute to Oscar Wilde"
 category: "Latest Take"
 week: 2
-year: 2026
+year: 2025
 draft: true
 ---
 
