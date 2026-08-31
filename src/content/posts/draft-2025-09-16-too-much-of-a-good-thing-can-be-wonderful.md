@@ -1,0 +1,12 @@
+---
+title: "Too much of a good thing can be wonderful!"
+slug: "too-much-of-a-good-thing-can-be-wonderful"
+date: "2025-09-16T23:21:00.000Z"
+excerpt: "-	Mae West"
+category: "Latest Take"
+week: 4
+year: 2026
+draft: true
+---
+
+<p>Is there such a thing as too much good football at once? I mean…this weekend pushed the limits. First, the Tide prevailed against the badgers (Woohoo! Way to go UA!), then the viles lost to the little kirbys (no complaints there) and, boom, we had four good games to watch at once?! I don’t mean to sound like an ingrate, but how are we supposed to sufficiently get our <em>hate on</em> for any one team when we have to split our attention between so many games?!&nbsp;</p><p>And now, just the same but not at all…the sec has four byes this weekend including the Tide being off!? That’s just mean. </p><p>&nbsp;Hey football gods, can’t we spread these games out a little better? What are we going to do with ourselves this weekend once we finish watching the sooners annihilate the boogs?! No one I know is getting married (no duh…it’s football season) so there’s not a wedding to attend…not basketball season yet…guess we will just have to rewind the okie game and watch them beat the aubs again! (I’ve seen worse television.)&nbsp;</p><p>Regardless, this is not a time for sitting around eating bonbons on the off weekend, Tide fans. We have a major battle ahead of us to prepare for…going to athens is going to be nothing short of brutal. The <em>road</em> has not been Alabama’s friend. Our best hope for a win on the road is a tried-and-true strategy that entails the georgia football players getting <em>out</em> on the <em>road</em> and arrested for reckless driving next week. (It’s happened before why not next week?)</p><p>Regardless of how you spend your time Saturday, do your part to support the Tide during this off weekend – go to church, temple (enter the worship service of your choice) and pray for a win! Don’t let bad karma be the reason we lose…be kind to your neighbor…tell your aub friend you feel his pain after the loss to oklahoma and may <em>really </em>know it when the sooners come to Tuscaloosa for Homecoming (eeek). Exercise, eat right, challenge a georgia football player to a drag race and, of course, wash those lucky undies so you are ready to beat the puppies! (Not real puppies just georgia bulldogs…no need to call PETA.)</p><p>Enjoy Week 4 and RTR!</p><p>Jackie&nbsp;</p>
