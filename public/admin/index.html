@@ -170,8 +170,8 @@
     .ad-check-item:hover { border-color:#c9c1bb;background:var(--paper); }
     .ad-check-item.dragging { opacity:.4; }
     .ad-check-item.drag-over { border-color:var(--cr);background:rgba(143,18,36,.05); }
-    .ad-drag-handle { font-size:15px;color:#ccc;cursor:grab;flex-shrink:0;padding-right:2px;user-select:none;line-height:1; }
-    .ad-drag-handle:active { cursor:grabbing; }
+    .ad-order-num { width:38px;text-align:center;border:1px solid var(--line);border-radius:3px;font-size:12px;font-weight:700;padding:2px 4px;color:var(--muted);background:#faf8f5;flex-shrink:0;cursor:pointer; }
+    .ad-order-num:focus { outline:2px solid var(--cr);color:var(--deep); }
     .ad-check-item input[type=checkbox] { width:15px;height:15px;accent-color:var(--cr);flex-shrink:0;cursor:pointer; }
     .ad-check-label-wrap { display:flex;align-items:center;gap:8px;flex:1;cursor:pointer; }
     .ad-check-thumb { width:52px;height:28px;object-fit:contain;border:1px solid var(--line);border-radius:2px;background:var(--paper);flex-shrink:0; }
@@ -910,7 +910,7 @@ document.getElementById('btn-preview').addEventListener('click', async () => {
   const pdfBanner = pdfUrl ? `
     <a class="schedule-download" href="${pdfUrl}" download>
       <span class="sd-icon">📄</span>
-      <span><strong>This Week's Televised Schedule</strong><span>Click to download &amp; print</span></span>
+      <span><strong>This Weeks Televised Football Schedule</strong><span>Click to download &amp; print</span></span>
       <span class="sd-cta">DOWNLOAD →</span>
     </a>` : '';
 
@@ -992,37 +992,16 @@ function escHtml(s) {
 }
 
 /* ── Drag-to-reorder for ad checkbox lists ── */
-function makeSortable(listEl) {
-  let dragged = null;
-  listEl.addEventListener('dragstart', e => {
-    dragged = e.target.closest('.ad-check-item');
-    if (!dragged) return;
-    e.dataTransfer.effectAllowed = 'move';
-    setTimeout(() => dragged && dragged.classList.add('dragging'), 0);
-  });
-  listEl.addEventListener('dragend', () => {
-    if (dragged) dragged.classList.remove('dragging');
-    listEl.querySelectorAll('.ad-check-item').forEach(el => el.classList.remove('drag-over'));
-    dragged = null;
-  });
-  listEl.addEventListener('dragover', e => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-    const target = e.target.closest('.ad-check-item');
-    listEl.querySelectorAll('.ad-check-item').forEach(el => el.classList.remove('drag-over'));
-    if (!target || target === dragged) return;
-    target.classList.add('drag-over');
-  });
-  listEl.addEventListener('drop', e => {
-    e.preventDefault();
-    const target = e.target.closest('.ad-check-item');
-    listEl.querySelectorAll('.ad-check-item').forEach(el => el.classList.remove('drag-over'));
-    if (!target || !dragged || target === dragged) return;
-    const rect = target.getBoundingClientRect();
-    const after = e.clientY > rect.top + rect.height / 2;
-    listEl.insertBefore(dragged, after ? target.nextSibling : target);
-  });
-}
+function reorderAdItem(input) {
+  const item = input.closest('.ad-check-item');
+  const list = item.parentElement;
+  const items = Array.from(list.querySelectorAll('.ad-check-item'));
+  const newPos = Math.max(1, Math.min(items.length, parseInt(input.value) || 1)) - 1;
+  list.removeChild(item);
+  const siblings = Array.from(list.querySelectorAll('.ad-check-item'));
+  if (newPos >= siblings.length) { list.appendChild(item); }
+  else { list.insertBefore(item, siblings[newPos]); }
+  Array.from(list.querySelectorAll('.ad-order-num')).forEach((inp, i) => { inp.value = i + 1; });
 
 /* ══════════════════════════════════════════════════════
    EDITOR ADS
@@ -1066,8 +1045,9 @@ async function loadEditorAds(filename) {
     ];
     el.innerHTML = orderedEntries.map(([id, ad]) => {
       const eid = escHtml(id); const ckId = `ck_${divId}_${id}`.replace(/\W/g,'_');
-      return `<div class="ad-check-item" draggable="true" data-id="${eid}">
-        <span class="ad-drag-handle" title="Drag to reorder">⠿</span>
+      const pos = _idx + 1;
+      return `<div class="ad-check-item" data-id="${eid}">
+        <input type="number" class="ad-order-num" min="1" value="${pos}" title="Rotation order" onchange="reorderAdItem(this)">
         <input type="checkbox" id="${ckId}" name="${divId}" value="${eid}"${curIds.includes(id) ? ' checked' : ''}>
         <label for="${ckId}" class="ad-check-label-wrap">
           <img class="ad-check-thumb" src="${escHtml(ad.imageUrl)}" alt="" onerror="this.style.display='none'">
@@ -1075,7 +1055,6 @@ async function loadEditorAds(filename) {
         </label>
       </div>`;
     }).join('');
-    makeSortable(el);
   });
 }
 
@@ -1162,8 +1141,9 @@ function renderDefaultSlots() {
     ];
     el.innerHTML = ordered.map(([id, ad]) => {
       const eid = escHtml(id); const ckId = `ck_${divId}_${id}`.replace(/\W/g,'_');
-      return `<div class="ad-check-item" draggable="true" data-id="${eid}">
-        <span class="ad-drag-handle" title="Drag to reorder">⠿</span>
+      const pos = _idx + 1;
+      return `<div class="ad-check-item" data-id="${eid}">
+        <input type="number" class="ad-order-num" min="1" value="${pos}" title="Rotation order" onchange="reorderAdItem(this)">
         <input type="checkbox" id="${ckId}" name="${divId}" value="${eid}"${curIds.includes(id) ? ' checked' : ''}>
         <label for="${ckId}" class="ad-check-label-wrap">
           <img class="ad-check-thumb" src="${escHtml(ad.imageUrl)}" alt="" onerror="this.style.display='none'">
@@ -1171,7 +1151,6 @@ function renderDefaultSlots() {
         </label>
       </div>`;
     }).join('');
-    makeSortable(el);
   });
   const intervalEl = document.getElementById('rotate-interval');
   if (intervalEl) intervalEl.value = adsConfig.rotate?.interval || 6;

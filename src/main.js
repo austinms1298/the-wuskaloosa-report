@@ -578,7 +578,7 @@ function postPage() {
     ? `<a class="schedule-download" href="${escapeHtml(post.schedulePdf)}" download>
         <span class="schedule-download__icon">📄</span>
         <span>
-          <strong>This Week's Televised Schedule</strong>
+          <strong>This Weeks Televised Football Schedule</strong>
           <span>Click to download &amp; print</span>
         </span>
         <span class="schedule-download__cta">DOWNLOAD →</span>
