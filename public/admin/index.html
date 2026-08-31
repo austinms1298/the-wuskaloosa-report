@@ -1132,6 +1132,7 @@ function renderAdLibrary() {
         <div class="lib-card-name">${escHtml(ad.name)}</div>
         <div class="lib-card-meta">${isRect ? '300 × 250 px' : '728 × 90 px'}${ad.link ? ' · <a href="'+escHtml(ad.link)+'" target="_blank" style="color:var(--cr)">Link ↗</a>' : ''}</div>
         <div class="lib-card-actions">
+          <button class="btn btn-outline btn-sm" onclick="renameAd('${id}')">Rename</button>
           <button class="btn btn-outline btn-sm" onclick="editAdLink('${id}')">Edit Link</button>
           <button class="btn btn-danger btn-sm" onclick="deleteAd('${id}')">Delete</button>
         </div>
@@ -1154,9 +1155,10 @@ function renderDefaultSlots() {
       return;
     }
     // Render selected first (in stored order), then unselected
+    const sizeFilter = slot === 'homepage' ? 'medium-rect' : 'leaderboard';
     const ordered = [
-      ...curIds.filter(id => lib2[id]).map(id => [id, lib2[id]]),
-      ...Object.entries(lib2).filter(([id]) => !curIds.includes(id)),
+      ...curIds.filter(id => lib2[id] && lib2[id].size === sizeFilter).map(id => [id, lib2[id]]),
+      ...Object.entries(lib2).filter(([id, ad]) => !curIds.includes(id) && ad.size === sizeFilter),
     ];
     el.innerHTML = ordered.map(([id, ad]) => {
       const eid = escHtml(id); const ckId = `ck_${divId}_${id}`.replace(/\W/g,'_');
@@ -1358,6 +1360,21 @@ window.deleteAd = async function(id) {
 };
 
 // ── Edit ad link ──
+window.renameAd = async function(id) {
+  const lib = adsConfig.library || {};
+  const ad = lib[id];
+  if (!ad) return;
+  const newName = prompt('Rename ad:', ad.name);
+  if (!newName || newName.trim() === ad.name) return;
+  adsConfig.library[id].name = newName.trim();
+  try {
+    await saveAdsConfig();
+    renderAdLibrary();
+    renderDefaultSlots();
+    renderPostAssignments();
+  } catch(e) { alert('Save failed: ' + e.message); }
+};
+
 window.editAdLink = function(id) {
   const ad = adsConfig.library?.[id];
   if (!ad) return;
