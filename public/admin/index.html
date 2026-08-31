@@ -1044,9 +1044,9 @@ async function loadEditorAds(filename) {
       ...curIds.filter(id => lib[id] && (lib[id].size || 'leaderboard') !== 'medium-rect').map(id => [id, lib[id]]),
       ...Object.entries(lib).filter(([id, ad]) => !curIds.includes(id) && (ad.size || 'leaderboard') !== 'medium-rect'),
     ];
-    el.innerHTML = orderedEntries.map(([id, ad]) => {
+    el.innerHTML = orderedEntries.map(([id, ad], _idx2) => {
       const eid = escHtml(id); const ckId = `ck_${divId}_${id}`.replace(/\W/g,'_');
-      const pos = _idx + 1;
+      const pos = _idx2 + 1;
       return `<div class="ad-check-item" data-id="${eid}">
         <input type="number" class="ad-order-num" min="1" value="${pos}" title="Rotation order" onchange="reorderAdItem(this)">
         <input type="checkbox" id="${ckId}" name="${divId}" value="${eid}"${curIds.includes(id) ? ' checked' : ''}>
@@ -1140,7 +1140,7 @@ function renderDefaultSlots() {
       ...curIds.filter(id => lib2[id] && (lib2[id].size || 'leaderboard') === sizeFilter).map(id => [id, lib2[id]]),
       ...Object.entries(lib2).filter(([id, ad]) => !curIds.includes(id) && (ad.size || 'leaderboard') === sizeFilter),
     ];
-    el.innerHTML = ordered.map(([id, ad]) => {
+    el.innerHTML = ordered.map(([id, ad], _idx) => {
       const eid = escHtml(id); const ckId = `ck_${divId}_${id}`.replace(/\W/g,'_');
       const pos = _idx + 1;
       return `<div class="ad-check-item" data-id="${eid}">
