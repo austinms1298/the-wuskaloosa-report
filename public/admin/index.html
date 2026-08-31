@@ -1041,8 +1041,8 @@ async function loadEditorAds(filename) {
     }
     // Render selected first (in stored order), then unselected
     const orderedEntries = [
-      ...curIds.filter(id => lib[id] && lib[id].size !== 'medium-rect').map(id => [id, lib[id]]),
-      ...Object.entries(lib).filter(([id, ad]) => !curIds.includes(id) && ad.size !== 'medium-rect'),
+      ...curIds.filter(id => lib[id] && (lib[id].size || 'leaderboard') !== 'medium-rect').map(id => [id, lib[id]]),
+      ...Object.entries(lib).filter(([id, ad]) => !curIds.includes(id) && (ad.size || 'leaderboard') !== 'medium-rect'),
     ];
     el.innerHTML = orderedEntries.map(([id, ad]) => {
       const eid = escHtml(id); const ckId = `ck_${divId}_${id}`.replace(/\W/g,'_');
@@ -1137,8 +1137,8 @@ function renderDefaultSlots() {
     // Render selected first (in stored order), then unselected
     const sizeFilter = slot === 'homepage' ? 'medium-rect' : 'leaderboard';
     const ordered = [
-      ...curIds.filter(id => lib2[id] && lib2[id].size === sizeFilter).map(id => [id, lib2[id]]),
-      ...Object.entries(lib2).filter(([id, ad]) => !curIds.includes(id) && ad.size === sizeFilter),
+      ...curIds.filter(id => lib2[id] && (lib2[id].size || 'leaderboard') === sizeFilter).map(id => [id, lib2[id]]),
+      ...Object.entries(lib2).filter(([id, ad]) => !curIds.includes(id) && (ad.size || 'leaderboard') === sizeFilter),
     ];
     el.innerHTML = ordered.map(([id, ad]) => {
       const eid = escHtml(id); const ckId = `ck_${divId}_${id}`.replace(/\W/g,'_');
