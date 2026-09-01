@@ -34,6 +34,13 @@
       "imageSha": "7b1b4bc38ce33ff956c0c27068d1e4c3be46d271",
       "link": "https://www.pepsi.com/",
       "size": "leaderboard"
+    },
+    "ad_1788285963752_0": {
+      "name": "YOUR AD HERE!",
+      "imageUrl": "/ads/ad_1788285963752_0.png",
+      "imageSha": "d501200952ef6a7156a819fca7cbf62502af4e70",
+      "link": "mailto:jackie@wuskaloosareport.com",
+      "size": "leaderboard"
     }
   },
   "defaults": {
