@@ -1,5 +1,5 @@
 ---
-title: "Untitled 1"
+title: "Making the Bowl Games Fair During Rona"
 slug: "untitled-1"
 date: "2020-12-21T22:26:00.000Z"
 excerpt: ""
