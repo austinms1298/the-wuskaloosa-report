@@ -27,6 +27,13 @@
       "imageSha": "ef4080e6eb50f0402b722eb5fe175b49a76097ed",
       "link": "https://www.princelaw.net/",
       "size": "medium-rect"
+    },
+    "ad_1788285936155_0": {
+      "name": "Dr. Pepper",
+      "imageUrl": "/ads/ad_1788285936155_0.png",
+      "imageSha": "7b1b4bc38ce33ff956c0c27068d1e4c3be46d271",
+      "link": "https://www.pepsi.com/",
+      "size": "leaderboard"
     }
   },
   "defaults": {
