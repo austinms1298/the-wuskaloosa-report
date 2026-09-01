@@ -1,5 +1,5 @@
 ---
-title: "During Rona -  all of us at the Capstone are excited to see the reunion of Joey Freshwater and Coach Saban"
+title: "During Rona, All of Us at the Capstone are excited to see the reunion of Joey Freshwater and Coach Saban"
 slug: "during-ronaall-of-us-at-the-capstone-are-excited-to-see-the-reunion-of-joey-freshwater-and-coach-saban"
 date: "2020-10-07T20:53:00.000Z"
 excerpt: ""
