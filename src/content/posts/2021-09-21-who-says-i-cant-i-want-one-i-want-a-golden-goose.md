@@ -1,0 +1,11 @@
+---
+title: "“Who says I can’t!? I want one! I want a golden goose!”"
+slug: "who-says-i-cant-i-want-one-i-want-a-golden-goose"
+date: "2021-09-21T22:17:00.000Z"
+excerpt: "– Spoiled brat Veruca Salt from Willy Wonka\n\n 	– And, also…spoiled Alabama football fans"
+category: "Latest Take"
+week: 4
+year: 2021
+---
+
+<p>Lots of folks are throwing shade at Alabama fans for complaining that we <em>won</em> our game against a formidable foe and ranked opponent by a <em>measly</em> two points. It’s not our fault we have become overindulged with football success. Blame Coach Saban for making all our football dreams come true. (Thank you for <em>processing</em> us into huge pains for the college football world Coach Saban!)</p><p>We should be more appreciative overall though. Seriously, no need to fret…it was a great weekend of college football! The good guys won a tough one on the road!...Well, not Auburn or South Carolina but the really, really good guys won. </p><p>At least Alabama fans are not totally delusional…like Gus Malzahn with his public declaration he is not interested in the USC Coaching job…officially removing his name out of consideration?! Since he was so forthcoming I feel it necessary to be just as transparent and make my announcement that I too am taking my name out of the running for the USC Head Football Coach search. Too much? Sorry…I’ve been conditioned to be cocky as an Alabama fan. </p><p>Speaking of Crimson pride, it’s the perfect time to mention my friend Brad Edward’s (former ESPN College GameDay radio host, BCS Bowl expert and Alabama grad) book that will be the <em>best</em> Christmas present for your favorite Alabama fan! Brad’s book demonstrates and proves through stats, charts and much more that Alabama Football is a dynasty that has no equal. Check it out at the link below! It will make you even <u>more</u> proud to be an Alabama fan and will justify your championship state of mind. </p><p><a href="https://bamadynastybook.com" rel="noopener noreferrer" target="_blank">https://bamadynastybook.com</a></p><p>&nbsp;	“Don’t forget what happened to the man who got everything he ever wanted…He lived happily ever after.” </p><p>&nbsp;	– Willy Wonka </p><p>&nbsp;Embrace it while it lasts Alabama fans!</p><p>Roll Tide, enjoy Week 4 <em>and</em> our football weather, </p><p>&nbsp;Jackie&nbsp;</p>
