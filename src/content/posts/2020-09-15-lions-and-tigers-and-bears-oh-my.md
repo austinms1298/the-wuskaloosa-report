@@ -2,9 +2,9 @@
 title: "Lions, and tigers and Bears, oh my!"
 slug: "lions-and-tigers-and-bears-oh-my"
 date: "2020-09-15T22:10:00.000Z"
-excerpt: "– Dorothy, Wizard of Oz…as she embarks upon the yellow brick road trip to Oz and…\n\n 	– SEC fans…about the upcoming road trip when the Auburn Tigers meet the Penn State Nittany Lions! \n\n	    (Why add “Bears” you say? Because one never misses an opportunity to pay tribute to Coach Paul “Bear” Bryant.)"
+excerpt: "– Dorothy, Wizard of Oz…as she embarks upon the yellow brick road trip to Oz and…\\n\\n 	– SEC fans…about the upcoming road trip when the Auburn Tigers meet the Penn State Nittany Lions! \\n\\n	    (Why add “Bears” you say? Because one never misses an opportunity to pay tribute to Coach Paul “Bear” Bryant.)"
 category: "Latest Take"
-week: 1
+week: 3
 year: 2021
 ---
 
