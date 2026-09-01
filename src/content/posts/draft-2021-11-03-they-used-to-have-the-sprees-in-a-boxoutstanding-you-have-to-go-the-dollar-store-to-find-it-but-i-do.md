@@ -1,0 +1,12 @@
+---
+title: "“They used to have the Sprees in a box…outstanding. You have to go the dollar store to find it, but I do.”"
+slug: "they-used-to-have-the-sprees-in-a-boxoutstanding-you-have-to-go-the-dollar-store-to-find-it-but-i-do"
+date: "2021-11-03T22:25:00.000Z"
+excerpt: "– MS ST Coach Mike Leach on his favorite Halloween candy"
+category: "Latest Take"
+week: 10
+year: 2021
+draft: true
+---
+
+<p>Let’s hope someone splurged to get Mike Leach his favorite “Sprees in a box” for his big win against Kentucky. (And not candy corn – he “completely hates candy corn.”) Full classic Leach interview on Halloween candy preferences below. </p><p><a href="https://www.clarionledger.com/story/sports/college/mississippi-state/2021/10/25/halloween-mississippi-state-coach-mike-leach-wont-give-candy-corn-second-chance/6121719001/" rel="noopener noreferrer" target="_blank">https://www.clarionledger.com/story/sports/college/mississippi-state/2021/10/25/halloween-mississippi-state-coach-mike-leach-wont-give-candy-corn-second-chance/6121719001/</a></p><p>Speaking of Mississippi happenings, Hugh Freeze is returning to Ole Miss with his Liberty Eagles at 11 am Saturday. I wonder what cell phone he will use to contact the ladies while in Oxford? Let’s hope he learned his lesson from his past grievances and repentance and will use a burner phone this time. </p><p>Moving on to the Alabama vs LSU game – not the rivalry it once was with championship implications for <em>both</em> teams and likely a far cry from Coach O’s, “this is our house now” locker room speech after the 2019 win over Alabama in Tuscaloosa. You know? His words can be difficult to decipher at times. With Alabama favored by 25 points this weekend…perhaps we just misunderstood him. Maybe instead of “this is our house now” he <em>actually </em>said, </p><p>“These are our cows now” thinking he was in Auburn?...or</p><p>“This is my date, Fouts (Not Montana!?) now”…or most likely </p><p>“I am a louse now.”</p><p>He’s a confusing character. At least he has not totally run down the LSU program to the point we were relegated to the 11 am kick off. Thanks for that Ed!</p><p>So sleep late, but turn on your television in time to see Auburn keep their SEC Championship dreams alive in College Station. Bringing it down to the Iron Bowl, aren’t we Tigers!?</p><p>Enjoy Week 10, beat the Tigahs and RTR!</p><p>&nbsp;Jackie&nbsp;</p>
