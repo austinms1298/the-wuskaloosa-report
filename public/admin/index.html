@@ -212,6 +212,40 @@
       .ads-grid .full-width { grid-column:1; }
       .posts-body,.editor-wrap,.ads-body { padding:16px; }
       .login-card { padding:36px 24px; }
+      .assign-header { display:none; }
+      .assign-row { grid-template-columns:1fr 1fr; }
+      .slot-row { grid-template-columns:1fr; gap:8px; }
+    }
+    @media (max-width:600px) {
+      /* Toolbar: shrink text, drop user label, allow wrap */
+      .toolbar { flex-wrap:wrap; height:auto; padding:8px 12px; gap:6px; }
+      .toolbar-brand { font-size:13px; flex:0 0 100%; order:-1; margin-bottom:2px; }
+      .toolbar-brand span { display:none; }
+      .toolbar-user { display:none; }
+      .btn { padding:7px 11px; font-size:12px; }
+      .btn-sm { padding:5px 9px; font-size:11px; }
+      /* Posts list */
+      .posts-body { padding:12px; }
+      .posts-header h2 { font-size:20px; }
+      .post-row { flex-wrap:wrap; gap:8px; padding:12px; }
+      .post-row .btn { flex:1; justify-content:center; }
+      /* Editor */
+      .editor-wrap { padding:10px; }
+      .editor-title-input { font-size:17px; padding:10px 12px; }
+      .field-row { grid-template-columns:1fr; }
+      /* Ads */
+      .ads-body { padding:10px; }
+      .assign-row { grid-template-columns:1fr; }
+      .assign-row select { width:100%; }
+      .slot-row { padding:12px; }
+      .ad-file-fields { grid-template-columns:1fr !important; }
+      .lib-grid { grid-template-columns:1fr; }
+      .lib-card-actions { flex-wrap:wrap; }
+      .ads-section-head { flex-wrap:wrap; gap:8px; }
+      .rotate-bar { flex-wrap:wrap; }
+      /* Login */
+      .login-card { padding:28px 16px; }
+      .login-wrap { padding:12px; }
     }
 
     /* ── Insert bar ── */
