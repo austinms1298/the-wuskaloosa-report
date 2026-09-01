@@ -558,7 +558,7 @@ function aboutPage() {
       <hr style="border:none;border-top:1px solid var(--line);margin:0 0 48px">
       <p class="eyebrow crimson">GET IN TOUCH</p>
       <p style="font-size:17px;line-height:1.7">Questions, corrections, sponsorship inquiries, or just want to argue about the offensive line? We're here for all of it.</p>
-      <a class="button" href="mailto:${site.email}" style="margin-bottom:48px">EMAIL US <span>→</span></a>
+
     </main>`;
 }
 
