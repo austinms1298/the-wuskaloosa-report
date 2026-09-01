@@ -41,6 +41,20 @@
       "imageSha": "d501200952ef6a7156a819fca7cbf62502af4e70",
       "link": "mailto:jackie@wuskaloosareport.com",
       "size": "leaderboard"
+    },
+    "ad_1788286006321_0": {
+      "name": "YOUR AD HERE!",
+      "imageUrl": "/ads/ad_1788286006321_0.png",
+      "imageSha": "bf03909d1f8b47a795b5aa7245e15178a445b619",
+      "link": "mailto:jackie@wuskaloosareport.com",
+      "size": "medium-rect"
+    },
+    "ad_1788286007646_1": {
+      "name": "Dr. Pepper",
+      "imageUrl": "/ads/ad_1788286007646_1.png",
+      "imageSha": "2fcbad972b5bbb2c4a6deb6bdebacf8e9ff2f857",
+      "link": "https://www.pepsi.com/",
+      "size": "medium-rect"
     }
   },
   "defaults": {
