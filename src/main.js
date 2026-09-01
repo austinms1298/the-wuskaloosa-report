@@ -198,16 +198,33 @@ function archivePage() {
       <p style="font-family:var(--marker);font-size:40px;margin:0">Coming soon.</p>
       <p style="margin:12px 0 0;font-size:15px">The takes are loading — check back before kickoff.</p>
     </div>`;
-  return `
 
-    <main class="page-shell inner-page">
-      <p class="eyebrow crimson">EVERY TAKE</p>
-      <h1 class="page-title">Past Takes</h1>
-      ${posts.length
-        ? `<div class="card-grid archive-grid">${posts.map(postCard).join('')}</div>`
-        : emptyState
-      }
-    </main>`;
+  function buildSeasonSections() {
+    const byYear = {};
+    posts.forEach(p => {
+      const yr = p.date instanceof Date ? p.date.getFullYear() : new Date(p.date).getFullYear();
+      if (!byYear[yr]) byYear[yr] = [];
+      byYear[yr].push(p);
+    });
+    const years = Object.keys(byYear).map(Number).sort((a, b) => b - a);
+    return years.map((yr, i) => {
+      const count = byYear[yr].length;
+      const cards = byYear[yr].map(postCard).join('');
+      return '<details class="archive-year"' + (i === 0 ? ' open' : '') + '>'
+        + '<summary class="archive-year-hd">'
+        + yr + ' Season'
+        + '<span class="archive-year-count">' + count + ' take' + (count !== 1 ? 's' : '') + '</span>'
+        + '</summary>'
+        + '<div class="card-grid archive-grid">' + cards + '</div>'
+        + '</details>';
+    }).join('');
+  }
+
+  return '<main class="page-shell inner-page">'
+    + '<p class="eyebrow crimson">EVERY TAKE</p>'
+    + '<h1 class="page-title">Past Takes</h1>'
+    + (posts.length ? buildSeasonSections() : emptyState)
+    + '</main>';
 }
 
 function schedulePage() {
@@ -493,7 +510,7 @@ function aboutPage() {
 
     <main class="page-shell inner-page narrow">
       <p class="eyebrow crimson">ABOUT THE REPORT</p>
-      <h1 class="page-title">Smart takes. Sassy opinions. Some football.</h1>
+      <h1 class="page-title">Smart takes, Sassy opinions, and Some football!</h1>
 
       <p style="font-size:18px;line-height:1.7;margin-bottom:0">
         Jackie Wuska Wear is a native of Birmingham and resides in Tuscaloosa with her husband Jason Wear
