@@ -1,11 +1,11 @@
 ---
 title: "“I’m not here to judge, I’m just pointing out the mistakes you are making.”"
 slug: "im-not-here-to-judge-im-just-pointing-out-the-mistakes-you-are-making"
-date: "2026-09-01T01:24:00.000Z"
+date: "2025-09-23T01:24:00.000Z"
 excerpt: "- Anonymous (or maybe everyone’s mom?)"
 category: "Latest Take"
-week: 1
-year: 2026
+week: 5
+year: 2025
 draft: true
 ---
 
