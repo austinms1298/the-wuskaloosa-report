@@ -1,11 +1,11 @@
 ---
-title: "When did SEC... it just means more.  become synonymous with"
+title: "When did SEC... it just means more  become synonymous with"
 slug: "when-did-sec-it-just-means-more-become-synonymous-with"
-date: "2026-09-01T20:58:00.000Z"
+date: "2020-10-15T20:58:00.000Z"
 excerpt: "Oh no, it’s the big one! You hear that Elizabeth? I’m coming to join you!                       \n\n               Fred Samford"
 category: "Latest Take"
-week: 1
-year: 2026
+week: 7
+year: 2020
 draft: true
 ---
 
