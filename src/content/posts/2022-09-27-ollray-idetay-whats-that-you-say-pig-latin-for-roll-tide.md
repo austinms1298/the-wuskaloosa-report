@@ -1,0 +1,11 @@
+---
+title: "Ollray Idetay! (What’s that you say? PIG Latin for “Roll Tide!”)"
+slug: "ollray-idetay-whats-that-you-say-pig-latin-for-roll-tide"
+date: "2022-09-28T00:50:00.000Z"
+excerpt: ""
+category: "Latest Take"
+week: 5
+year: 2022
+---
+
+<p>So many close games Saturday – it was not a day for the faint of heart. With Coach Saban at the helm, it was a <em>no worries</em> day for Alabama fans, but others likely suffered great anxiety. </p><p>For example, after narrowly defeating the Mizzou tigers, the aubs now face a <em>second</em> tigers bowl against LSU this weekend. Will this be a <em>best yet</em> Godfather 2 sequel performance or a <em>half-hearted</em> Grease 2 type attempt? </p><p>And there’s so much more heart pounding SEC fun to be had! This week Mark Stoops’ undefeated Kittycats face the undefeated Lanes in Oxford. When was the last season Kentucky and Ole Miss met undefeated? (Not even sure the football gods care enough about that stat for it be found.) Another interesting game for college football fans – Mississippi State hosts Jimbo’s aggies to give him another shot at bettering his record (37-15) beyond Kevin Sumlin’s 36-14 record that resulted in the aggies showing Sumlin the door. The investment in Jimbo is finally paying off!</p><p>Since Coach Saban had the Commodores under control this past Saturday, the main palpitations Alabama fans experienced may have resulted from flipping channels during commercials in the Alabama game to watch Arkansas beating <em>then</em> losing to the aggies. Alabama plays the Piggies this weekend in Pigville, and I’m a little nervous about this one. The Tide has already lost a heart-breaking battle to the Pigs for “best college football player name” with our very own Koolaid McKinstry going down to Hogs player named Bumper Pool. And it’s not even close…Bumper Pool is <em>College Football Name Hall of Fame</em> material. But I believe the Tide will develop the winning scheme to pull us through <u>on the field</u>. So, don’t go bacon my heart Alabama! (Sorry, could not resist required bacon/barbecue reference when playing Arkansas.)</p><p>Ollray Idetay! (What’s that you say? PIG Latin for “Roll Tide!”)</p><p>Enjoyway Eekway Ivefay! (Enjoy Week Five!)</p><p>Ackiejay&nbsp;</p>
