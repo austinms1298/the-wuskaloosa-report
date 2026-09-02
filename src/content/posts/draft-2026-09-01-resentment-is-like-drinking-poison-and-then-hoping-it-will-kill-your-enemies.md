@@ -1,7 +1,7 @@
 ---
 title: "“Resentment is like drinking poison and then hoping it will kill your enemies.”"
 slug: "resentment-is-like-drinking-poison-and-then-hoping-it-will-kill-your-enemies"
-date: "2026-09-02T00:44:00.000Z"
+date: "2022-09-24T00:44:00.000Z"
 excerpt: "- Nelson Mandela"
 category: "Latest Take"
 week: 4
