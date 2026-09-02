@@ -17,7 +17,7 @@ function parsePost(path, raw) {
   return {
     slug,
     title: data.title || 'Untitled',
-    excerpt: data.excerpt || '',
+    excerpt: decodeEntities(data.excerpt || ''),
     date: data.date ? new Date(data.date) : new Date(),
     image: data.image || '/images/post-placeholder.svg',
     category: data.category || 'Latest Take',
@@ -37,6 +37,16 @@ const posts = Object.entries(rawPosts)
 const escapeHtml = (value = '') => String(value).replace(/[&<>'"]/g, char => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#039;', '"': '&quot;'
 }[char]));
+
+// Decode common HTML entities stored in CMS fields (e.g. &nbsp; from Quill)
+const decodeEntities = (s = '') => String(s)
+  .replace(/&nbsp;/g, ' ')
+  .replace(/&amp;/g, '&')
+  .replace(/&lt;/g, '<')
+  .replace(/&gt;/g, '>')
+  .replace(/&quot;/g, '"')
+  .replace(/&#039;/g, "'")
+  .replace(/&#39;/g, "'");
 
 // Strip HTML tags and return up to maxLen plain-text characters from article body
 function bodyPreview(html, maxLen = 300) {
