@@ -1,7 +1,7 @@
 ---
 title: "“If it’s brown, lay down. If it’s black, fight back. If it’s white, good night.”"
 slug: "if-its-brown-lay-down-if-its-black-fight-back-if-its-white-good-night"
-date: "2024-10-11T01:56:00.000Z"
+date: "2024-09-11T01:56:00.000Z"
 excerpt: ""
 category: "Latest Take"
 week: 3
