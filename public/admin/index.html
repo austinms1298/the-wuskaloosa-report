@@ -518,11 +518,27 @@
     </div>
 
     <div id="ml-import-panel" style="display:none;background:#fff;border:1px solid var(--line);border-radius:2px;padding:16px;margin-bottom:16px">
-      <h3 style="font-family:'Oswald',sans-serif;font-weight:400;font-size:15px;margin:0 0 10px">Paste emails to import (one per line or comma-separated)</h3>
-      <textarea id="ml-import-text" rows="5" style="width:100%;box-sizing:border-box;padding:8px;font-size:13px;border:1px solid var(--line);border-radius:2px;font-family:'Inter',sans-serif;resize:vertical" placeholder="user@example.com&#10;another@example.com"></textarea>
-      <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
-        <button class="btn btn-primary btn-sm" id="ml-do-import">Import</button>
-        <span id="ml-import-status" style="font-size:13px;color:var(--muted)"></span>
+      <!-- Step 1: paste -->
+      <div id="ml-import-step1">
+        <h3 style="font-family:'Oswald',sans-serif;font-weight:400;font-size:15px;margin:0 0 10px">Paste emails to import (one per line or comma-separated)</h3>
+        <textarea id="ml-import-text" rows="5" style="width:100%;box-sizing:border-box;padding:8px;font-size:13px;border:1px solid var(--line);border-radius:2px;font-family:'Inter',sans-serif;resize:vertical" placeholder="user@example.com&#10;another@example.com"></textarea>
+        <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
+          <button class="btn btn-primary btn-sm" id="ml-check-dupes">Check for Duplicates →</button>
+          <span id="ml-import-status" style="font-size:13px;color:var(--muted)"></span>
+        </div>
+      </div>
+      <!-- Step 2: review -->
+      <div id="ml-import-step2" style="display:none">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+          <h3 style="font-family:'Oswald',sans-serif;font-weight:400;font-size:15px;margin:0;flex:1">Review Import</h3>
+          <button class="btn btn-outline btn-sm" id="ml-import-back">← Edit Emails</button>
+        </div>
+        <div id="ml-review-new" style="margin-bottom:14px"></div>
+        <div id="ml-review-dupes" style="margin-bottom:14px"></div>
+        <div style="display:flex;gap:8px;align-items:center;padding-top:10px;border-top:1px solid var(--line)">
+          <button class="btn btn-primary btn-sm" id="ml-do-import">Import Selected</button>
+          <span id="ml-import-status2" style="font-size:13px;color:var(--muted)"></span>
+        </div>
       </div>
     </div>
 
@@ -1694,27 +1710,99 @@ document.getElementById('ml-wipe').addEventListener('click', async () => {
   }
 });
 
-document.getElementById('ml-do-import').addEventListener('click', async () => {
+// ── Import: step 1 — check for duplicates ───────────────────────────────────
+document.getElementById('ml-check-dupes').addEventListener('click', () => {
   const raw = document.getElementById('ml-import-text').value;
-  const allEmails = raw.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
-  if (!allEmails.length) return;
-  const statusEl = document.getElementById('ml-import-status');
+  const parsed = raw.split(/[\n,]+/).map(s => s.trim().toLowerCase()).filter(s => s.includes('@'));
+  if (!parsed.length) {
+    document.getElementById('ml-import-status').textContent = 'No valid emails found.';
+    return;
+  }
+  const existingSet = new Set(mlEmails.map(e => e.email.toLowerCase()));
+  const newEmails   = parsed.filter(e => !existingSet.has(e));
+  const dupeEmails  = parsed.filter(e =>  existingSet.has(e));
+  // Deduplicate within the pasted list itself
+  const uniqueNew   = [...new Set(newEmails)];
+  const uniqueDupes = [...new Set(dupeEmails)];
+
+  // Build review UI
+  const newSection = document.getElementById('ml-review-new');
+  const dupeSection = document.getElementById('ml-review-dupes');
+
+  if (uniqueNew.length) {
+    newSection.innerHTML = `<div style="font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#065f46;margin-bottom:6px">
+      ✓ New — ${uniqueNew.length} email${uniqueNew.length!==1?'s':''} (will be added)</div>`
+      + uniqueNew.map(e => `<div style="display:flex;align-items:center;gap:8px;padding:5px 10px;border-bottom:1px solid var(--line);font-size:13px">
+        <span style="width:16px;height:16px;border-radius:50%;background:#dcfce7;display:inline-flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0">✓</span>
+        <span style="flex:1">${e}</span></div>`).join('');
+  } else {
+    newSection.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:8px 0">No new emails to add.</div>';
+  }
+
+  if (uniqueDupes.length) {
+    dupeSection.innerHTML = `<div style="font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#92400e;margin:12px 0 6px">
+      ⚠ Already in list — ${uniqueDupes.length} duplicate${uniqueDupes.length!==1?'s':''}</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px">Check the box next to any you want to re-add anyway.</div>`
+      + uniqueDupes.map(e => `<div style="display:flex;align-items:center;gap:8px;padding:5px 10px;background:#fef9ec;border:1px solid #fde68a;border-radius:2px;margin-bottom:4px;font-size:13px">
+        <input type="checkbox" class="dupe-cb" data-email="${e}" style="width:15px;height:15px;accent-color:var(--cr);flex-shrink:0">
+        <span style="flex:1">${e}</span>
+        <span style="font-size:11px;color:#92400e;font-weight:700">DUPLICATE</span></div>`).join('');
+  } else {
+    dupeSection.innerHTML = '<div style="font-size:13px;color:#065f46;padding:6px 0">🎉 No duplicates found!</div>';
+  }
+
+  // Switch steps
+  document.getElementById('ml-import-step1').style.display = 'none';
+  document.getElementById('ml-import-step2').style.display = 'block';
+  document.getElementById('ml-import-status').textContent = '';
+  document.getElementById('ml-import-status2').textContent = '';
+
+  // Store for the confirm handler
+  document.getElementById('ml-do-import')._newEmails   = uniqueNew;
+  document.getElementById('ml-do-import')._dupeEmails  = uniqueDupes;
+  const importBtn = document.getElementById('ml-do-import');
+  importBtn.textContent = uniqueNew.length
+    ? `Import ${uniqueNew.length} New Email${uniqueNew.length!==1?'s':''}`
+    : 'Import Selected';
+});
+
+// ── Import: back to step 1 ────────────────────────────────────────────────────
+document.getElementById('ml-import-back').addEventListener('click', () => {
+  document.getElementById('ml-import-step1').style.display = 'block';
+  document.getElementById('ml-import-step2').style.display = 'none';
+});
+
+// ── Import: step 2 — confirm import ──────────────────────────────────────────
+document.getElementById('ml-do-import').addEventListener('click', async () => {
+  const btn = document.getElementById('ml-do-import');
+  const statusEl = document.getElementById('ml-import-status2');
+  const newEmails  = btn._newEmails  || [];
+  const checkedDupes = [...document.querySelectorAll('.dupe-cb:checked')].map(cb => cb.dataset.email);
+  const toImport = [...newEmails, ...checkedDupes];
+  if (!toImport.length) { statusEl.textContent = 'Nothing selected to import.'; return; }
+
+  btn.disabled = true;
   const CHUNK = 500;
   let totalAdded = 0, totalSkipped = 0;
-  statusEl.textContent = `Importing 0 / ${allEmails.length}…`;
+  statusEl.textContent = `Importing…`;
   try {
-    for (let i = 0; i < allEmails.length; i += CHUNK) {
-      const chunk = allEmails.slice(i, i + CHUNK);
+    for (let i = 0; i < toImport.length; i += CHUNK) {
+      const chunk = toImport.slice(i, i + CHUNK);
       const res = await api('POST', '/api/emails/import', { emails: chunk });
-      totalAdded += res.added;
-      totalSkipped += res.skipped;
-      statusEl.textContent = `Importing ${Math.min(i + CHUNK, allEmails.length)} / ${allEmails.length}…`;
+      totalAdded   += res.added   || 0;
+      totalSkipped += res.skipped || 0;
     }
-    statusEl.textContent = `Done — added ${totalAdded}, skipped ${totalSkipped} (duplicates/invalid).`;
+    statusEl.textContent = `Done — ${totalAdded} added${checkedDupes.length ? ', ' + checkedDupes.length + ' duplicate(s) re-added' : ''}.`;
     document.getElementById('ml-import-text').value = '';
+    // Reset to step 1
+    document.getElementById('ml-import-step1').style.display = 'block';
+    document.getElementById('ml-import-step2').style.display = 'none';
+    document.getElementById('ml-import-panel').style.display = 'none';
     await loadEmails();
   } catch(err) {
     statusEl.textContent = `Error: ${err.message}`;
+  } finally {
+    btn.disabled = false;
   }
 });
 
