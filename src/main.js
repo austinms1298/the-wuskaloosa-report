@@ -51,7 +51,7 @@ const escapeHtml = (value = '') => String(value).replace(/[&<>'"]/g, char => ({
 
 // Strip HTML tags and return up to maxLen plain-text characters from article body
 function bodyPreview(html, maxLen = 300) {
-  const plain = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+  const plain = decodeEntities(html.replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ').trim();
   if (plain.length <= maxLen) return plain;
   const cut = plain.lastIndexOf(' ', maxLen);
   return plain.slice(0, cut > 0 ? cut : maxLen) + '…';
