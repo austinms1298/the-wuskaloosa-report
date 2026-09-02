@@ -1,0 +1,12 @@
+---
+title: "“Resentment is like drinking poison and then hoping it will kill your enemies.”"
+slug: "resentment-is-like-drinking-poison-and-then-hoping-it-will-kill-your-enemies"
+date: "2026-09-02T00:44:00.000Z"
+excerpt: "- Nelson Mandela"
+category: "Latest Take"
+week: 4
+year: 2022
+draft: true
+---
+
+<p>Woohoo! It was another great weekend of football! What?! Not for Auburn fans you say? Well, that’s just looking at the glass half empty. Sure the boogs lost their game…but they tied in the field goal contest! And due to the “orange-out” their fans have beat the rush to get orange clothing for the upcoming Halloween holiday. In addition, don’t forget the eagle “Independence” NAILED her pregame landing at midfield…providing a helpful hint <u>this</u> would be the area where the team would spend most of the day…no reason to be a negative Nelly here. </p><p>Also, to continue the season with rose colored glasses (maybe more of the Crimson persuasion actually) Texas AM bounced back from a devastating defeat by beating Miami this past weekend. I have to admit the loss to Appalachian State was a monumental low for them. Not sure how one attempts to comfort or encourage Jimbo in his despair and resentment when ESPN added salt to the wound by declaring a national celebration of their loss in choosing Appalachian State for the <em>ESPN Game Day</em> location last Saturday!? But thank goodness the Aggies’ victory over a private school made everything <em>wrong</em> with their world <em>right</em> for them again. Maybe they are considering giving Jimbo a mid-year raise!</p><p>Staying on that positive track, we have some strong SEC on SEC action ahead of us this weekend as the conference season is really just getting started! </p><p>&nbsp;It’s a “go tigers” weekend in Auburn with Missouri coming to visit for the brunch-time game slot. The Gators are taking the CBS kick at 230 pm and heading to Knoxvegas for a battle to climb the ranks of the SEC East behind Georgia, and, later in the evening, right before the Tide kicks off, the Piggies are headed to Arlington to see how Jimbo can do against a public SEC university. </p><p>&nbsp;Of course, Alabama’s game against LA Monroe was full of successful action preparing us to open SEC play greeting Vandy to Bryant Denny this upcoming weekend. In the spirit of optimism, I think we got this one. </p><p>Enjoy Week 4 and RTR!</p><p>&nbsp;Jackie</p><p>&nbsp;</p>
