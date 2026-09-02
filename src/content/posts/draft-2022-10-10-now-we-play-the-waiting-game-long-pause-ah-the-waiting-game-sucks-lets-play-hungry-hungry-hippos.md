@@ -1,0 +1,12 @@
+---
+title: "Now we play the waiting game. (long pause) Ah, the waiting game sucks. Let’s play Hungry, Hungry Hippos!"
+slug: "now-we-play-the-waiting-game-long-pause-ah-the-waiting-game-sucks-lets-play-hungry-hungry-hippos"
+date: "2022-10-11T00:52:00.000Z"
+excerpt: "Homer Simpson of The Simpsons"
+category: "Latest Take"
+week: 7
+year: 2022
+draft: true
+---
+
+<p>It’s Alabama vs. tennessee week, and the vols have been waiting 15 long years to beat Alabama again. The Alabama tennessee series is actually a lot like the tabletop game <em>Hungry, Hungry Hippos</em> where the goal is not to <em>gobble a</em> <em>marble </em>but to <em>gobble up the</em> <em>most</em> marbles. Meaning: ever since the days of Coach Bryant’s reign at Alabama, this game most often is won in streaks with one team dominating the other for years in a row as opposed to a back-and-forth/year-to-year sort of competition – an embarrassment of riches, you might say, but with tremendous bragging rights for the winner. (Alabama’s 15-year run is the record for either team in most consecutive wins.)</p><p>So, the vols are fired up to be undefeated and hosting the (thankfully) also victorious Tide. Nervous Alabama fans? If our starting QB is still out…eeek, yeah, maybe? But I believe it will be a close one in which Alabama will prevail! With or without Bryce we have our beloved Coach GOAT, and if you need further proof/convincing…<em>Hungry Hungry Hippos</em> is marketed under the Milton Bradley banner…Elefun and Friends. And <u>this</u> is the logic you share with your spouse when you bet your house on the Tide and our favorite elephant Big Al to pull us through Saturday… pretty much indisputable rationale. It’s a lock! </p><p>Elsewhere in the SEC, Jimbo’s record of 37-17 is now worse than Kevin Sumlin’s record at tx am. However, Jimbo cannot allow himself to wallow in self doubt during his open weekend but instead must utilize the power of positive thinking and look on the bright side – he <u>cannot</u> lose again this Saturday! And there is more SEC on SEC gobbling to witness on Saturday – auburn goes to ole miss early and, after the Tide and vols play, Brian Kelly tries out his Southern accent in Gainesville while Leach’s bulldogs face off with the kitty cats in Lexington. </p><p>RTR and beat the vol snitches! Enjoy Week 7!</p><p>&nbsp;Jackie </p><p>&nbsp;</p>
