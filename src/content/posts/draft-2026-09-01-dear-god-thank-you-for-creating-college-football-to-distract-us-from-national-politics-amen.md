@@ -1,7 +1,7 @@
 ---
 title: "Dear God,  Thank you for creating college football to distract us from national politics.  Amen"
 slug: "dear-god-thank-you-for-creating-college-football-to-distract-us-from-national-politics-amen"
-date: "2024-10-30T02:14:00.000Z"
+date: "2024-10-25T02:14:00.000Z"
 excerpt: ""
 category: "Latest Take"
 week: 10
