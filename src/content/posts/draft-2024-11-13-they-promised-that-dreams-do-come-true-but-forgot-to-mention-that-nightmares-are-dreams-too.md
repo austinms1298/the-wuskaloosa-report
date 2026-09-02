@@ -1,0 +1,12 @@
+---
+title: "They promised that dreams do come true -but forgot to mention that nightmares are dreams too."
+slug: "they-promised-that-dreams-do-come-true-but-forgot-to-mention-that-nightmares-are-dreams-too"
+date: "2024-11-14T03:18:00.000Z"
+excerpt: "-Oscar Wilde"
+category: "Latest Take"
+week: 11
+year: 2024
+draft: true
+---
+
+<p>I had the worst nightmare ever…Alabama lost to Vandy and Tennessee in one season!? So glad we woke up and, <em>instead</em>, people are complaining about UA beating them! And we are contenders for the College Football Playoffs as well! Woohoo!</p><p>Meanwhile, the governor of Louisiana is not living the dream lamenting the lsu vs. Alabama game,</p><p>	<em>Our tiger, our live tiger, unfortunately, disappointingly, was the only tiger who showed up Saturday.&nbsp;</em></p><p>You know, <em>our</em> MeeMaw would not throw football shade like that on her state’s football programs or she would have been dogging her alma mater’s tigers a long time ago. Our governor is <em>also</em> better than yours, Louisiana!&nbsp;</p><p>You may have heard other whining from brian kelly about Alabama blitzing at the end of the game…well, that was our second and third string defense in there, buddy and lsu still had their starters playing. Nussmeier was passing the ball trying to gain some vanity points with .11 left just to make the final score less embarrassing. Were the “make the game look closer” points really worth it…as they were met with silence in death valley, because <em>only</em> <em>Alabama fans were left</em>? And, even worse, the Tide backups caught a qb tiger by the tail resulting in Nussmeier limping off the field? Perfect case of, <em>if you are going to do something at night you are going to regret in the morning, sleep late.</em> You up yet, kelly?&nbsp;</p><p>Moving on… Saturday’s football schedule will allow for some serious nap time in between the good games, which, of course, consist of the Tide and the Mercer Bears before we go home to hold our noses for the villains bowl (volatiles and the dawgs, of course) in athens. Regarding Mercer - do not be fooled by the illusion of <em>pay us to come to your stadium so you can demolish our team</em>…their record is 9-1 this season.&nbsp;</p><p>But the world is as it should be…<em>we are such stuff as dreams are made of</em>! So keep up the great work and keep the dream alive, Tide!&nbsp;</p><p>Enjoy Week 11! RTR!</p><p>Jackie&nbsp;</p>
