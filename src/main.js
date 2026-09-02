@@ -3,6 +3,16 @@ import yaml from 'js-yaml';
 import { marked } from 'marked';
 import { schedule, site } from './data/site.js';
 
+// Decode common HTML entities stored in CMS fields (e.g. &nbsp; from Quill)
+const decodeEntities = (s = '') => String(s)
+  .replace(/&nbsp;/g, ' ')
+  .replace(/&amp;/g, '&')
+  .replace(/&lt;/g, '<')
+  .replace(/&gt;/g, '>')
+  .replace(/&quot;/g, '"')
+  .replace(/&#039;/g, "'")
+  .replace(/&#39;/g, "'");
+
 const rawPosts = import.meta.glob('./content/posts/*.md', {
   query: '?raw',
   import: 'default',
@@ -38,15 +48,6 @@ const escapeHtml = (value = '') => String(value).replace(/[&<>'"]/g, char => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#039;', '"': '&quot;'
 }[char]));
 
-// Decode common HTML entities stored in CMS fields (e.g. &nbsp; from Quill)
-const decodeEntities = (s = '') => String(s)
-  .replace(/&nbsp;/g, ' ')
-  .replace(/&amp;/g, '&')
-  .replace(/&lt;/g, '<')
-  .replace(/&gt;/g, '>')
-  .replace(/&quot;/g, '"')
-  .replace(/&#039;/g, "'")
-  .replace(/&#39;/g, "'");
 
 // Strip HTML tags and return up to maxLen plain-text characters from article body
 function bodyPreview(html, maxLen = 300) {
