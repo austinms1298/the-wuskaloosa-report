@@ -1,0 +1,12 @@
+---
+title: "No matter how much cats fight there always seem to be plenty of kittens around."
+slug: "no-matter-how-much-cats-fight-there-always-seem-to-be-plenty-of-kittens-around"
+date: "2024-12-06T03:21:00.000Z"
+excerpt: "– Abraham Lincoln"
+category: "Latest Take"
+week: 12
+year: 2024
+draft: true
+---
+
+<p>Gosh there were a lot of fights this past weekend…<em>during</em> the football games on both the field and the sidelines, <em>after </em>the games planting flags on the fields …players calling each other names, calling each other’s mommas names…can’t we just get along during the season of gratitude…not on rivalry weekend, apparently. And the blood is boiling even more so now that <em>as of this week</em> three-loss Alabama has been deemed a spot in the CFP! I honestly don’t blame people. I’m mad Alabama has three losses, also. But certainly, most college football fans realize you can’t start a new chapter of college football without The University of Alabama involved!? That’s not entitlement that’s just facts…that would be like having a peanut butter and jelly sandwich without any bread or NASCAR without any rednecks…it’s just messy and not as much fun!&nbsp;</p><p>This weekend will be a confusing and emotional struggle for Tide fans for sure as we find ourselves dependent on others to secure our destiny…creating deep rooted philosophical dilemmas such as…</p><p>&nbsp;<em>Do we or don’t we wear our lucky undies to root for or against other teams? </em></p><p><em>If the outcome is looking unfavorable, will switching seats or moving to another room have any impact or alter these foreign teams’ performances as we know it does for our home teams? </em></p><p>&nbsp;It’s new territory to helplessly sit back and watch <em>other </em>teams (unwillingly) fight our battle for us. <em>Any</em> and <em>all </em>guidance or suggestions on how best to navigate this weekend are appreciated.&nbsp;</p><p>Regardless, as of today…Alabama is alive to fight another day! Enjoy Championship Weekend…maybe! </p><p>RTR and (the strangest addition to our chant ever) let’s go SMU and Boise State!</p><p>Jackie&nbsp;</p>
