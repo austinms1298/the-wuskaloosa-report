@@ -91,6 +91,7 @@ function header(active = 'home', hideBrand = false) {
     ['home', '/', 'Home'],
     ['archive', '/archive', 'Past Takes'],
     ['schedule', '/schedule', 'SEC Schedules'],
+    ['subscribe', '/subscribe', 'Subscribe'],
     ['about', '/about', 'About'],
   ];
   return `
@@ -108,7 +109,6 @@ function header(active = 'home', hideBrand = false) {
 
 function footer() {
   return `
-    ${newsletter()}
     <footer class="footer">
       <div><strong>${site.title}</strong><p>${site.tagline}</p></div>
       <p>© ${new Date().getFullYear()} The Wuskaloosa Report &mdash; <a href="mailto:${site.email}" style="color:#bbb">${site.email}</a></p>
@@ -117,6 +117,8 @@ function footer() {
 
 function newsletter() { return ""; }
 
+
+function subscribePage() { return ''; }
 function homePage() {
   const featured = posts[0];
   const archive = posts.filter(post => post.slug !== featured?.slug).slice(0, 3);
@@ -623,13 +625,14 @@ let page = homePage();
 if (path === '/archive')  page = archivePage();
 if (path === '/schedule') page = schedulePage();
 if (path === '/about')    page = aboutPage();
+if (path === '/subscribe') page = subscribePage();
 if (path === '/post')     page = postPage();
 if (/^\/\d{4}\/week\d+$/.test(path)) page = postPage();
 if (path === '/404')      page = notFoundPage();
 
 document.querySelector('#app').innerHTML = page;
 // Update active nav link
-const _navSection = path === '/archive' ? 'archive' : path === '/schedule' ? 'schedule' : path === '/about' ? 'about' : 'home';
+const _navSection = path === '/archive' ? 'archive' : path === '/schedule' ? 'schedule' : path === '/about' ? 'about' : path === '/subscribe' ? 'subscribe' : 'home';
 document.querySelectorAll('#site-nav a').forEach(a => a.classList.remove('active'));
 const _navActive = document.querySelector(`#site-nav a[data-nav="${_navSection}"]`);
 if (_navActive) _navActive.classList.add('active');
