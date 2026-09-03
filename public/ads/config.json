@@ -48,6 +48,13 @@
       "imageSha": "2fcbad972b5bbb2c4a6deb6bdebacf8e9ff2f857",
       "link": "https://www.pepsi.com/",
       "size": "medium-rect"
+    },
+    "ad_1788469281932_0": {
+      "name": "PGH",
+      "imageUrl": "/ads/ad_1788469281932_0.png",
+      "imageSha": "d908e7ff56b5e2e08a7b54b3b91b184582d4a2fa",
+      "link": "https://www.princelaw.net/",
+      "size": "medium-rect"
     }
   },
   "defaults": {
