@@ -118,7 +118,10 @@ function footer() {
 function newsletter() { return ""; }
 
 
-function subscribePage() { return ''; }
+function subscribePage() {
+  document.title = 'Subscribe | The Wuskaloosa Report';
+  return '';
+}
 function homePage() {
   const featured = posts[0];
   const archive = posts.filter(post => post.slug !== featured?.slug).slice(0, 3);

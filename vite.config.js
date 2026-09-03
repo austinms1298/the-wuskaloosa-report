@@ -15,8 +15,9 @@ export default defineConfig({
         about:    resolve(import.meta.dirname, 'about.html'),
         archive:  resolve(import.meta.dirname, 'archive.html'),
         schedule: resolve(import.meta.dirname, 'schedule.html'),
-        post:     resolve(import.meta.dirname, 'post.html'),
-        '404':    resolve(import.meta.dirname, '404.html'),
+        post:      resolve(import.meta.dirname, 'post.html'),
+        subscribe: resolve(import.meta.dirname, 'subscribe.html'),
+        '404':     resolve(import.meta.dirname, '404.html'),
       }
     }
   }
