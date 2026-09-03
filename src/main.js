@@ -117,13 +117,27 @@ function footer() {
 
 function newsletter() {
   return `
-    <section class="newsletter" id="subscribe">
-      <div>
-        <p class="marker-label">DON'T MISS A TAKE!</p>
-        <h2>Get the newest thoughts, analysis and opinions in your inbox.</h2>
+    <form action="https://app.kit.com/forms/9877935/subscriptions" style="background-color:rgb(143,19,36);display:block" class="seva-form formkit-form" method="post" data-sv-form="9877935" data-uid="e27a3b8d57" data-format="inline" data-version="5" min-width="400 500 600 700 800">
+      <div class="formkit-container" data-stacked="false">
+        <div class="formkit-content" style="color:rgb(255,255,255);font-weight:700" data-element="content">
+          <h2>DON'T MISS A TAKE!</h2>
+          <p>Get this week's latest take and televised football schedule in your inbox!</p>
+        </div>
+        <div style="color:rgb(255,255,255)">
+          <ul class="formkit-alert formkit-alert-error" data-element="errors" data-group="alert"></ul>
+          <div data-element="fields" style="color:rgb(255,255,255)" class="seva-fields formkit-fields">
+            <div class="formkit-field">
+              <input class="formkit-input" name="email_address" style="color:rgb(0,0,0);border-color:rgb(255,255,255);border-radius:4px;font-weight:700" aria-label="Email Address" placeholder="Email Address" required type="email">
+            </div>
+            <button data-element="submit" class="formkit-submit" style="color:rgb(255,255,255);background-color:rgb(0,0,0);border-radius:4px;font-weight:700">
+              <div class="formkit-spinner"><div></div><div></div><div></div></div>
+              <span>Sign up</span>
+            </button>
+          </div>
+        </div>
       </div>
-      <div class="kit-embed" data-uid="b8ade3e912"></div>
-    </section>`;
+      <style>.formkit-form[data-uid="e27a3b8d57"]{display:block!important;box-sizing:border-box;max-width:none!important;padding:15px 45px;width:100%;-webkit-font-smoothing:antialiased}.formkit-form[data-uid="e27a3b8d57"] .formkit-container{margin:0 auto;max-width:940px}.formkit-form[data-uid="e27a3b8d57"] .formkit-content{flex-grow:1;margin-bottom:20px;margin-right:30px}.formkit-form[data-uid="e27a3b8d57"] .formkit-fields{display:flex;flex-wrap:wrap;margin:0 auto}.formkit-form[data-uid="e27a3b8d57"] .formkit-field{flex:100 1 auto;margin:0 5px 15px}.formkit-form[data-uid="e27a3b8d57"] .formkit-submit{flex:1 1 auto;width:auto;margin:0 5px 15px;border:0;border-radius:5px;color:#fff;cursor:pointer;display:inline-block;text-align:center;font-size:15px;font-weight:500;overflow:hidden;padding:0;position:relative;vertical-align:middle}.formkit-form[data-uid="e27a3b8d57"] .formkit-submit>span{display:block;padding:9px 24px 10px}.formkit-form[data-uid="e27a3b8d57"] .formkit-input{background:#fff;font-size:15px;padding:9px 12px;border:1px solid #e3e3e3;flex:1 0 auto;line-height:1.4;margin:0;width:100%;box-shadow:0 1px 2px rgba(0,0,0,.05)}.formkit-form[data-uid="e27a3b8d57"] .formkit-field .formkit-input{box-sizing:border-box}.formkit-form[data-uid="e27a3b8d57"] .formkit-alert{list-style:none;margin:0 0 15px;padding:12px;border-radius:4px;text-align:center}.formkit-form[data-uid="e27a3b8d57"] .formkit-alert:empty{display:none}.formkit-form[data-uid="e27a3b8d57"] .formkit-alert-success{background:#d3fbeb;color:#0c905c}.formkit-form[data-uid="e27a3b8d57"] .formkit-alert-error{background:rgba(0,0,0,.25);color:#fff}.formkit-form[data-uid="e27a3b8d57"] .formkit-spinner{display:flex;height:0;width:0;position:absolute;top:0;left:0;right:0;overflow:hidden;transition:all 300ms}.formkit-form[data-uid="e27a3b8d57"] .formkit-spinner>div{margin:auto;width:12px;height:12px;background:#fff;opacity:.3;border-radius:100%;display:inline-block;animation:kit-bounce 1.4s infinite ease-in-out both}.formkit-form[data-uid="e27a3b8d57"] .formkit-spinner>div:nth-child(1){animation-delay:-.32s}.formkit-form[data-uid="e27a3b8d57"] .formkit-spinner>div:nth-child(2){animation-delay:-.16s}.formkit-form[data-uid="e27a3b8d57"] .formkit-submit[data-active] .formkit-spinner{opacity:1;height:100%;width:50px}.formkit-form[data-uid="e27a3b8d57"] .formkit-submit[data-active] .formkit-spinner~span{opacity:0}.formkit-form[data-uid="e27a3b8d57"] .formkit-powered-by{color:rgba(255,255,255,.6);display:block;font-size:11px;margin:4px 0 0;text-align:center}@media screen and (min-width:700px){.formkit-form[data-uid="e27a3b8d57"] .formkit-container{display:flex;align-items:center;}.formkit-form[data-uid="e27a3b8d57"] .formkit-content{margin-bottom:15px}}@keyframes kit-bounce{0%,80%,100%{transform:scale(0)}40%{transform:scale(1)}}</style>
+    </form>`;
 }
 
 function homePage() {
