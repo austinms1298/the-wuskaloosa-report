@@ -21,13 +21,6 @@
       "link": "https://www.pepsi.com/",
       "size": "medium-rect"
     },
-    "ad_1787861320301_1": {
-      "name": "PGH",
-      "imageUrl": "/ads/ad_1787861320301_1.png",
-      "imageSha": "ef4080e6eb50f0402b722eb5fe175b49a76097ed",
-      "link": "https://www.princelaw.net/",
-      "size": "medium-rect"
-    },
     "ad_1788285936155_0": {
       "name": "Dr. Pepper",
       "imageUrl": "/ads/ad_1788285936155_0.png",
@@ -69,7 +62,6 @@
       "ad_1788285963752_0"
     ],
     "homepage": [
-      "ad_1787861320301_1",
       "ad_1788286006321_0",
       "ad_1788286007646_1"
     ]
