@@ -115,7 +115,15 @@ function footer() {
     </footer>`;
 }
 
-function newsletter() { return ""; }
+function newsletter() {
+  return `
+    <section class="newsletter" id="subscribe">
+      <p class="eyebrow" style="color:rgba(255,255,255,.7);margin-bottom:8px">STAY IN THE KNOW</p>
+      <h2 style="font-family:var(--marker);font-size:clamp(28px,5vw,42px);color:#fff;margin:0 0 8px">DON'T MISS A TAKE</h2>
+      <p style="color:rgba(255,255,255,.85);font-size:16px;max-width:480px;margin:0 auto 24px;line-height:1.55">Get Jackie's latest Wuskaloosa takes delivered straight to your inbox.</p>
+      <a href="/subscribe" class="button" style="background:#fff;color:var(--crimson);border-color:#fff;font-weight:800">SUBSCRIBE NOW <span>→</span></a>
+    </section>`;
+}
 
 
 function subscribePage() {
@@ -634,6 +642,13 @@ if (/^\/\d{4}\/week\d+$/.test(path)) page = postPage();
 if (path === '/404')      page = notFoundPage();
 
 document.querySelector('#app').innerHTML = page;
+
+// Inject newsletter bar before footer on all pages except /subscribe
+if (path !== '/subscribe') {
+  const footerEl = document.querySelector('.footer');
+  if (footerEl) footerEl.insertAdjacentHTML('beforebegin', newsletter());
+}
+
 // Update active nav link
 const _navSection = path === '/archive' ? 'archive' : path === '/schedule' ? 'schedule' : path === '/about' ? 'about' : path === '/subscribe' ? 'subscribe' : 'home';
 document.querySelectorAll('#site-nav a').forEach(a => a.classList.remove('active'));
