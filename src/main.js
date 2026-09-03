@@ -122,11 +122,7 @@ function newsletter() {
         <p class="marker-label">DON'T MISS A TAKE!</p>
         <h2>Get the newest thoughts, analysis and opinions in your inbox.</h2>
       </div>
-      <form class="newsletter-form" id="newsletter-form">
-        <label class="sr-only" for="nl-email">Email address</label>
-        <input id="nl-email" type="email" name="email" placeholder="Enter your email" required>
-        <button type="submit">LET'S GO!</button>
-      </form>
+      <div class="kit-embed" data-uid="b8ade3e912"></div>
     </section>`;
 }
 
@@ -657,27 +653,7 @@ toggle?.addEventListener('click', () => {
   nav.classList.toggle('open');
 });
 
-// Newsletter form — submits to the admin Worker
-const nlForm = document.querySelector('#newsletter-form');
-if (nlForm) {
-  nlForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const emailVal = nlForm.querySelector('input[type="email"]').value;
-    const btn = nlForm.querySelector('button');
-    btn.textContent = 'SENDING...';
-    btn.disabled = true;
-    try {
-      await fetch('https://wuskaloosa-admin.austin-a73.workers.dev/api/subscribe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: emailVal })
-      });
-    } catch {
-      // still show success — don't block the user on a network hiccup
-    }
-    nlForm.innerHTML = `<p style="font-weight:800;color:#fff;margin:auto;font-size:15px;padding:14px 0">✓ You're on the list! Roll Tide 🏈</p>`;
-  });
-}
+// Newsletter handled by Kit embed
 
 // ── Ads — load asynchronously after page render ────────────────────────────────
 async function loadAds() {
