@@ -118,10 +118,13 @@ function footer() {
 function newsletter() {
   return `
     <section class="newsletter" id="subscribe">
-      <p class="eyebrow" style="color:rgba(255,255,255,.7);margin-bottom:8px">STAY IN THE KNOW</p>
-      <h2 style="font-family:var(--marker);font-size:clamp(28px,5vw,42px);color:#fff;margin:0 0 8px">DON'T MISS A TAKE</h2>
-      <p style="color:rgba(255,255,255,.85);font-size:16px;max-width:480px;margin:0 auto 24px;line-height:1.55">Get Jackie's latest Wuskaloosa takes delivered straight to your inbox.</p>
-      <a href="/subscribe" class="button" style="background:#fff;color:var(--crimson);border-color:#fff;font-weight:800">SUBSCRIBE NOW <span>→</span></a>
+      <div>
+        <p class="marker-label">DON'T MISS A TAKE!</p>
+        <h2>Get the newest thoughts, analysis and opinions in your inbox.</h2>
+      </div>
+      <div class="newsletter-form">
+        <a href="/subscribe" style="display:flex;align-items:center;justify-content:center;flex:1;background:#1e1818;color:#fff;font-weight:800;padding:14px 20px;font-size:13px;letter-spacing:.05em;text-decoration:none">SUBSCRIBE NOW →</a>
+      </div>
     </section>`;
 }
 
