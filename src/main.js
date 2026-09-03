@@ -117,14 +117,19 @@ function footer() {
 
 function newsletter() {
   return `
-    <section class="newsletter" id="subscribe">
+    <style>
+      #nl-bar{display:flex;justify-content:space-between;align-items:center;gap:30px;background:#8f1224;color:#fff;padding:30px 36px;overflow:hidden}
+      #nl-bar .nl-title{font-family:var(--marker),'Oswald',sans-serif;font-size:30px;margin:0;line-height:1.1}
+      #nl-bar .nl-sub{font-size:15px;font-weight:500;margin:5px 0 0;max-width:520px}
+      #nl-bar .nl-btn{flex-shrink:0;background:#1e1818;color:#fff;font-weight:800;padding:14px 24px;font-size:13px;letter-spacing:.05em;text-decoration:none;white-space:nowrap;display:inline-block}
+      @media(max-width:680px){#nl-bar{flex-direction:column;align-items:stretch;padding:26px 20px}}
+    </style>
+    <section id="nl-bar">
       <div>
-        <p class="marker-label">DON'T MISS A TAKE!</p>
-        <h2>Get the newest thoughts, analysis and opinions in your inbox.</h2>
+        <p class="nl-title">DON'T MISS A TAKE!</p>
+        <p class="nl-sub">Get the newest thoughts, analysis and opinions in your inbox.</p>
       </div>
-      <div class="newsletter-form">
-        <a href="/subscribe" style="display:flex;align-items:center;justify-content:center;flex:1;background:#1e1818;color:#fff;font-weight:800;padding:14px 20px;font-size:13px;letter-spacing:.05em;text-decoration:none">SUBSCRIBE NOW →</a>
-      </div>
+      <a href="/subscribe" class="nl-btn">SUBSCRIBE NOW →</a>
     </section>`;
 }
 
