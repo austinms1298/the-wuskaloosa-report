@@ -8,7 +8,7 @@
 .ad-slot-wrap a,.ad-slot-wrap span{display:block;line-height:0}
 .ad-rotator{position:relative;overflow:hidden;width:100%;max-width:100%}
 .ad-rotator--leader{aspect-ratio:728/90;max-width:728px;margin:0 auto}
-.ad-rotator--rect{aspect-ratio:300/250;width:100%;max-width:300px;margin:0 auto}
+.ad-rotator--rect{aspect-ratio:300/250;width:100%}
 .ad-layer{position:absolute;inset:0;transition:opacity 0.4s ease;will-change:opacity}
 .ad-layer a,.ad-layer span{display:block;width:100%;height:100%;line-height:0}
 .ad-layer img{width:100%;height:100%;object-fit:contain;display:block}
