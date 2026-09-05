@@ -142,14 +142,29 @@
     .slot-dim { font-size:11px;color:var(--muted);display:block;margin-top:2px; }
     .slot-row select { padding:8px 10px;border:1px solid var(--line);border-radius:2px;font-size:13px;font-family:'Inter',sans-serif;background:#fff; }
 
-    /* Post assignment table */
+    /* Post assignment accordion */
     .assign-table { background:#fff;border:1px solid var(--line);border-radius:3px;overflow:hidden; }
-    .assign-header { display:grid;grid-template-columns:1fr 200px 200px;gap:12px;padding:10px 18px;background:var(--paper);border-bottom:1px solid var(--line);font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted); }
-    .assign-row { display:grid;grid-template-columns:1fr 200px 200px;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid var(--line); }
-    .assign-row:last-child { border-bottom:none; }
-    .assign-post-name { font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
-    .assign-post-date { font-size:11px;color:var(--muted); }
-    .assign-row select { padding:7px 9px;border:1px solid var(--line);border-radius:2px;font-size:12px;font-family:'Inter',sans-serif;background:#fff;width:100%; }
+    .pa-row { border-bottom:1px solid var(--line);background:#fff; }
+    .pa-row:last-child { border-bottom:none; }
+    .pa-row-hd { display:flex;align-items:center;gap:10px;padding:12px 18px;cursor:pointer;list-style:none;user-select:none; }
+    .pa-row-hd::-webkit-details-marker { display:none; }
+    .pa-row-hd:hover { background:var(--paper); }
+    .pa-title-wrap { flex:1;min-width:0; }
+    .pa-post-name { font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+    .pa-post-date { font-size:11px;color:var(--muted);margin-top:1px; }
+    .pa-summary-badge { font-size:11px;color:var(--muted);white-space:nowrap; }
+    .pa-summary-badge.custom { color:var(--cr);font-weight:700; }
+    .pa-arrow { font-size:11px;color:var(--muted);transition:transform .2s;flex-shrink:0; }
+    .pa-row[open] .pa-arrow { transform:rotate(180deg); }
+    .pa-slots { display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:0 18px 16px;background:#faf8f5;border-top:1px solid var(--line); }
+    .pa-slot-label { font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;padding-top:12px; }
+    .pa-default-toggle { display:flex;align-items:center;gap:7px;margin-bottom:8px; }
+    .pa-default-toggle input[type=checkbox] { width:14px;height:14px;accent-color:var(--cr);flex-shrink:0; }
+    .pa-default-toggle label { font-size:12px;font-weight:600;cursor:pointer;color:var(--muted); }
+    .pa-custom .ad-check-item { padding:5px 8px; }
+    .pa-custom .ad-check-thumb { width:40px;height:22px; }
+    .pa-custom .ad-check-label { font-size:12px; }
+    .pa-custom .ad-order-num { width:30px;max-width:30px;flex:0 0 30px;font-size:11px; }
 
     .ads-save-bar { display:flex;align-items:center;gap:14px;padding-top:8px; }
     .ads-save-status { font-size:13px;font-weight:600; }
@@ -459,7 +474,7 @@
         <h2>Post Assignments</h2>
       </div>
       <p class="ads-section-note">
-        Ad assignments per post are set in the post editor sidebar. This shows a read-only summary of what's currently assigned.
+        Override which ads run on specific posts. Expand any post to assign ads for its top and bottom banner slots. Check "Use Default" to fall back to the defaults above.
       </p>
       <div id="post-assignments-wrap">
         <div class="lib-empty">Loading posts…</div>
@@ -1199,21 +1214,23 @@ function renderDefaultSlots() {
       el.innerHTML = '<p class="ad-check-empty">No ads uploaded yet.</p>';
       return;
     }
-    // Render selected first (in stored order), then unselected
-    const sizeFilter = slot === 'homepage' ? 'medium-rect' : 'leaderboard';
+    // Render selected first (in stored order), then unselected — no size filter; show all ads with badges
     const ordered = [
-      ...curIds.filter(id => lib2[id] && (lib2[id].size || 'leaderboard') === sizeFilter).map(id => [id, lib2[id]]),
-      ...Object.entries(lib2).filter(([id, ad]) => !curIds.includes(id) && (ad.size || 'leaderboard') === sizeFilter),
+      ...curIds.filter(id => lib2[id]).map(id => [id, lib2[id]]),
+      ...Object.entries(lib2).filter(([id]) => !curIds.includes(id)),
     ];
     el.innerHTML = ordered.map(([id, ad], _idx) => {
       const eid = escHtml(id); const ckId = `ck_${divId}_${id}`.replace(/\W/g,'_');
       const pos = _idx + 1;
+      const sizeBadge = (ad.size === 'medium-rect')
+        ? `<span style="font-size:9px;font-weight:800;color:#1a6e2e;background:rgba(26,110,46,.12);padding:1px 5px;border-radius:2px;letter-spacing:.06em;margin-left:5px;flex-shrink:0;">300&#xD7;250</span>`
+        : `<span style="font-size:9px;font-weight:800;color:#1e40af;background:rgba(30,64,175,.1);padding:1px 5px;border-radius:2px;letter-spacing:.06em;margin-left:5px;flex-shrink:0;">728&#xD7;90</span>`;
       return `<div class="ad-check-item" data-id="${eid}">
         <input type="number" class="ad-order-num" min="1" value="${pos}" title="Rotation order" onchange="reorderAdItem(this)">
         <input type="checkbox" id="${ckId}" name="${divId}" value="${eid}"${curIds.includes(id) ? ' checked' : ''}>
         <label for="${ckId}" class="ad-check-label-wrap">
           <img class="ad-check-thumb" src="${escHtml(ad.imageUrl)}" alt="" onerror="this.style.display='none'">
-          <span class="ad-check-label">${escHtml(ad.name)}</span>
+          <span class="ad-check-label">${escHtml(ad.name)}</span>${sizeBadge}
         </label>
       </div>`;
     }).join('');
@@ -1234,12 +1251,32 @@ async function renderPostAssignments() {
   }
   const assigned = adsConfig.posts || {};
   const lib = adsConfig.library || {};
-  const adNames = (val) => {
-    if (!val) return '<span style="color:var(--muted);font-style:italic">Default</span>';
-    const ids = Array.isArray(val) ? val : [val];
-    if (!ids.length) return '<span style="color:var(--muted);font-style:italic">Default</span>';
-    return escHtml(ids.map(id => lib[id]?.name || id).join(', '));
+
+  const adCheckboxes = (postSlug, slotKey, curIds) => {
+    const entries = Object.entries(lib);
+    if (!entries.length) return '<p class="ad-check-empty">No ads uploaded yet.</p>';
+    const ordered = [
+      ...curIds.filter(id => lib[id]).map(id => [id, lib[id]]),
+      ...entries.filter(([id]) => !curIds.includes(id)),
+    ];
+    return ordered.map(([id, ad], _idx) => {
+      const eid = escHtml(id);
+      const ckId = `ck_pa_${postSlug}_${slotKey}_${id}`.replace(/\W/g,'_');
+      const pos = _idx + 1;
+      const sizeBadge = (ad.size === 'medium-rect')
+        ? `<span style="font-size:9px;font-weight:800;color:#1a6e2e;background:rgba(26,110,46,.12);padding:1px 4px;border-radius:2px;letter-spacing:.06em;margin-left:4px;flex-shrink:0;">300&#xD7;250</span>`
+        : `<span style="font-size:9px;font-weight:800;color:#1e40af;background:rgba(30,64,175,.1);padding:1px 4px;border-radius:2px;letter-spacing:.06em;margin-left:4px;flex-shrink:0;">728&#xD7;90</span>`;
+      return `<div class="ad-check-item" data-id="${eid}">
+        <input type="number" class="ad-order-num" min="1" value="${pos}" title="Rotation order" onchange="reorderAdItem(this)">
+        <input type="checkbox" id="${ckId}" name="pa_${escHtml(postSlug)}_${slotKey}" value="${eid}"${curIds.includes(id) ? ' checked' : ''}>
+        <label for="${ckId}" class="ad-check-label-wrap">
+          <img class="ad-check-thumb" src="${escHtml(ad.imageUrl)}" alt="" onerror="this.style.display='none'">
+          <span class="ad-check-label">${escHtml(ad.name)}${sizeBadge}</span>
+        </label>
+      </div>`;
+    }).join('');
   };
+
   const rows = published.map(p => {
     const postSlug = slugFromFilename(p.name);
     const pa = assigned[postSlug] || {};
@@ -1247,19 +1284,66 @@ async function renderPostAssignments() {
     const ds = parts.length >= 3 ? `${parts[0]}-${parts[1]}-${parts[2]}` : '';
     const label = (parts.slice(3).join(' ') || p.name).replace(/^\w/, c => c.toUpperCase());
     const disp = ds ? new Date(ds+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
-    return `<div class="assign-row">
-      <div>
-        <div class="assign-post-name">${escHtml(label)}</div>
-        ${disp ? `<div class="assign-post-date">${disp}</div>` : ''}
+
+    const topIds = Array.isArray(pa.top) ? pa.top : (pa.top ? [pa.top] : []);
+    const botIds = Array.isArray(pa.bottom) ? pa.bottom : (pa.bottom ? [pa.bottom] : []);
+    const topUseDefault = !pa.top || !topIds.length;
+    const botUseDefault = !pa.bottom || !botIds.length;
+    const bothDefault = topUseDefault && botUseDefault;
+    const slug = escHtml(postSlug);
+
+    return `<details class="pa-row" data-slug="${slug}">
+      <summary class="pa-row-hd">
+        <div class="pa-title-wrap">
+          <div class="pa-post-name">${escHtml(label)}</div>
+          ${disp ? `<div class="pa-post-date">${disp}</div>` : ''}
+        </div>
+        <span class="pa-summary-badge${bothDefault ? '' : ' custom'}" id="pa-summary-${slug}">${bothDefault ? 'Both default' : 'Custom'}</span>
+        <span class="pa-arrow">&#x25BC;</span>
+      </summary>
+      <div class="pa-slots">
+        <div class="pa-slot">
+          <div class="pa-slot-label">Top Banner</div>
+          <div class="pa-default-toggle">
+            <input type="checkbox" id="pa-top-def-${slug}" data-slug="${slug}" data-slot="top" onchange="togglePostDefault(this)"${topUseDefault ? ' checked' : ''}>
+            <label for="pa-top-def-${slug}">Use Default</label>
+          </div>
+          <div class="pa-custom ad-check-list" id="pa-top-list-${slug}"${topUseDefault ? ' style="display:none"' : ''}>
+            ${adCheckboxes(postSlug, 'top', topIds)}
+          </div>
+        </div>
+        <div class="pa-slot">
+          <div class="pa-slot-label">Bottom Banner</div>
+          <div class="pa-default-toggle">
+            <input type="checkbox" id="pa-bot-def-${slug}" data-slug="${slug}" data-slot="bottom" onchange="togglePostDefault(this)"${botUseDefault ? ' checked' : ''}>
+            <label for="pa-bot-def-${slug}">Use Default</label>
+          </div>
+          <div class="pa-custom ad-check-list" id="pa-bot-list-${slug}"${botUseDefault ? ' style="display:none"' : ''}>
+            ${adCheckboxes(postSlug, 'bottom', botIds)}
+          </div>
+        </div>
       </div>
-      <div class="assign-summary">${adNames(pa.top)}</div>
-      <div class="assign-summary">${adNames(pa.bottom)}</div>
-    </div>`;
+    </details>`;
   }).join('');
-  wrap.innerHTML = `<div class="assign-table">
-    <div class="assign-header"><span>Post</span><span>Top Banner</span><span>Bottom Banner</span></div>
-    ${rows}
-  </div>`;
+
+  wrap.innerHTML = `<div class="assign-table">${rows}</div>`;
+}
+
+window.togglePostDefault = function(cb) {
+  const slug = cb.dataset.slug;
+  const slot = cb.dataset.slot;
+  const listEl = document.getElementById(slot === 'top' ? `pa-top-list-${slug}` : `pa-bot-list-${slug}`);
+  if (listEl) listEl.style.display = cb.checked ? 'none' : '';
+  const topDef = document.getElementById(`pa-top-def-${slug}`)?.checked ?? true;
+  const botDef = document.getElementById(`pa-bot-def-${slug}`)?.checked ?? true;
+  const summEl = document.getElementById(`pa-summary-${slug}`);
+  if (summEl) {
+    const both = topDef && botDef;
+    summEl.textContent = both ? 'Both default' : 'Custom';
+    summEl.className = 'pa-summary-badge' + (both ? '' : ' custom');
+  }
+};
+
 }
 
 async function openAdsView() {
@@ -1448,6 +1532,27 @@ document.getElementById('btn-save-assignments').addEventListener('click', async 
   if (!isNaN(rotateInterval) && rotateInterval >= 2) {
     adsConfig.rotate = { interval: rotateInterval };
   }
+
+  // Collect per-post assignments from the accordion
+  const newPostsMap = {};
+  document.querySelectorAll('.pa-row[data-slug]').forEach(row => {
+    const slug = row.dataset.slug;
+    const topDefault = document.getElementById(`pa-top-def-${slug}`)?.checked ?? true;
+    const botDefault = document.getElementById(`pa-bot-def-${slug}`)?.checked ?? true;
+    if (!topDefault || !botDefault) {
+      const entry = {};
+      if (!topDefault) {
+        const ids = Array.from(document.querySelectorAll(`#pa-top-list-${slug} input[type=checkbox]:checked`)).map(c => c.value).filter(Boolean);
+        entry.top = ids.length === 0 ? null : (ids.length === 1 ? ids[0] : ids);
+      }
+      if (!botDefault) {
+        const ids = Array.from(document.querySelectorAll(`#pa-bot-list-${slug} input[type=checkbox]:checked`)).map(c => c.value).filter(Boolean);
+        entry.bottom = ids.length === 0 ? null : (ids.length === 1 ? ids[0] : ids);
+      }
+      newPostsMap[slug] = entry;
+    }
+  });
+  adsConfig.posts = newPostsMap;
 
   // Refresh SHA before saving so we never conflict with a stale sha
   try { const fresh = await api('GET', '/api/ads'); if (fresh.sha) adsSha = fresh.sha; } catch {}

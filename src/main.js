@@ -795,6 +795,7 @@ async function loadAds() {
         homeEl.style.background = 'none';
         homeEl.style.border = '1px solid var(--line)';
         homeEl.style.padding = '0';
+        homeEl.style.alignItems = 'center';
         startRotation(homeEl, homeAds, true);
       }
     }
