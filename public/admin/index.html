@@ -1214,23 +1214,21 @@ function renderDefaultSlots() {
       el.innerHTML = '<p class="ad-check-empty">No ads uploaded yet.</p>';
       return;
     }
-    // Render selected first (in stored order), then unselected — no size filter; show all ads with badges
+    // Render selected first (in stored order), then unselected — filtered by correct size for this slot
+    const sizeFilter = slot === 'homepage' ? 'medium-rect' : 'leaderboard';
     const ordered = [
-      ...curIds.filter(id => lib2[id]).map(id => [id, lib2[id]]),
-      ...Object.entries(lib2).filter(([id]) => !curIds.includes(id)),
+      ...curIds.filter(id => lib2[id] && (lib2[id].size || 'leaderboard') === sizeFilter).map(id => [id, lib2[id]]),
+      ...Object.entries(lib2).filter(([id, ad]) => !curIds.includes(id) && (ad.size || 'leaderboard') === sizeFilter),
     ];
     el.innerHTML = ordered.map(([id, ad], _idx) => {
       const eid = escHtml(id); const ckId = `ck_${divId}_${id}`.replace(/\W/g,'_');
       const pos = _idx + 1;
-      const sizeBadge = (ad.size === 'medium-rect')
-        ? `<span style="font-size:9px;font-weight:800;color:#1a6e2e;background:rgba(26,110,46,.12);padding:1px 5px;border-radius:2px;letter-spacing:.06em;margin-left:5px;flex-shrink:0;">300&#xD7;250</span>`
-        : `<span style="font-size:9px;font-weight:800;color:#1e40af;background:rgba(30,64,175,.1);padding:1px 5px;border-radius:2px;letter-spacing:.06em;margin-left:5px;flex-shrink:0;">728&#xD7;90</span>`;
       return `<div class="ad-check-item" data-id="${eid}">
         <input type="number" class="ad-order-num" min="1" value="${pos}" title="Rotation order" onchange="reorderAdItem(this)">
         <input type="checkbox" id="${ckId}" name="${divId}" value="${eid}"${curIds.includes(id) ? ' checked' : ''}>
         <label for="${ckId}" class="ad-check-label-wrap">
           <img class="ad-check-thumb" src="${escHtml(ad.imageUrl)}" alt="" onerror="this.style.display='none'">
-          <span class="ad-check-label">${escHtml(ad.name)}</span>${sizeBadge}
+          <span class="ad-check-label">${escHtml(ad.name)}</span>
         </label>
       </div>`;
     }).join('');
@@ -1253,25 +1251,23 @@ async function renderPostAssignments() {
   const lib = adsConfig.library || {};
 
   const adCheckboxes = (postSlug, slotKey, curIds) => {
-    const entries = Object.entries(lib);
-    if (!entries.length) return '<p class="ad-check-empty">No ads uploaded yet.</p>';
+    // Post top/bottom slots are always 728x90 leaderboard
+    const leaderboards = Object.entries(lib).filter(([, ad]) => (ad.size || 'leaderboard') === 'leaderboard');
+    if (!leaderboards.length) return '<p class="ad-check-empty">No 728×90 banner ads uploaded yet.</p>';
     const ordered = [
-      ...curIds.filter(id => lib[id]).map(id => [id, lib[id]]),
-      ...entries.filter(([id]) => !curIds.includes(id)),
+      ...curIds.filter(id => lib[id] && (lib[id].size || 'leaderboard') === 'leaderboard').map(id => [id, lib[id]]),
+      ...leaderboards.filter(([id]) => !curIds.includes(id)),
     ];
     return ordered.map(([id, ad], _idx) => {
       const eid = escHtml(id);
       const ckId = `ck_pa_${postSlug}_${slotKey}_${id}`.replace(/\W/g,'_');
       const pos = _idx + 1;
-      const sizeBadge = (ad.size === 'medium-rect')
-        ? `<span style="font-size:9px;font-weight:800;color:#1a6e2e;background:rgba(26,110,46,.12);padding:1px 4px;border-radius:2px;letter-spacing:.06em;margin-left:4px;flex-shrink:0;">300&#xD7;250</span>`
-        : `<span style="font-size:9px;font-weight:800;color:#1e40af;background:rgba(30,64,175,.1);padding:1px 4px;border-radius:2px;letter-spacing:.06em;margin-left:4px;flex-shrink:0;">728&#xD7;90</span>`;
       return `<div class="ad-check-item" data-id="${eid}">
         <input type="number" class="ad-order-num" min="1" value="${pos}" title="Rotation order" onchange="reorderAdItem(this)">
         <input type="checkbox" id="${ckId}" name="pa_${escHtml(postSlug)}_${slotKey}" value="${eid}"${curIds.includes(id) ? ' checked' : ''}>
         <label for="${ckId}" class="ad-check-label-wrap">
           <img class="ad-check-thumb" src="${escHtml(ad.imageUrl)}" alt="" onerror="this.style.display='none'">
-          <span class="ad-check-label">${escHtml(ad.name)}${sizeBadge}</span>
+          <span class="ad-check-label">${escHtml(ad.name)}</span>
         </label>
       </div>`;
     }).join('');
