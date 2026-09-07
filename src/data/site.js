@@ -1,5 +1,5 @@
 export const schedule = [
-  { gameDate: '2026-09-05', date: 'SEP 5',  day: 'SAT', time: '11 a.m. CT',   home: true,  opponent: 'East Carolina',   city: 'Tuscaloosa, Ala.',  result: '' },
+  { gameDate: '2026-09-05', date: 'SEP 5',  day: 'SAT', time: '11 a.m. CT',   home: true,  opponent: 'East Carolina',   city: 'Tuscaloosa, Ala.',  result: 'W 48-10' },
   { gameDate: '2026-09-12', date: 'SEP 12', day: 'SAT', time: '2:30 p.m. CT', home: false, opponent: 'Kentucky',         city: 'Lexington, Ky.',    result: '' },
   { gameDate: '2026-09-19', date: 'SEP 19', day: 'SAT', time: '2:30 p.m. CT', home: true,  opponent: 'Florida State',   city: 'Tuscaloosa, Ala.',  result: '' },
   { gameDate: '2026-09-26', date: 'SEP 26', day: 'SAT', time: 'Night',        home: true,  opponent: 'South Carolina',  city: 'Tuscaloosa, Ala.',  result: '' },
