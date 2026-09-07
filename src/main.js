@@ -176,22 +176,33 @@ function homePage() {
         </section>
 
         <aside class="schedule-card">
-          <h2>2026 Alabama Football Schedule</h2>
-          <div class="schedule-list">
-            ${(() => {
-              const today = new Date(); today.setHours(0,0,0,0);
-              const weekEnd = new Date(today); weekEnd.setDate(weekEnd.getDate() + 7);
-              return schedule.map(game => {
-                const gd = game.gameDate ? new Date(game.gameDate) : null;
-                const isThisWeek = gd && gd >= today && gd <= weekEnd;
-                const isPast = gd && gd < today;
-                const label = isThisWeek ? 'THIS WEEK!' : (isPast ? (game.result || 'FINAL') : (game.time || ''));
-                const cls = isThisWeek ? 'featured' : '';
-                const matchup = game.home === null ? game.opponent : `${game.home ? 'vs' : 'at'} ${game.opponent}`;
-                return `<div class="schedule-row ${cls}"><span>${game.date}</span><strong>${matchup}</strong><b>${label}</b></div>`;
-              }).join('');
-            })()}
-          </div>
+          ${(() => {
+            const SEC_OPP = ['Kentucky','South Carolina','Mississippi State','Georgia','Tennessee','Texas A&M','LSU','Vanderbilt','Auburn'];
+            const todayR = new Date(); todayR.setHours(0,0,0,0);
+            let wins=0,losses=0,secW=0,secL=0;
+            schedule.forEach(g => {
+              const gd = g.gameDate ? new Date(g.gameDate) : null;
+              if(gd && gd < todayR && g.result) {
+                const w = g.result.startsWith('W'), l = g.result.startsWith('L');
+                if(w) wins++; if(l) losses++;
+                if(SEC_OPP.includes(g.opponent)) { if(w) secW++; if(l) secL++; }
+              }
+            });
+            const today = new Date(); today.setHours(0,0,0,0);
+            const weekEnd = new Date(today); weekEnd.setDate(weekEnd.getDate() + 7);
+            const rows = schedule.map(game => {
+              const gd = game.gameDate ? new Date(game.gameDate) : null;
+              const isThisWeek = gd && gd >= today && gd <= weekEnd;
+              const isPast = gd && gd < today;
+              const label = isThisWeek ? 'THIS WEEK!' : (isPast ? (game.result || 'FINAL') : (game.time || ''));
+              const cls = isThisWeek ? 'featured' : '';
+              const matchup = game.home === null ? game.opponent : `${game.home ? 'vs' : 'at'} ${game.opponent}`;
+              const rCls = isPast && game.result ? (game.result.startsWith('W') ? 'result-w' : game.result.startsWith('L') ? 'result-l' : '') : '';
+              return `<div class="schedule-row ${cls}"><span>${game.date}</span><strong>${matchup}</strong><b class="${rCls}">${label}</b></div>`;
+            }).join('');
+            return `<h2>2026 Alabama Football Schedule <span class="record-badges"><span class="record-badge">${wins}-${losses}</span><span class="record-badge sec">${secW}-${secL} SEC</span></span></h2>
+          <div class="schedule-list">${rows}</div>`;
+          })()}
           <a class="button button-small" href="/schedule">VIEW FULL SCHEDULE</a>
         </aside>
 
