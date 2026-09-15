@@ -1,7 +1,7 @@
 ---
 title: "The most powerful weapon is a slow start."
 slug: "the-most-powerful-weapon-is-a-slow-start"
-date: "2026-09-14T22:11:00.000Z"
+date: "2026-09-15T22:11:00.000Z"
 excerpt: "- Sun Tzu, The Art of War"
 category: "Latest Take"
 week: 3
