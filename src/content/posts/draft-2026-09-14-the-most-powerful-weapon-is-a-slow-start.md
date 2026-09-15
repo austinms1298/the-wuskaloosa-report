@@ -6,6 +6,7 @@ excerpt: "- Sun Tzu, The Art of War"
 category: "Latest Take"
 week: 3
 year: 2026
+schedule_pdf: "/schedules/2026/week-3.pdf"
 draft: true
 ---
 
