@@ -62,6 +62,13 @@
       "imageSha": "f01dfc2b9489c04a4f37c96820fdcfac98598aa1",
       "link": "https://uwwa.org/dating",
       "size": "leaderboard"
+    },
+    "ad_1790714935652_0": {
+      "name": "Dating Game",
+      "imageUrl": "/ads/ad_1790714935652_0.png",
+      "imageSha": "bb7ca23f77981fe2192b256063d887ce20a58d73",
+      "link": "https://uwwa.org/dating",
+      "size": "medium-rect"
     }
   },
   "defaults": {
