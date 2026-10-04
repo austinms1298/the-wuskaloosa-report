@@ -3,7 +3,7 @@ export const schedule = [
   { gameDate: '2026-09-12', date: 'SEP 12', day: 'SAT', time: '2:30 p.m. CT', home: false, opponent: 'Kentucky',         city: 'Lexington, Ky.',    result: 'W 45-17' },
   { gameDate: '2026-09-19', date: 'SEP 19', day: 'SAT', time: '2:30 p.m. CT', home: true,  opponent: 'Florida State',   city: 'Tuscaloosa, Ala.',  result: 'W 50-36' },
   { gameDate: '2026-09-26', date: 'SEP 26', day: 'SAT', time: 'Night',        home: true,  opponent: 'South Carolina',  city: 'Tuscaloosa, Ala.',  result: 'W 49-18' },
-  { gameDate: '2026-10-03', date: 'OCT 3',  day: 'SAT', time: 'Early',        home: false, opponent: 'Mississippi State',city: 'Starkville, Miss.', result: '' },
+  { gameDate: '2026-10-03', date: 'OCT 3',  day: 'SAT', time: 'Early',        home: false, opponent: 'Mississippi State',city: 'Starkville, Miss.', result: 'W 56-23' },
   { gameDate: '2026-10-10', date: 'OCT 10', day: 'SAT', time: 'Night',        home: true,  opponent: 'Georgia',         city: 'Tuscaloosa, Ala.',  result: '' },
   { gameDate: '2026-10-17', date: 'OCT 17', day: 'SAT', time: 'Flex',         home: false, opponent: 'Tennessee',       city: 'Knoxville, Tenn.',  result: '' },
   { gameDate: '2026-10-24', date: 'OCT 24', day: 'SAT', time: 'Flex',         home: true,  opponent: 'Texas A&M',       city: 'Tuscaloosa, Ala.',  result: '' },
