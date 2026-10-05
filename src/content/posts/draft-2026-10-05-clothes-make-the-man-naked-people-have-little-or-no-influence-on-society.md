@@ -2,7 +2,7 @@
 title: "Clothes make the man. Naked people have little or no influence on society."
 slug: "clothes-make-the-man-naked-people-have-little-or-no-influence-on-society"
 date: "2026-10-05T21:59:00.000Z"
-excerpt: "-	Mark Twain"
+excerpt: "Mark Twain"
 category: "Latest Take"
 week: 6
 year: 2026
