@@ -55,13 +55,6 @@
       "imageSha": "6fda070fa9388df7d318bc4b59b94ae1f71774cd",
       "link": "https://www.princelaw.net/",
       "size": "leaderboard"
-    },
-    "ad_1790714935652_0": {
-      "name": "Dating Game",
-      "imageUrl": "/ads/ad_1790714935652_0.png",
-      "imageSha": "bb7ca23f77981fe2192b256063d887ce20a58d73",
-      "link": "https://uwwa.org/dating",
-      "size": "medium-rect"
     }
   },
   "defaults": {
@@ -78,8 +71,7 @@
     "homepage": [
       "ad_1788470621147_0",
       "ad_1788286007646_1",
-      "ad_1788286006321_0",
-      "ad_1790714935652_0"
+      "ad_1788286006321_0"
     ]
   },
   "posts": {
