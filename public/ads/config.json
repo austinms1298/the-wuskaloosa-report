@@ -62,6 +62,13 @@
       "imageSha": "7c2cd2a3d0fe7590dc68b29c78e078aa481c1425",
       "link": "https://contact.pepsico.com/lifewtr/product-locator",
       "size": "medium-rect"
+    },
+    "ad_1791854876728_0": {
+      "name": "Life Wtr",
+      "imageUrl": "/ads/ad_1791854876728_0.png",
+      "imageSha": "9850769715e4374a5c1a56ee2db1a295578fbee2",
+      "link": "https://contact.pepsico.com/lifewtr/product-locator",
+      "size": "leaderboard"
     }
   },
   "defaults": {
