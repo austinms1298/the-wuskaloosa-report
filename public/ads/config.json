@@ -55,6 +55,13 @@
       "imageSha": "6fda070fa9388df7d318bc4b59b94ae1f71774cd",
       "link": "https://www.princelaw.net/",
       "size": "leaderboard"
+    },
+    "ad_1791854861874_0": {
+      "name": "Life Wtr",
+      "imageUrl": "/ads/ad_1791854861874_0.png",
+      "imageSha": "7c2cd2a3d0fe7590dc68b29c78e078aa481c1425",
+      "link": "https://contact.pepsico.com/lifewtr/product-locator",
+      "size": "medium-rect"
     }
   },
   "defaults": {
