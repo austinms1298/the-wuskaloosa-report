@@ -1982,7 +1982,7 @@ document.getElementById('inline-img-file').addEventListener('change', async e =>
 ══════════════════════════════════════════════════════ */
 document.getElementById('btn-insert-embed').addEventListener('click', () => {
   const panel = document.getElementById('embed-panel');
-  const isVisible = panel.style.display !== 'none';
+  const isVisible = getComputedStyle(panel).display !== 'none';
   panel.style.display = isVisible ? 'none' : 'block';
   if (!isVisible) document.getElementById('embed-url-input').focus();
 });
