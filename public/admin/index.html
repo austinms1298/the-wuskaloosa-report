@@ -1748,17 +1748,34 @@ document.getElementById('embed-url-input').addEventListener('keydown', e => {
   if (e.key === 'Escape') { document.getElementById('embed-panel').style.display = 'none'; document.getElementById('embed-url-input').value = ''; }
 });
 
-function doInsertEmbed() {
+async function doInsertEmbed() {
   const url = document.getElementById('embed-url-input').value.trim();
   if (!url) return;
+
+  const btn = document.getElementById('btn-do-embed');
+  btn.disabled = true;
+  btn.textContent = 'Loading…';
+
   let html = '';
 
-  // Twitter / X
+  // Twitter / X — fetch real tweet content via noembed so editor shows actual text
   const twitterM = url.match(/(?:twitter\.com|x\.com)\/\w+\/status\/(\d+)/);
   if (twitterM) {
-    html = `<blockquote class="twitter-tweet" data-dnt="true"><a href="${url}">View tweet</a></blockquote>`;
+    try {
+      const resp = await fetch(`https://noembed.com/embed?url=${encodeURIComponent(url)}`);
+      if (resp.ok) {
+        const data = await resp.json();
+        if (data.html) {
+          // noembed returns blockquote + a <script> tag; strip the script (won't run in Quill anyway)
+          // Keep the blockquote with the actual tweet text for display & for published rendering
+          html = data.html.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '').trim();
+        }
+      }
+    } catch (e) { /* network error — fall through to fallback */ }
+    // Fallback if noembed fails
+    if (!html) html = `<blockquote class="twitter-tweet" data-dnt="true"><a href="${url}">View tweet on Twitter/X</a></blockquote>`;
   }
-  // YouTube
+  // YouTube — iframe embed (works fine in Quill)
   else {
     const ytM = url.match(/(?:youtube\.com\/watch\?(?:.*&)?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
     if (ytM) {
@@ -1775,6 +1792,8 @@ function doInsertEmbed() {
   quill.clipboard.dangerouslyPasteHTML(idx, html);
   document.getElementById('embed-panel').style.display = 'none';
   document.getElementById('embed-url-input').value = '';
+  btn.disabled = false;
+  btn.textContent = 'Insert';
 }
 
 /* ══════════════════════════════════════════════════════

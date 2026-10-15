@@ -662,6 +662,18 @@ if (path === '/404')      page = notFoundPage();
 
 document.querySelector('#app').innerHTML = page;
 
+// Activate social embeds after injecting page HTML
+(function activateSocialEmbeds() {
+  // Twitter / X — load widget.js if any twitter-tweet blockquotes are present
+  if (document.querySelector('.twitter-tweet, .twitter-timeline')) {
+    const s = document.createElement('script');
+    s.src = 'https://platform.twitter.com/widgets.js';
+    s.async = true;
+    s.charset = 'utf-8';
+    document.body.appendChild(s);
+  }
+})();
+
 // Inject newsletter bar before footer on all pages except /subscribe
 if (path !== '/subscribe') {
   const footerEl = document.querySelector('.footer');
