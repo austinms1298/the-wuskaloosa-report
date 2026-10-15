@@ -112,7 +112,27 @@
        ADS VIEW
     ════════════════════════════════════════════════ */
     #view-ads { display:none; }
-    #view-mailing-list { display:none; }
+    #view-analytics { display:none; }
+
+    .an-stats-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+    .an-stat{background:var(--paper);border:1px solid var(--line);border-radius:2px;padding:16px 20px;flex:1;min-width:120px}
+    .an-stat-num{font-family:'Oswald',sans-serif;font-size:28px;font-weight:700;color:var(--crimson);line-height:1}
+    .an-stat-label{font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--muted);margin-top:4px;text-transform:uppercase}
+    .an-chart-wrap{background:var(--paper);border:1px solid var(--line);border-radius:2px;padding:14px 16px;margin-bottom:14px}
+    .an-section-title{font-family:'Oswald',sans-serif;font-weight:400;font-size:14px;letter-spacing:.06em;margin:0 0 12px;color:var(--deep)}
+    .an-bar-chart{display:flex;align-items:flex-end;gap:3px;height:80px;overflow-x:auto;padding-bottom:4px}
+    .an-bar-wrap{display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;min-width:18px;height:100%}
+    .an-bar{width:100%;background:var(--crimson);border-radius:1px 1px 0 0;min-height:2px}
+    .an-bar-label{font-size:9px;color:var(--muted);white-space:nowrap}
+    .an-two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    @media(max-width:640px){.an-two-col{grid-template-columns:1fr}}
+    .an-panel{background:var(--paper);border:1px solid var(--line);border-radius:2px;padding:14px 16px}
+    .an-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--line);font-size:13px}
+    .an-row:last-child{border-bottom:none}
+    .an-row.an-hdr{font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;padding-bottom:8px}
+    .an-path{color:var(--deep);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:75%}
+    .an-count{font-weight:700;color:var(--crimson);flex-shrink:0}
+    .an-empty{font-size:13px;color:var(--muted);margin:8px 0 0}
     .ads-body { padding:32px 36px;max-width:1060px;margin:0 auto; }
     .ads-section { margin-bottom:40px; }
     .ads-section-head { display:flex;align-items:center;gap:14px;margin-bottom:16px;padding-bottom:10px;border-bottom:2px solid var(--line); }
@@ -298,7 +318,7 @@
     <div class="toolbar-brand">THE WUSKALOOSA REPORT <span>/ ADMIN</span></div>
     <span class="toolbar-user" id="toolbar-user"></span>
     <button class="btn btn-white" id="btn-manage-ads">Manage Ads</button>
-    <button class="btn btn-white" id="btn-mailing-list">Mailing List</button>
+    <button class="btn btn-white" id="btn-analytics">Analytics</button>
     <button class="btn btn-white" id="btn-new-post">+ New Post</button>
     <button class="btn btn-ghost btn-sm" id="btn-logout">Log Out</button>
   </div>
@@ -500,557 +520,26 @@
 </div>
 
 
-<!-- ════ MAILING LIST ════════════════════════════════════════════════════════ -->
-<div id="view-mailing-list">
+<!-- ════ ANALYTICS ════════════════════════════════════════════════════════════ -->
+<div id="view-analytics">
   <div class="toolbar">
-    <div class="toolbar-brand">THE WUSKALOOSA REPORT <span>/ MAILING LIST</span></div>
-    <span class="toolbar-user" id="ml-toolbar-user"></span>
-    <button class="btn btn-ghost btn-sm" id="btn-ml-back">← Back</button>
+    <div class="toolbar-brand">THE WUSKALOOSA REPORT <span>/ ANALYTICS</span></div>
+    <span class="toolbar-user" id="an-toolbar-user"></span>
+    <select id="cf-date-range" class="btn btn-outline btn-sm" style="cursor:pointer;padding:6px 10px">
+      <option value="7">Last 7 days</option>
+      <option value="30" selected>Last 30 days</option>
+      <option value="90">Last 90 days</option>
+    </select>
+    <button class="btn btn-primary btn-sm" id="btn-an-refresh">Refresh</button>
+    <button class="btn btn-ghost btn-sm" id="btn-an-back">&#8592; Back</button>
   </div>
-  <div class="posts-body" style="max-width:900px">
-    <div class="posts-header"><h2>Mailing List</h2></div>
+  <div class="posts-body" style="max-width:1100px">
+    <div class="posts-header"><h2>Analytics</h2></div>
 
-    <div style="display:flex;gap:16px;margin-bottom:24px;flex-wrap:wrap">
-      <div class="sidebar-section" style="flex:1;min-width:160px;text-align:center;padding:20px 10px">
-        <div style="font-size:40px;font-weight:800;font-family:'Oswald',sans-serif;color:var(--crimson);line-height:1" id="ml-total">—</div>
-        <div style="font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--muted);margin-top:6px">TOTAL EMAILS</div>
-      </div>
-      <div class="sidebar-section" style="flex:1;min-width:160px;text-align:center;padding:20px 10px">
-        <div style="font-size:40px;font-weight:800;font-family:'Oswald',sans-serif;color:var(--crimson);line-height:1" id="ml-weekly">—</div>
-        <div style="font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--muted);margin-top:6px">NEW THIS WEEK</div>
-      </div>
-    </div>
-
-    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
-      <button class="btn btn-navy btn-sm" id="ml-copy-all">Copy All Emails</button>
-      <button class="btn btn-white btn-sm" id="ml-refresh">Refresh</button>
-      <button class="btn btn-white btn-sm" id="ml-toggle-import">+ Import Emails</button>
-      <button class="btn btn-sm" id="ml-wipe" style="background:#dc2626;color:#fff;border:none;margin-left:auto">Wipe List</button>
-    </div>
-
-    <div style="margin-bottom:12px">
-      <input id="ml-search" type="search" placeholder="Search emails…" style="width:100%;box-sizing:border-box;padding:8px 12px;font-size:13px;border:1px solid var(--line);border-radius:2px;font-family:'Inter',sans-serif">
-    </div>
-
-    <div id="ml-import-panel" style="display:none;background:#fff;border:1px solid var(--line);border-radius:2px;padding:16px;margin-bottom:16px">
-      <!-- Step 1: paste -->
-      <div id="ml-import-step1">
-        <h3 style="font-family:'Oswald',sans-serif;font-weight:400;font-size:15px;margin:0 0 10px">Paste emails to import (one per line or comma-separated)</h3>
-        <textarea id="ml-import-text" rows="5" style="width:100%;box-sizing:border-box;padding:8px;font-size:13px;border:1px solid var(--line);border-radius:2px;font-family:'Inter',sans-serif;resize:vertical" placeholder="user@example.com&#10;another@example.com"></textarea>
-        <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
-          <button class="btn btn-primary btn-sm" id="ml-check-dupes">Check for Duplicates →</button>
-          <span id="ml-import-status" style="font-size:13px;color:var(--muted)"></span>
-        </div>
-      </div>
-      <!-- Step 2: review -->
-      <div id="ml-import-step2" style="display:none">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
-          <h3 style="font-family:'Oswald',sans-serif;font-weight:400;font-size:15px;margin:0;flex:1">Review Import</h3>
-          <button class="btn btn-outline btn-sm" id="ml-import-back">← Edit Emails</button>
-        </div>
-        <div id="ml-review-new" style="margin-bottom:14px"></div>
-        <div id="ml-review-dupes" style="margin-bottom:14px"></div>
-        <div style="display:flex;gap:8px;align-items:center;padding-top:10px;border-top:1px solid var(--line)">
-          <button class="btn btn-primary btn-sm" id="ml-do-import">Import Selected</button>
-          <span id="ml-import-status2" style="font-size:13px;color:var(--muted)"></span>
-        </div>
-      </div>
-    </div>
-
-    <div class="slot-table" id="ml-email-table">
-      <div style="padding:24px;text-align:center;color:var(--muted);font-size:14px">Loading…</div>
-    </div>
+    <span id="an-status" style="font-size:13px;color:var(--muted);display:block;margin:8px 0"></span>
+    <div id="an-content"></div>
   </div>
 </div>
-
-<input type="file" id="inline-img-file" accept="image/*" style="display:none">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.7/quill.min.js"></script>
-<script>
-// ═══════════════════════════════════════════════════════
-const API_URL = 'https://wuskaloosa-admin.austin-a73.workers.dev';
-// ═══════════════════════════════════════════════════════
-
-let token    = localStorage.getItem('wkr_token') || null;
-let username = localStorage.getItem('wkr_user')  || null;
-let quill    = null;
-let editFile = null;
-let editSha  = null;
-let pdfUrl   = null;
-let pdfSha   = null;
-
-// Ads state
-let adsConfig = {};   // {slot: {imageUrl, link, imageSha}}
-let adsSha    = null; // GitHub SHA of ads/config.json
-
-/* ── API ── */
-async function api(method, path, body) {
-  const headers = { 'Content-Type': 'application/json' };
-  if (token) headers['Authorization'] = `Bearer ${token}`;
-  const res = await fetch(`${API_URL}${path}`, {
-    method, headers,
-    body: body !== undefined ? JSON.stringify(body) : undefined,
-  });
-  if (res.status === 401) { logout(); throw new Error('Session expired.'); }
-  const data = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
-  if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
-  return data;
-}
-
-/* ── Views ── */
-function showView(id) {
-  ['view-login','view-posts','view-editor','view-ads','view-mailing-list'].forEach(v => {
-    document.getElementById(v).style.display =
-      v === id ? (v === 'view-login' ? 'flex' : 'block') : 'none';
-  });
-}
-
-/* ── Banner ── */
-function showBanner(type, msg) {
-  const el = document.getElementById('status-banner');
-  el.className = `status-banner ${type}`;
-  el.textContent = msg;
-  el.classList.remove('hidden');
-  if (type === 'success') setTimeout(() => el.classList.add('hidden'), 8000);
-}
-function hideBanner() { document.getElementById('status-banner').classList.add('hidden'); }
-
-/* ══════════════════════════════════════════════════════
-   LOGIN
-══════════════════════════════════════════════════════ */
-document.getElementById('login-form').addEventListener('submit', async e => {
-  e.preventDefault();
-  const errEl = document.getElementById('login-err');
-  const btn   = document.getElementById('btn-login');
-  errEl.textContent = ''; btn.textContent = 'Signing in…'; btn.disabled = true;
-  try {
-    const res = await fetch(`${API_URL}/api/login`, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ username: document.getElementById('inp-user').value.trim(), password: document.getElementById('inp-pass').value }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Login failed');
-    token = data.token; username = data.username;
-    localStorage.setItem('wkr_token', token);
-    localStorage.setItem('wkr_user', username);
-    loadPostList();
-  } catch (err) {
-    errEl.textContent = err.message === 'Invalid credentials' ? 'Wrong username or password.' : `Error: ${err.message}`;
-    btn.textContent = 'SIGN IN →'; btn.disabled = false;
-  }
-});
-
-/* ══════════════════════════════════════════════════════
-   POST LIST
-══════════════════════════════════════════════════════ */
-async function loadPostList() {
-  showView('view-posts');
-  document.getElementById('toolbar-user').textContent = username ? `Signed in as ${username}` : '';
-  const listEl = document.getElementById('posts-list');
-  listEl.innerHTML = '<p class="posts-loading">Loading posts…</p>';
-  try {
-    const posts = await api('GET', '/api/posts');
-    if (!posts.length) {
-      listEl.innerHTML = '<div class="posts-empty"><p>🏈</p><p>No posts yet — write your first take!</p></div>';
-      return;
-    }
-    listEl.innerHTML = posts.map(p => {
-      const isDraft = p.name.startsWith('draft-');
-      const baseName = isDraft ? p.name.slice(6) : p.name; // strip 'draft-' for display
-      const parts  = baseName.replace('.md','').split('-');
-      const ds     = parts.length >= 3 ? `${parts[0]}-${parts[1]}-${parts[2]}` : '';
-      const label  = (parts.slice(3).join(' ') || baseName).replace(/^\w/, c => c.toUpperCase());
-      const disp   = ds ? new Date(ds+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
-      const badge  = isDraft ? '<span class="draft-badge">Draft</span>' : '';
-      return `<div class="post-row">
-        <div class="post-info">
-          <div class="post-name">${label}${badge}</div>
-          <div class="post-meta">${disp ? `${disp} · ` : ''}${p.name}</div>
-        </div>
-        <button class="btn btn-outline btn-sm" onclick="openEditPost('${p.name}','${p.sha}')">Edit</button>
-        <button class="btn btn-danger btn-sm" onclick="confirmDelete('${p.name}','${p.sha}')">Delete</button>
-      </div>`;
-    }).join('');
-  } catch (err) {
-    listEl.innerHTML = `<p style="color:#dc2626;font-size:14px;padding:24px 0">Error: ${err.message}</p>`;
-  }
-}
-
-document.getElementById('btn-new-post').addEventListener('click', () => openEditor(null, null, null));
-document.getElementById('btn-logout').addEventListener('click', logout);
-document.getElementById('btn-manage-ads').addEventListener('click', openAdsView);
-
-function logout() {
-  token = null; username = null;
-  localStorage.removeItem('wkr_token'); localStorage.removeItem('wkr_user');
-  showView('view-login');
-}
-async function confirmDelete(filename, sha) {
-  if (!confirm(`Delete "${filename}"?\n\nThis cannot be undone.`)) return;
-  try { await api('DELETE', `/api/posts/${filename}?sha=${encodeURIComponent(sha)}`); loadPostList(); }
-  catch (err) { alert(`Delete failed: ${err.message}`); }
-}
-
-/* ══════════════════════════════════════════════════════
-   EDITOR
-══════════════════════════════════════════════════════ */
-function initQuill() {
-  if (quill) return;
-  quill = new Quill('#quill-editor', {
-    theme: 'snow',
-    placeholder: 'Write your take here…',
-    modules: { toolbar: [
-      [{ font: [] }],
-      [{ size: ['small', false, 'large', 'huge'] }],
-      ['bold','italic','underline','strike'],
-      [{ color: [] }, { background: [] }],
-      [{ header: [1,2,3,false] }],
-      [{ list:'ordered' }, { list:'bullet' }],
-      [{ indent:'-1' }, { indent:'+1' }],
-      [{ align: [] }],
-      ['link','blockquote'],
-      ['clean'],
-    ]},
-  });
-}
-
-document.getElementById('f-title').addEventListener('input', () => {
-  if (editFile) return;
-  document.getElementById('f-slug').value = document.getElementById('f-title').value
-    .toLowerCase().replace(/[^a-z0-9\s-]/g,'').replace(/\s+/g,'-').replace(/-+/g,'-').replace(/^-+|-+$/g,'');
-});
-
-function openEditor(filename, sha, content) {
-  editFile = filename; editSha = sha; pdfUrl = null; pdfSha = null;
-  initQuill(); hideBanner();
-  const isNew = !filename;
-  document.getElementById('editor-toolbar-title').textContent = isNew ? 'New Post' : 'Edit Post';
-  const isLive = filename && !filename.startsWith('draft-');
-  document.getElementById('btn-publish').textContent = isLive ? 'Save Changes' : 'Publish';
-  const delBtn = document.getElementById('btn-delete-post');
-  isNew ? delBtn.classList.add('hidden') : delBtn.classList.remove('hidden');
-  delBtn.onclick = () => {
-    if (confirm(`Delete "${editFile}"?`)) {
-      api('DELETE', `/api/posts/${editFile}?sha=${encodeURIComponent(editSha)}`)
-        .then(() => loadPostList()).catch(err => alert(`Delete failed: ${err.message}`));
-    }
-  };
-  if (content) {
-    const { data, body } = parseFrontmatter(content);
-    document.getElementById('f-title').value   = data.title   || '';
-    document.getElementById('f-slug').value    = data.slug    || '';
-    document.getElementById('f-excerpt').value = data.excerpt || '';
-    updateExcerptCount();
-    document.getElementById('f-week').value  = data.week  !== undefined ? data.week  : 1;
-    document.getElementById('f-year').value  = data.year  !== undefined ? data.year  : 2026;
-    const cats = ['Latest Take','Analysis','Preview','Recap','Culture','Opinion'];
-    document.getElementById('f-category').value = cats.includes(data.category) ? data.category : 'Latest Take';
-    document.getElementById('f-date').value = data.date ? toLocalInput(new Date(data.date)) : toLocalInput(new Date());
-    pdfUrl = data.schedule_pdf || null;
-    renderPdfStatus();
-    body.trim().startsWith('<') ? (quill.root.innerHTML = body.trim()) : quill.setText(body.trim());
-  } else {
-    ['f-title','f-slug','f-excerpt'].forEach(id => { document.getElementById(id).value = ''; }); updateExcerptCount();
-    document.getElementById('f-week').value = 1;
-    document.getElementById('f-year').value = new Date().getFullYear();
-    document.getElementById('f-category').value = 'Latest Take';
-    document.getElementById('f-date').value = toLocalInput(new Date());
-    pdfUrl = null; pdfSha = null; renderPdfStatus(); quill.setText('');
-  }
-  document.getElementById('f-pdf-file').value = '';
-  document.getElementById('pdf-status').textContent = '';
-  // Reset ad checkbox lists while loading
-  ['f-ad-top-checks','f-ad-bottom-checks'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.innerHTML = '<p class="ad-check-empty">Loading ads…</p>';
-  });
-  showView('view-editor');
-  document.getElementById('f-title').focus();
-  loadEditorAds(filename);
-}
-
-async function openEditPost(filename, sha) {
-  try {
-    const { content, sha: freshSha } = await api('GET', `/api/posts/${filename}`);
-    openEditor(filename, freshSha, content);
-  } catch (err) { alert(`Could not load post: ${err.message}`); }
-}
-
-document.getElementById('btn-back').addEventListener('click', () => {
-  loadPostList();
-});
-
-/* ── PDF upload ── */
-function renderPdfStatus() {
-  const el = document.getElementById('pdf-current');
-  const statusEl = document.getElementById('pdf-status');
-  if (pdfUrl) {
-    el.textContent = 'PDF uploaded.';
-    statusEl.textContent = '✓ Uploaded';
-    statusEl.className = 'pdf-status ok';
-  } else {
-    el.textContent = 'No PDF linked yet.';
-    statusEl.textContent = '';
-    statusEl.className = 'pdf-status';
-  }
-}
-
-document.getElementById('btn-upload-pdf').addEventListener('click', async () => {
-  const fileInput = document.getElementById('f-pdf-file');
-  const statusEl  = document.getElementById('pdf-status');
-  const btn       = document.getElementById('btn-upload-pdf');
-  if (!fileInput.files.length) { statusEl.textContent='Choose a PDF first.'; statusEl.className='pdf-status err'; return; }
-  const file = fileInput.files[0];
-  const week = parseInt(document.getElementById('f-week').value, 10);
-  const year = parseInt(document.getElementById('f-year').value, 10);
-  if (isNaN(week)||isNaN(year)) { statusEl.textContent='Set Week # and Year first.'; statusEl.className='pdf-status err'; return; }
-  btn.textContent='Uploading…'; btn.disabled=true; statusEl.textContent='';
-  try {
-    const b64 = await fileToBase64(file);
-    const result = await api('POST', '/api/upload', { path:`schedules/${year}/week-${week}.pdf`, content:b64, sha:pdfSha||undefined });
-    pdfUrl = result.url; pdfSha = result.sha;
-    renderPdfStatus();
-    statusEl.textContent='Uploaded'; statusEl.className='pdf-status ok'; fileInput.value='';
-  } catch (err) { statusEl.textContent=`Upload failed: ${err.message}`; statusEl.className='pdf-status err'; }
-  finally { btn.textContent='Upload PDF'; btn.disabled=false; }
-});
-
-/* ── Publish ── */
-document.getElementById('btn-publish').addEventListener('click', async () => {
-  const title    = document.getElementById('f-title').value.trim();
-  const slug     = document.getElementById('f-slug').value.trim();
-  const excerpt  = document.getElementById('f-excerpt').value.trim();
-  const category = document.getElementById('f-category').value;
-  const dateVal  = document.getElementById('f-date').value;
-  const week     = parseInt(document.getElementById('f-week').value, 10);
-  const year     = parseInt(document.getElementById('f-year').value, 10);
-  const body     = quill.root.innerHTML.trim();
-  const bodyIsEmpty = quill.getText().trim() === '';
-  if (!title)   { showBanner('error','Title is required.'); return; }
-  if (!dateVal) { showBanner('error','Publish date is required.'); return; }
-  const isDraftFile = editFile && editFile.startsWith('draft-');
-  // If publishing from a draft, use the base filename without 'draft-' prefix
-  const filename = isDraftFile
-    ? editFile.replace(/^draft-/, '')
-    : (editFile || makeFilename(slug, dateVal));
-  const content  = buildFrontmatter({title,slug,date:new Date(dateVal).toISOString(),excerpt,category,week,year,schedulePdf:pdfUrl})
-    + (bodyIsEmpty ? '' : body);
-  const btn = document.getElementById('btn-publish');
-  btn.textContent='Publishing…'; btn.disabled=true; hideBanner();
-  try {
-    // When publishing from a draft, the target file is new — no sha
-    const oldDraftFile = isDraftFile ? editFile : null;
-    const oldDraftSha  = isDraftFile ? editSha  : null;
-    const result = await api('POST', `/api/posts/${filename}`, { content, sha: isDraftFile ? undefined : (editSha||undefined) });
-    editFile = filename; editSha = result.sha;
-    // Delete the draft file now that it's published
-    if (oldDraftFile) {
-      api('DELETE', `/api/posts/${oldDraftFile}?sha=${encodeURIComponent(oldDraftSha)}`).catch(() => {});
-    }
-    document.getElementById('editor-toolbar-title').textContent = 'Edit Post';
-    document.getElementById('btn-publish').textContent = 'Save Changes';
-    document.getElementById('btn-delete-post').classList.remove('hidden');
-    // Save ad assignments for this post
-    const getCheckedIds = (divId) => Array.from(document.querySelectorAll(`#${divId} input[type=checkbox]:checked`)).map(c => c.value).filter(Boolean);
-    const adTopIds    = getCheckedIds('f-ad-top-checks');
-    const adBottomIds = getCheckedIds('f-ad-bottom-checks');
-    const adInterval  = parseInt(document.getElementById('f-ad-interval')?.value, 10);
-    if (adsConfig.library) {
-      if (!adsConfig.posts) adsConfig.posts = {};
-      const pa = {};
-      if (adTopIds.length)    pa.top    = adTopIds.length === 1 ? adTopIds[0] : adTopIds;
-      if (adBottomIds.length) pa.bottom = adBottomIds.length === 1 ? adBottomIds[0] : adBottomIds;
-      if (Object.keys(pa).length) { adsConfig.posts[slug] = pa; }
-      else { delete adsConfig.posts[slug]; }
-      if (!isNaN(adInterval) && adInterval >= 2) adsConfig.rotate = { interval: adInterval };
-      api('POST', '/api/ads', { config: adsConfig, sha: adsSha||undefined })
-        .then(s => { adsSha = s.sha; }).catch(() => {});
-    }
-    showBanner('success', 'Published');
-  } catch (err) { showBanner('error', `Error: ${err.message}`); }
-  finally { btn.textContent='Publish'; btn.disabled=false; }
-});
-
-/* ── Save Draft ── */
-document.getElementById('btn-save-draft').addEventListener('click', async () => {
-  let title    = document.getElementById('f-title').value.trim();
-  let slug     = document.getElementById('f-slug').value.trim();
-  const excerpt  = document.getElementById('f-excerpt').value.trim();
-  const category = document.getElementById('f-category').value;
-  const dateVal  = document.getElementById('f-date').value;
-  const week     = parseInt(document.getElementById('f-week').value, 10);
-  const year     = parseInt(document.getElementById('f-year').value, 10);
-  const body     = quill.root.innerHTML.trim();
-  const bodyIsEmpty = quill.getText().trim() === '';
-  if (!title) {
-    // Auto-generate "Untitled N" — scan the rendered post list for existing untitled drafts
-    const existing = [...document.querySelectorAll('#posts-list .post-meta')]
-      .map(el => el.textContent).join(' ');
-    const nums = [...existing.matchAll(/draft-untitled-(\d+)\.md/g)].map(m => parseInt(m[1], 10));
-    const n = nums.length ? Math.max(...nums) + 1 : 1;
-    title = `Untitled ${n}`;
-    document.getElementById('f-title').value = title;
-    if (!slug) { slug = `untitled-${n}`; document.getElementById('f-slug').value = slug; }
-  }
-  // Reuse existing draft filename or create a new one with draft- prefix
-  const draftFilename = (editFile && editFile.startsWith('draft-'))
-    ? editFile
-    : ('draft-' + makeFilename(slug, dateVal || new Date().toISOString()));
-  const content = buildFrontmatter({
-    title, slug, date: dateVal ? new Date(dateVal).toISOString() : new Date().toISOString(),
-    excerpt, category, week, year, schedulePdf: pdfUrl, draft: true,
-  }) + (bodyIsEmpty ? '' : body);
-  const btn = document.getElementById('btn-save-draft');
-  btn.textContent = 'Saving…'; btn.disabled = true; hideBanner();
-  try {
-    // Use existing sha only if we're re-saving the same draft file
-    const sha = (editFile === draftFilename) ? editSha : undefined;
-    const result = await api('POST', `/api/posts/${draftFilename}`, { content, sha });
-    editFile = draftFilename; editSha = result.sha;
-    document.getElementById('editor-toolbar-title').textContent = 'Draft';
-    document.getElementById('btn-delete-post').classList.remove('hidden');
-    showBanner('success', 'Saved as draft — not visible on the site');
-  } catch (err) { showBanner('error', `Error: ${err.message}`); }
-  finally { btn.textContent = 'Save Draft'; btn.disabled = false; }
-});
-
-/* ══════════════════════════════════════════════════════
-   PREVIEW
-══════════════════════════════════════════════════════ */
-document.getElementById('btn-preview').addEventListener('click', async () => {
-  const title    = document.getElementById('f-title').value.trim() || 'Untitled';
-  const category = document.getElementById('f-category').value;
-  const dateVal  = document.getElementById('f-date').value;
-  const excerpt  = document.getElementById('f-excerpt').value.trim();
-  const body     = quill.root.innerHTML;
-  const dateDisp = dateVal
-    ? new Date(dateVal).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})
-    : new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
-
-  // Load current ads if not already loaded
-  if (!adsConfig.library) {
-    try {
-      const r = await fetch(`${API_URL}/api/ads`);
-      if (r.ok) { const d = await r.json(); adsConfig = normAdsConfig(d.config || {}); adsSha = d.sha || null; }
-    } catch {}
-  }
-
-  const rotateInterval = parseInt(document.getElementById('f-ad-interval')?.value, 10) || adsConfig.rotate?.interval || 6;
-
-  const adHtml = (slot) => {
-    const lib = adsConfig.library || {};
-    // Read live checkbox state from the editor sidebar
-    let checkedIds = [];
-    if (slot === 'post-top' || slot === 'post-bottom') {
-      const divId = slot === 'post-top' ? 'f-ad-top-checks' : 'f-ad-bottom-checks';
-      checkedIds = Array.from(document.querySelectorAll(`#${divId} input[type=checkbox]:checked`))
-        .map(c => c.value).filter(Boolean);
-    }
-    // Fall back to saved defaults if no live selection in the checkboxes
-    if (!checkedIds.length) {
-      const defaultSlot = slot === 'post-top' ? 'post-top' : 'post-bottom';
-      const defVal = adsConfig.defaults?.[defaultSlot];
-      checkedIds = Array.isArray(defVal) ? defVal : (defVal ? [defVal] : []);
-    }
-    const ads = checkedIds.map(id => lib[id]).filter(Boolean);
-    if (!ads.length) {
-      return `<div class="ad-placeholder"><span>728 × 90 — Ad Slot</span></div>`;
-    }
-    if (ads.length === 1) {
-      const ad = ads[0];
-      const img = `<img src="${escHtml(ad.imageUrl)}" alt="Advertisement" style="max-width:100%;display:block;margin:0 auto;">`;
-      return ad.link ? `<a href="${escHtml(ad.link)}" target="_blank" rel="noopener sponsored">${img}</a>` : img;
-    }
-    // Multiple ads — rotate in the preview iframe
-    const rotId = 'rot_' + slot.replace(/-/g, '_');
-    const adsJson = JSON.stringify(ads.map(a => ({ i: a.imageUrl, l: a.link || '' })));
-    return `<div id="${rotId}" style="line-height:0;text-align:center"></div>
-<script>
-(function(){
-  var ads=${adsJson},idx=0,el=document.getElementById('${rotId}');
-  function show(){var a=ads[idx];el.innerHTML=a.l?'<a href="'+a.l+'" target="_blank" rel="noopener sponsored"><img src="'+a.i+'" alt="Ad" style="max-width:100%;display:block;margin:0 auto"></a>':'<img src="'+a.i+'" alt="Ad" style="max-width:100%;display:block;margin:0 auto">';}
-  show();setInterval(function(){idx=(idx+1)%ads.length;show();},${rotateInterval*1000});
-})();
-<\/script>`;
-  };
-
-  const pdfBanner = pdfUrl ? `
-    <a class="schedule-download" href="${pdfUrl}" download>
-      <span class="sd-icon">📄</span>
-      <span><strong>This Weeks Televised Football Schedule</strong><span>Click to download &amp; print</span></span>
-      <span class="sd-cta">DOWNLOAD →</span>
-    </a>` : '';
-
-  const html = buildPreviewDoc({title, category, dateDisp, excerpt, body, pdfBanner, adHtml});
-  const frame = document.getElementById('preview-frame');
-  frame.srcdoc = html;
-  document.getElementById('preview-overlay').classList.remove('hidden');
-});
-
-document.getElementById('btn-close-preview').addEventListener('click', () => {
-  document.getElementById('preview-overlay').classList.add('hidden');
-  document.getElementById('preview-frame').srcdoc = '';
-  renderPdfStatus(); // restore PDF indicator in case browser cleared it
-});
-
-function buildPreviewDoc({title, category, dateDisp, excerpt, body, pdfBanner, adHtml}) {
-  return `<!doctype html><html lang="en"><head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Preview — ${title}</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<style>
-  :root{--crimson:#8f1224;--deep:#171313;--paper:#f8f6f1;--line:#ded9d0;--muted:#706a64}
-  *{box-sizing:border-box}
-  html{scroll-behavior:smooth}
-  body{margin:0;background:var(--paper);color:var(--deep);font-family:'Inter',sans-serif;line-height:1.55}
-  a{color:inherit;text-decoration:none}
-  img{display:block;max-width:100%}
-  .preview-notice{background:#166534;color:#fff;text-align:center;padding:10px 20px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
-  .eyebrow{margin:0;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
-  .crimson{color:var(--crimson)}
-  .lead{font-size:clamp(18px,2.5vw,24px);line-height:1.45}
-  .article{padding-bottom:80px}
-  .article-header{max-width:950px;margin:60px auto 30px;padding:0 24px;text-align:center}
-  .article-header h1{font-family:'Oswald',sans-serif;font-weight:400;font-size:clamp(42px,6vw,86px);line-height:1.08;margin:14px 0}
-  .article-body{max-width:760px;margin:auto;padding:24px 24px 40px;font-size:18px;line-height:1.7}
-  .article-body h1,.article-body h2{font-family:'Oswald',sans-serif;font-weight:400}
-  .article-body h2{font-size:38px}
-  .article-body p{margin-bottom:1em}
-  .schedule-download{display:flex;align-items:center;gap:16px;background:#fff;border:2px solid var(--crimson);border-left:6px solid var(--crimson);padding:14px 20px;margin:24px auto 0;max-width:600px;color:var(--deep)}
-  .schedule-download strong{display:block;font-size:15px;font-weight:700}
-  .schedule-download span>span{font-size:12px;color:var(--muted)}
-  .sd-icon{font-size:28px;line-height:1;flex-shrink:0}
-  .sd-cta{margin-left:auto;font-size:12px;font-weight:800;letter-spacing:.08em;color:var(--crimson)}
-  .ad-slot-wrap{text-align:center;padding:20px 24px;background:#fff;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin:0 0 8px}
-  .ad-slot-wrap + .article-header{margin-top:24px}
-  .ad-label{font-size:9px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin-bottom:8px}
-  .ad-placeholder{width:728px;max-width:100%;height:90px;background:repeating-linear-gradient(-45deg,#f0ede8,#f0ede8 8px,#e8e4de 8px,#e8e4de 16px);display:flex;align-items:center;justify-content:center;margin:0 auto;font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.08em;text-transform:uppercase;border:1px dashed var(--line)}
-</style></head><body>
-<div class="preview-notice">⚠ PREVIEW MODE — This post has not been published yet</div>
-
-<div class="ad-slot-wrap">
-  <div class="ad-label">Advertisement</div>
-  ${adHtml('post-top')}
-</div>
-
-<article class="article">
-  <header class="article-header">
-    <p style="font-size:13px;font-weight:700;color:var(--muted);margin:0 0 20px">← All Takes</p>
-    <p class="eyebrow crimson">${category} · ${dateDisp}</p>
-    <h1>${escHtml(title)}</h1>
-    <p class="lead" style="white-space:pre-wrap">${escHtml(excerpt)}</p>
-    ${pdfBanner}
-  </header>
-  <div class="article-body">${body || '<p style="color:var(--muted);font-style:italic">No body content yet.</p>'}</div>
-</article>
-
-<div class="ad-slot-wrap">
-  <div class="ad-label">Advertisement</div>
-  ${adHtml('post-bottom')}
-</div>
-${body.includes('twitter-tweet') ? '<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"><\/script>' : ''}
-
 <!-- ════ DELETE CONFIRM MODAL ════════════════════════════════════════════════ -->
 <div id="wipe-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.55);align-items:center;justify-content:center">
   <div style="background:#fff;border-radius:3px;border-top:5px solid #dc2626;padding:32px 28px;max-width:400px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.3)">
@@ -1656,296 +1145,80 @@ function fileToBase64(file) {
 
 
 /* ══════════════════════════════════════════════════════
-   MAILING LIST
+   ANALYTICS
 ══════════════════════════════════════════════════════ */
-let mlEmails = [];
-let mlPage   = 0;
-let mlSearch = '';
-const ML_PER_PAGE = 100;
+const CF_GQL = 'https://api.cloudflare.com/client/v4/graphql';
 
-async function openMailingList() {
-  document.getElementById('ml-toolbar-user').textContent = username || '';
-  showView('view-mailing-list');
-  await loadEmails();
+const CF_SETTINGS = {
+  accountId: 'a739f4eb91846321263701c2ee0d2ba5',
+  siteTag:   'd7332e889b6548388187632bc18213b8',
+  apiToken:  'cfut_tpJ1sZYykRO1YwRk88HSZBT5he2Pw0KOGTqUeFhacedfd4d6'
+};
+function getCFSettings() { return CF_SETTINGS; }
+
+async function openAnalytics() {
+  showView('view-analytics');
+  await loadAnalyticsData();
 }
 
-async function loadEmails() {
-  const table = document.getElementById('ml-email-table');
-  table.innerHTML = '<div style="padding:24px;text-align:center;color:var(--muted);font-size:14px">Loading…</div>';
+async function loadAnalyticsData() {
+  const s = getCFSettings();
+  if (!s.accountId || !s.siteTag || !s.apiToken) return;
+  const days = parseInt(document.getElementById('cf-date-range').value) || 30;
+  const to   = new Date().toISOString().split('T')[0];
+  const from = new Date(Date.now() - days * 86400000).toISOString().split('T')[0];
+  const statusEl = document.getElementById('an-status');
+  statusEl.textContent = 'Loading…';
+  const q = `{viewer{accounts(filter:{accountTag:"${s.accountId}"}){totals:rumPageloadEventsAdaptiveGroups(filter:{AND:[{siteTag:"${s.siteTag}"},{date_geq:"${from}"},{date_leq:"${to}"}]},limit:1){count sum{visits}}topPaths:rumPageloadEventsAdaptiveGroups(filter:{AND:[{siteTag:"${s.siteTag}"},{date_geq:"${from}"},{date_leq:"${to}"}]},limit:15,orderBy:[count_DESC]){count dimensions{requestPath}}byDay:rumPageloadEventsAdaptiveGroups(filter:{AND:[{siteTag:"${s.siteTag}"},{date_geq:"${from}"},{date_leq:"${to}"}]},limit:90,orderBy:[date_ASC]){count dimensions{date}}topRefs:rumPageloadEventsAdaptiveGroups(filter:{AND:[{siteTag:"${s.siteTag}"},{date_geq:"${from}"},{date_leq:"${to}"},{refererHost_neq:""}]},limit:10,orderBy:[count_DESC]){count dimensions{refererHost}}}}}`;
   try {
-    const data = await api('GET', '/api/emails');
-    mlEmails = data.emails || [];
-    renderEmailStats();
-    renderEmailTable();
+    const res = await fetch(CF_GQL, {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + s.apiToken, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query: q })
+    });
+    const json = await res.json();
+    if (json.errors) throw new Error(json.errors[0].message);
+    statusEl.textContent = '';
+    renderAnalytics(json.data.viewer.accounts[0], from, to);
   } catch(err) {
-    table.innerHTML = `<div style="padding:24px;text-align:center;color:#dc2626;font-size:14px">Error: ${err.message}</div>`;
+    statusEl.textContent = 'Error: ' + err.message;
   }
 }
 
-function renderEmailStats() {
-  const total = mlEmails.length;
-  const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-  const weekly = mlEmails.filter(e => new Date(e.timestamp) >= weekAgo).length;
-  document.getElementById('ml-total').textContent = total;
-  document.getElementById('ml-weekly').textContent = weekly;
-}
-
-function renderEmailTable() {
-  const table = document.getElementById('ml-email-table');
-  const q = mlSearch.trim().toLowerCase();
-  const filtered = q ? mlEmails.filter(e => e.email.toLowerCase().includes(q)) : mlEmails;
-  const totalPages = Math.max(1, Math.ceil(filtered.length / ML_PER_PAGE));
-  if (mlPage >= totalPages) mlPage = totalPages - 1;
-  const slice = filtered.slice(mlPage * ML_PER_PAGE, (mlPage + 1) * ML_PER_PAGE);
-
-  if (!mlEmails.length) {
-    table.innerHTML = '<div style="padding:24px;text-align:center;color:var(--muted);font-size:14px">No emails yet — list will grow as people subscribe.</div>';
-    return;
-  }
-  if (!filtered.length) {
-    table.innerHTML = '<div style="padding:24px;text-align:center;color:var(--muted);font-size:14px">No emails match your search.</div>';
-    return;
-  }
-
-  const rows = slice.map((e, si) => {
-    const i = mlEmails.indexOf(e);
-    const date = new Date(e.timestamp).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
-    const badge = e.source === 'import'
-      ? `<span style="font-size:10px;background:#f3f4f6;color:#6b7280;padding:2px 7px;border-radius:8px;font-weight:700;letter-spacing:.05em">IMPORTED</span>`
-      : `<span style="font-size:10px;background:#dcfce7;color:#166534;padding:2px 7px;border-radius:8px;font-weight:700;letter-spacing:.05em">SIGNUP</span>`;
-    return `<div style="display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--line);font-size:13px" id="ml-row-${i}">
-      <span class="ml-email-label" style="flex:1;font-weight:600">${e.email}</span>
-      <input class="ml-email-edit" type="email" value="${e.email}" style="display:none;flex:1;padding:5px 8px;font-size:13px;border:1px solid var(--line);border-radius:2px;font-family:'Inter',sans-serif">
-      ${badge}
-      <span style="color:var(--muted);white-space:nowrap;font-size:12px">${date}</span>
-      <button class="btn btn-white btn-sm" style="padding:3px 10px;font-size:11px" onclick="startEditEmail(${i})">Edit</button>
-      <button class="btn btn-sm" style="padding:3px 10px;font-size:11px;background:#dc2626;color:#fff;border:none" onclick="deleteEmail('${e.email}')">✕</button>
-    </div>`;
+function renderAnalytics(data, from, to) {
+  const totalViews  = (data.totals||[]).reduce((s,g)=>s+g.count, 0);
+  const totalVisits = (data.totals||[]).reduce((s,g)=>s+(g.sum?.visits||0), 0);
+  const maxDay = Math.max(...(data.byDay||[]).map(g=>g.count), 1);
+  const bars = (data.byDay||[]).map(g => {
+    const pct = Math.round(g.count / maxDay * 100);
+    const lbl = (g.dimensions.date||'').slice(5);
+    return `<div class="an-bar-wrap" title="${g.dimensions.date}: ${g.count.toLocaleString()} views"><div class="an-bar" style="height:${Math.max(pct,2)}%"></div><span class="an-bar-label">${lbl}</span></div>`;
   }).join('');
-
-  const pager = totalPages > 1 ? `
-    <div style="display:flex;align-items:center;justify-content:center;gap:12px;padding:14px;font-size:13px;border-top:1px solid var(--line)">
-      <button class="btn btn-white btn-sm" onclick="mlChangePage(-1)" ${mlPage === 0 ? 'disabled' : ''}>← Prev</button>
-      <span style="color:var(--muted)">Page ${mlPage + 1} of ${totalPages} &nbsp;·&nbsp; ${filtered.length} result${filtered.length !== 1 ? 's' : ''}</span>
-      <button class="btn btn-white btn-sm" onclick="mlChangePage(1)" ${mlPage >= totalPages - 1 ? 'disabled' : ''}>Next →</button>
-    </div>` : '';
-
-  table.innerHTML = rows + pager;
+  const pathRows = (data.topPaths||[]).map(g =>
+    `<div class="an-row"><span class="an-path">${g.dimensions.requestPath||'/'}</span><span class="an-count">${g.count.toLocaleString()}</span></div>`
+  ).join('') || '<p class="an-empty">No data</p>';
+  const refRows = (data.topRefs||[]).map(g =>
+    `<div class="an-row"><span class="an-path">${g.dimensions.refererHost}</span><span class="an-count">${g.count.toLocaleString()}</span></div>`
+  ).join('') || '<p class="an-empty">No referrer data</p>';
+  document.getElementById('an-content').innerHTML = `
+    <div class="an-stats-row">
+      <div class="an-stat"><div class="an-stat-num">${totalViews.toLocaleString()}</div><div class="an-stat-label">Page Views</div></div>
+      <div class="an-stat"><div class="an-stat-num">${totalVisits.toLocaleString()}</div><div class="an-stat-label">Visits</div></div>
+      <div class="an-stat"><div class="an-stat-num" style="font-size:15px">${from} – ${to}</div><div class="an-stat-label">Period</div></div>
+    </div>
+    <div class="an-chart-wrap"><p class="an-section-title">DAILY TRAFFIC</p><div class="an-bar-chart">${bars||'<p class="an-empty">No data</p>'}</div></div>
+    <div class="an-two-col">
+      <div class="an-panel"><p class="an-section-title">TOP PAGES</p><div class="an-row an-hdr"><span>Path</span><span>Views</span></div>${pathRows}</div>
+      <div class="an-panel"><p class="an-section-title">TOP REFERRERS</p><div class="an-row an-hdr"><span>Source</span><span>Views</span></div>${refRows}</div>
+    </div>`;
 }
 
-function mlChangePage(dir) {
-  mlPage += dir;
-  renderEmailTable();
-  document.getElementById('ml-email-table').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-}
+document.getElementById('btn-analytics').addEventListener('click', openAnalytics);
+document.getElementById('btn-an-back').addEventListener('click', () => showView('view-posts'));
+document.getElementById('btn-an-refresh').addEventListener('click', loadAnalyticsData);
 
-function startEditEmail(i) {
-  const row = document.getElementById('ml-row-' + i);
-  const label = row.querySelector('.ml-email-label');
-  const input = row.querySelector('.ml-email-edit');
-  const editBtn = row.querySelectorAll('button')[0];
-  label.style.display = 'none';
-  input.style.display = 'block';
-  input.focus();
-  editBtn.textContent = 'Save';
-  editBtn.onclick = () => saveEditEmail(i, mlEmails[i].email, input.value.trim());
-}
+document.getElementById('cf-date-range').addEventListener('change', loadAnalyticsData);
 
-async function saveEditEmail(i, oldEmail, newEmail) {
-  if (!newEmail || newEmail === oldEmail) { renderEmailTable(); return; }
-  try {
-    // Import new email first, then delete old
-    await api('POST', '/api/emails/import', { emails: [newEmail] });
-    await api('DELETE', '/api/emails/' + encodeURIComponent(oldEmail));
-    await loadEmails();
-  } catch(err) {
-    alert('Error: ' + err.message);
-  }
-}
-
-async function deleteEmail(email) {
-  if (!confirm('Remove ' + email + ' from the list?')) return;
-  // Instant optimistic removal
-  const idx = mlEmails.findIndex(e => e.email === email);
-  if (idx !== -1) mlEmails.splice(idx, 1);
-  renderEmailStats();
-  renderEmailTable();
-  try {
-    await api('DELETE', '/api/emails/' + encodeURIComponent(email));
-  } catch(err) {
-    // Roll back on error
-    alert('Error: ' + err.message);
-    await loadEmails();
-  }
-}
-
-document.getElementById('btn-mailing-list').addEventListener('click', openMailingList);
-document.getElementById('btn-ml-back').addEventListener('click', () => showView('view-posts'));
-
-document.getElementById('ml-copy-all').addEventListener('click', async () => {
-  const btn = document.getElementById('ml-copy-all');
-  const orig = btn.textContent;
-  btn.textContent = 'Fetching…'; btn.disabled = true;
-  try {
-    // Always fetch fresh so we get the full live list, not a cached slice
-    const data = await api('GET', '/api/emails');
-    const all = (data.emails || []).map(e => e.email).filter(Boolean);
-    await navigator.clipboard.writeText(all.join('\n'));
-    btn.textContent = `✓ Copied ${all.length}!`;
-    setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 2500);
-  } catch(err) {
-    btn.textContent = 'Error — try again';
-    btn.disabled = false;
-    setTimeout(() => btn.textContent = orig, 3000);
-  }
-});
-
-document.getElementById('ml-refresh').addEventListener('click', loadEmails);
-
-document.getElementById('ml-toggle-import').addEventListener('click', () => {
-  const panel = document.getElementById('ml-import-panel');
-  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-});
-
-document.getElementById('ml-search').addEventListener('input', e => {
-  mlSearch = e.target.value;
-  mlPage = 0;
-  renderEmailTable();
-});
-
-document.getElementById('ml-wipe').addEventListener('click', () => {
-  // Show custom modal
-  document.getElementById('wipe-count').textContent = mlEmails.length + ' email' + (mlEmails.length !== 1 ? 's' : '');
-  const input = document.getElementById('wipe-confirm-input');
-  input.value = '';
-  document.getElementById('wipe-confirm-btn').disabled = true;
-  const modal = document.getElementById('wipe-modal');
-  modal.style.display = 'flex';
-  input.focus();
-});
-
-document.getElementById('wipe-confirm-input').addEventListener('input', e => {
-  document.getElementById('wipe-confirm-btn').disabled = e.target.value !== 'DELETE';
-});
-
-document.getElementById('wipe-cancel').addEventListener('click', () => {
-  document.getElementById('wipe-modal').style.display = 'none';
-});
-
-document.getElementById('wipe-confirm-btn').addEventListener('click', async () => {
-  if (document.getElementById('wipe-confirm-input').value !== 'DELETE') return;
-  document.getElementById('wipe-modal').style.display = 'none';
-  const btn = document.getElementById('ml-wipe');
-  btn.textContent = 'Wiping…'; btn.disabled = true;
-  try {
-    const res = await api('DELETE', '/api/emails');
-    mlEmails = [];
-    mlPage = 0;
-    renderEmailStats();
-    renderEmailTable();
-    showBanner('success', `Mailing list cleared — ${res.deleted} emails removed.`);
-  } catch(err) {
-    alert('Error: ' + err.message);
-  } finally {
-    btn.textContent = 'Wipe List'; btn.disabled = false;
-  }
-});
-
-// ── Import: step 1 — check for duplicates ───────────────────────────────────
-document.getElementById('ml-check-dupes').addEventListener('click', () => {
-  const raw = document.getElementById('ml-import-text').value;
-  const parsed = raw.split(/[\n,]+/).map(s => s.trim().toLowerCase()).filter(s => s.includes('@'));
-  if (!parsed.length) {
-    document.getElementById('ml-import-status').textContent = 'No valid emails found.';
-    return;
-  }
-  const existingSet = new Set(mlEmails.map(e => e.email.toLowerCase()));
-  const newEmails   = parsed.filter(e => !existingSet.has(e));
-  const dupeEmails  = parsed.filter(e =>  existingSet.has(e));
-  // Deduplicate within the pasted list itself
-  const uniqueNew   = [...new Set(newEmails)];
-  const uniqueDupes = [...new Set(dupeEmails)];
-
-  // Build review UI
-  const newSection = document.getElementById('ml-review-new');
-  const dupeSection = document.getElementById('ml-review-dupes');
-
-  if (uniqueNew.length) {
-    newSection.innerHTML = `<div style="font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#065f46;margin-bottom:6px">
-      ✓ New — ${uniqueNew.length} email${uniqueNew.length!==1?'s':''} (will be added)</div>`
-      + uniqueNew.map(e => `<div style="display:flex;align-items:center;gap:8px;padding:5px 10px;border-bottom:1px solid var(--line);font-size:13px">
-        <span style="width:16px;height:16px;border-radius:50%;background:#dcfce7;display:inline-flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0">✓</span>
-        <span style="flex:1">${e}</span></div>`).join('');
-  } else {
-    newSection.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:8px 0">No new emails to add.</div>';
-  }
-
-  if (uniqueDupes.length) {
-    dupeSection.innerHTML = `<div style="font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#92400e;margin:12px 0 6px">
-      ⚠ Already in list — ${uniqueDupes.length} duplicate${uniqueDupes.length!==1?'s':''}</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:8px">Check the box next to any you want to re-add anyway.</div>`
-      + uniqueDupes.map(e => `<div style="display:flex;align-items:center;gap:8px;padding:5px 10px;background:#fef9ec;border:1px solid #fde68a;border-radius:2px;margin-bottom:4px;font-size:13px">
-        <input type="checkbox" class="dupe-cb" data-email="${e}" style="width:15px;height:15px;accent-color:var(--cr);flex-shrink:0">
-        <span style="flex:1">${e}</span>
-        <span style="font-size:11px;color:#92400e;font-weight:700">DUPLICATE</span></div>`).join('');
-  } else {
-    dupeSection.innerHTML = '<div style="font-size:13px;color:#065f46;padding:6px 0">🎉 No duplicates found!</div>';
-  }
-
-  // Switch steps
-  document.getElementById('ml-import-step1').style.display = 'none';
-  document.getElementById('ml-import-step2').style.display = 'block';
-  document.getElementById('ml-import-status').textContent = '';
-  document.getElementById('ml-import-status2').textContent = '';
-
-  // Store for the confirm handler
-  document.getElementById('ml-do-import')._newEmails   = uniqueNew;
-  document.getElementById('ml-do-import')._dupeEmails  = uniqueDupes;
-  const importBtn = document.getElementById('ml-do-import');
-  importBtn.textContent = uniqueNew.length
-    ? `Import ${uniqueNew.length} New Email${uniqueNew.length!==1?'s':''}`
-    : 'Import Selected';
-});
-
-// ── Import: back to step 1 ────────────────────────────────────────────────────
-document.getElementById('ml-import-back').addEventListener('click', () => {
-  document.getElementById('ml-import-step1').style.display = 'block';
-  document.getElementById('ml-import-step2').style.display = 'none';
-});
-
-// ── Import: step 2 — confirm import ──────────────────────────────────────────
-document.getElementById('ml-do-import').addEventListener('click', async () => {
-  const btn = document.getElementById('ml-do-import');
-  const statusEl = document.getElementById('ml-import-status2');
-  const newEmails  = btn._newEmails  || [];
-  const checkedDupes = [...document.querySelectorAll('.dupe-cb:checked')].map(cb => cb.dataset.email);
-  const toImport = [...newEmails, ...checkedDupes];
-  if (!toImport.length) { statusEl.textContent = 'Nothing selected to import.'; return; }
-
-  btn.disabled = true;
-  const CHUNK = 500;
-  let totalAdded = 0, totalSkipped = 0;
-  statusEl.textContent = `Importing…`;
-  try {
-    for (let i = 0; i < toImport.length; i += CHUNK) {
-      const chunk = toImport.slice(i, i + CHUNK);
-      const res = await api('POST', '/api/emails/import', { emails: chunk });
-      totalAdded   += res.added   || 0;
-      totalSkipped += res.skipped || 0;
-    }
-    statusEl.textContent = `Done — ${totalAdded} added${checkedDupes.length ? ', ' + checkedDupes.length + ' duplicate(s) re-added' : ''}.`;
-    document.getElementById('ml-import-text').value = '';
-    // Reset to step 1
-    document.getElementById('ml-import-step1').style.display = 'block';
-    document.getElementById('ml-import-step2').style.display = 'none';
-    document.getElementById('ml-import-panel').style.display = 'none';
-    await loadEmails();
-  } catch(err) {
-    statusEl.textContent = `Error: ${err.message}`;
-  } finally {
-    btn.disabled = false;
-  }
-});
 
 /* ══════════════════════════════════════════════════════
    INLINE IMAGE INSERT
