@@ -56,19 +56,19 @@
       "link": "https://www.princelaw.net/",
       "size": "leaderboard"
     },
-    "ad_1790714909407_0": {
-      "name": "Dating Game",
-      "imageUrl": "/ads/ad_1790714909407_0.png",
-      "imageSha": "f01dfc2b9489c04a4f37c96820fdcfac98598aa1",
-      "link": "https://uwwa.org/dating",
-      "size": "leaderboard"
-    },
-    "ad_1790714935652_0": {
-      "name": "Dating Game",
-      "imageUrl": "/ads/ad_1790714935652_0.png",
-      "imageSha": "bb7ca23f77981fe2192b256063d887ce20a58d73",
-      "link": "https://uwwa.org/dating",
+    "ad_1791854861874_0": {
+      "name": "Life Wtr",
+      "imageUrl": "/ads/ad_1791854861874_0.png",
+      "imageSha": "7c2cd2a3d0fe7590dc68b29c78e078aa481c1425",
+      "link": "https://contact.pepsico.com/lifewtr/product-locator",
       "size": "medium-rect"
+    },
+    "ad_1791854876728_0": {
+      "name": "Life Wtr",
+      "imageUrl": "/ads/ad_1791854876728_0.png",
+      "imageSha": "9850769715e4374a5c1a56ee2db1a295578fbee2",
+      "link": "https://contact.pepsico.com/lifewtr/product-locator",
+      "size": "leaderboard"
     }
   },
   "defaults": {
@@ -76,36 +76,22 @@
       "ad_1788285936155_0",
       "ad_1788487849818_0",
       "ad_1788285963752_0",
-      "ad_1790714909407_0"
+      "ad_1791854876728_0"
     ],
     "post-bottom": [
       "ad_1788285936155_0",
       "ad_1788487849818_0",
       "ad_1788285963752_0",
-      "ad_1790714909407_0"
+      "ad_1791854876728_0"
     ],
     "homepage": [
       "ad_1788470621147_0",
       "ad_1788286007646_1",
       "ad_1788286006321_0",
-      "ad_1790714935652_0"
+      "ad_1791854861874_0"
     ]
   },
-  "posts": {
-    "the-most-powerful-weapon-is-a-slow-start": {
-      "top": [
-        "ad_1788285936155_0",
-        "ad_1788487849818_0",
-        "ad_1788285963752_0",
-        "ad_1790714909407_0"
-      ],
-      "bottom": [
-        "ad_1788285936155_0",
-        "ad_1788285963752_0",
-        "ad_1790714909407_0"
-      ]
-    }
-  },
+  "posts": {},
   "rotate": {
     "interval": 10
   }
