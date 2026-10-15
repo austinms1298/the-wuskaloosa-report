@@ -664,7 +664,18 @@ document.querySelector('#app').innerHTML = page;
 
 // Activate social embeds after injecting page HTML
 (function activateSocialEmbeds() {
-  // Twitter / X — load widget.js if any twitter-tweet blockquotes are present
+  // Old posts were saved with the twitter-tweet class stripped by Quill.
+  // Scan every blockquote for a Twitter/X status link and restore the class
+  // in the DOM so widget.js can find and render them.
+  document.querySelectorAll('blockquote:not(.twitter-tweet)').forEach(bq => {
+    const link = bq.querySelector('a[href*="twitter.com/"], a[href*="x.com/"]');
+    if (link && /\/status\/\d+/.test(link.href)) {
+      bq.classList.add('twitter-tweet');
+      bq.setAttribute('data-dnt', 'true');
+    }
+  });
+
+  // Load Twitter widget.js if any twitter-tweet blockquotes exist (original or restored)
   if (document.querySelector('.twitter-tweet, .twitter-timeline')) {
     const s = document.createElement('script');
     s.src = 'https://platform.twitter.com/widgets.js';

@@ -801,7 +801,7 @@ document.getElementById('btn-publish').addEventListener('click', async () => {
   const dateVal  = document.getElementById('f-date').value;
   const week     = parseInt(document.getElementById('f-week').value, 10);
   const year     = parseInt(document.getElementById('f-year').value, 10);
-  const body     = quill.root.innerHTML.trim();
+  const body     = restoreEmbeds(quill.root.innerHTML.trim());
   const bodyIsEmpty = quill.getText().trim() === '';
   if (!title)   { showBanner('error','Title is required.'); return; }
   if (!dateVal) { showBanner('error','Publish date is required.'); return; }
@@ -857,7 +857,7 @@ document.getElementById('btn-save-draft').addEventListener('click', async () => 
   const dateVal  = document.getElementById('f-date').value;
   const week     = parseInt(document.getElementById('f-week').value, 10);
   const year     = parseInt(document.getElementById('f-year').value, 10);
-  const body     = quill.root.innerHTML.trim();
+  const body     = restoreEmbeds(quill.root.innerHTML.trim());
   const bodyIsEmpty = quill.getText().trim() === '';
   if (!title) {
     // Auto-generate "Untitled N" — scan the rendered post list for existing untitled drafts
@@ -1747,6 +1747,25 @@ document.getElementById('embed-url-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') { e.preventDefault(); doInsertEmbed(); }
   if (e.key === 'Escape') { document.getElementById('embed-panel').style.display = 'none'; document.getElementById('embed-url-input').value = ''; }
 });
+
+// Quill strips class/data attributes from blockquotes. Before saving, scan for
+// blockquotes whose only link points to twitter.com / x.com and restore the
+// twitter-tweet class so platform.twitter.com/widgets.js can render them.
+function restoreEmbeds(html) {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  doc.querySelectorAll('blockquote').forEach(bq => {
+    if (bq.classList.contains('twitter-tweet')) return; // already tagged
+    const links = bq.querySelectorAll('a');
+    const twitterLink = [...links].find(a =>
+      /(?:twitter\.com|x\.com)\/\w+\/status\/\d+/.test(a.href)
+    );
+    if (twitterLink) {
+      bq.classList.add('twitter-tweet');
+      bq.setAttribute('data-dnt', 'true');
+    }
+  });
+  return doc.body.innerHTML;
+}
 
 async function doInsertEmbed() {
   const url = document.getElementById('embed-url-input').value.trim();
