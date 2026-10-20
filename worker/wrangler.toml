@@ -22,3 +22,16 @@ compatibility_date = "2024-11-01"
 [[kv_namespaces]]
 binding = "EMAIL_LIST"
 id      = "43b9e05a80394e9086afa444f03bdd31"
+
+# ── Comments D1 database ───────────────────────────────────────────────────────
+# See worker/COMMENTS_SETUP.md for the full walkthrough. In short:
+#   cd worker && wrangler d1 create wuskaloosa-comments
+#   → paste the returned "database_id" below
+#   wrangler d1 execute wuskaloosa-comments --remote --file=schema.sql
+[[d1_databases]]
+binding       = "DB"
+database_name = "wuskaloosa-comments"
+database_id   = "6057ef89-aae9-4fed-a7f9-f899c1900a35"
+
+# Optional secret for comments (after `wrangler deploy`):
+#   wrangler secret put TURNSTILE_SECRET_KEY   (omit entirely to run without Turnstile)

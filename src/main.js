@@ -2,6 +2,14 @@ import './styles.css';
 import yaml from 'js-yaml';
 import { marked } from 'marked';
 import { schedule, site } from './data/site.js';
+import { moderate } from './moderation.js';
+
+// ── Comments config ──────────────────────────────────────────────────────────
+const COMMENTS_API = 'https://wuskaloosa-admin.austin-a73.workers.dev';
+// Paste your Turnstile SITE key here once you've set one up (see
+// worker/COMMENTS_SETUP.md). Leave blank to run comments without Turnstile —
+// everything else works fine either way.
+const TURNSTILE_SITE_KEY = '';
 
 // Decode common HTML entities stored in CMS fields (e.g. &nbsp; from Quill)
 const decodeEntities = (s = '') => String(s)
@@ -604,6 +612,109 @@ function notFoundPage() {
     </main>`;
 }
 
+// ── Comments: markup helpers ─────────────────────────────────────────────────
+
+// Generic silhouette avatar. Swap this function's return value later to add
+// rotating/custom avatars without touching anything else in the comment UI.
+function avatarMarkup() {
+  return `<svg viewBox="0 0 40 40" aria-hidden="true" focusable="false">
+    <circle cx="20" cy="20" r="20" fill="#ded9d0"/>
+    <circle cx="20" cy="16.5" r="7" fill="#fff"/>
+    <path d="M5 37c1.8-10 8.5-14.5 15-14.5S33.2 27 35 37" fill="#fff"/>
+  </svg>`;
+}
+
+function commentCountWords(n, upper) {
+  if (upper) return `${n} ${n === 1 ? 'COMMENT' : 'COMMENTS'}`;
+  return `${n} ${n === 1 ? 'Comment' : 'Comments'}`;
+}
+
+function timeAgo(ts) {
+  const diffSec = Math.max(0, Math.floor((Date.now() - ts) / 1000));
+  if (diffSec < 45) return 'just now';
+  const min = Math.floor(diffSec / 60);
+  if (min < 60) return `${min} minute${min === 1 ? '' : 's'} ago`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `${hr} hour${hr === 1 ? '' : 's'} ago`;
+  const day = Math.floor(hr / 24);
+  if (day < 7) return `${day} day${day === 1 ? '' : 's'} ago`;
+  return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(ts));
+}
+
+function commentItemHTML(c) {
+  const likeWord = c.likeCount === 1 ? 'like' : 'likes';
+  return `<li class="comment-item" data-id="${escapeHtml(c.id)}">
+    <div class="comment-avatar">${avatarMarkup()}</div>
+    <div class="comment-main">
+      <p class="comment-meta"><span class="comment-name">${escapeHtml(c.name)}</span><span class="comment-time">${timeAgo(c.createdAt)}</span></p>
+      <p class="comment-text">${escapeHtml(c.body)}</p>
+      <button type="button" class="comment-like-btn${c.liked ? ' is-liked' : ''}" data-id="${escapeHtml(c.id)}" aria-pressed="${c.liked ? 'true' : 'false'}" aria-label="${c.liked ? 'Unlike' : 'Like'} this comment, currently ${c.likeCount} ${likeWord}">
+        <span class="comment-like-icon" aria-hidden="true">${c.liked ? '♥' : '♡'}</span> Like <span class="comment-like-count">${c.likeCount}</span>
+      </button>
+    </div>
+  </li>`;
+}
+
+function commentsSectionHTML() {
+  return `
+    <section class="comments" id="comments" aria-labelledby="comments-heading">
+      <div class="comments-inner">
+        <h2 id="comments-heading" class="comments-heading">Join the Conversation</h2>
+        <p class="comments-guidelines">Keep it friendly and on-topic.
+          <button type="button" class="comments-rules-link" id="btn-view-rules">View Posting Rules</button>
+        </p>
+
+        <form class="comment-form" id="comment-form" novalidate>
+          <label for="comment-name" class="sr-only">Name</label>
+          <input type="text" id="comment-name" name="name" class="comment-name-input" placeholder="Your name" maxlength="60" autocomplete="name" required>
+
+          <label for="comment-body" class="sr-only">Comment</label>
+          <textarea id="comment-body" name="body" class="comment-body-input" rows="4" placeholder="Share your take…" maxlength="2000" aria-describedby="comment-warning" required></textarea>
+
+          <p class="comment-warning" id="comment-warning" role="status" aria-live="polite" hidden></p>
+
+          ${TURNSTILE_SITE_KEY ? `<div class="cf-turnstile" data-sitekey="${escapeHtml(TURNSTILE_SITE_KEY)}" data-size="compact" id="comment-turnstile"></div>` : ''}
+
+          <div class="comment-form-actions">
+            <span class="comment-status" id="comment-status" role="status" aria-live="polite"></span>
+            <button type="submit" class="button button-small" id="btn-post-comment">Post Comment</button>
+          </div>
+        </form>
+
+        <div class="comments-list-header">
+          <p class="comments-count" id="comments-count-label">0 Comments</p>
+          <div class="comments-sort" role="group" aria-label="Sort comments">
+            <button type="button" class="comments-sort-btn is-active" data-sort="newest" aria-pressed="true">Newest</button>
+            <span class="comments-sort-sep" aria-hidden="true">|</span>
+            <button type="button" class="comments-sort-btn" data-sort="liked" aria-pressed="false">Most Liked</button>
+          </div>
+        </div>
+
+        <ul class="comment-list" id="comment-list" aria-live="polite" aria-busy="true"></ul>
+      </div>
+    </section>
+
+    <div class="rules-modal" id="rules-modal" role="dialog" aria-modal="true" aria-labelledby="rules-modal-heading" hidden>
+      <div class="rules-modal__backdrop" id="rules-modal-backdrop"></div>
+      <div class="rules-modal__panel" role="document">
+        <button type="button" class="rules-modal__close" id="rules-modal-close" aria-label="Close posting rules">&times;</button>
+        <h3 id="rules-modal-heading">Wuskaloosa Community Guidelines</h3>
+        <p>Keep Wuskaloosa friendly, useful, and appropriate for everyone. Please don&rsquo;t post:</p>
+        <ul>
+          <li>Profanity or vulgar language</li>
+          <li>Political discussion, partisan commentary, or ideological arguments</li>
+          <li>Personal attacks or harassment</li>
+          <li>Hate speech or discriminatory language</li>
+          <li>Threats</li>
+          <li>Sexually explicit or inappropriate content</li>
+          <li>Spam, excessive links, or promotion</li>
+          <li>Intentionally disruptive or inflammatory comments</li>
+        </ul>
+        <p>Keep comments relevant to the article, place, event, business, or topic being discussed.</p>
+      </div>
+    </div>`;
+}
+
 function postPage() {
   let slug = new URLSearchParams(window.location.search).get('slug');
   if (!slug) slug = window.location.pathname.replace(/^\//, '');
@@ -636,7 +747,7 @@ function postPage() {
           <p style="font-size:13px;font-weight:700;color:var(--muted);margin:0 0 20px">
             <a href="/archive" style="color:var(--crimson)">← Back</a>
           </p>
-          <p class="eyebrow crimson">${escapeHtml(post.category)} &middot; ${formatDate(post.date)}</p>
+          <p class="eyebrow crimson">${escapeHtml(post.category)} &middot; ${formatDate(post.date)} &middot; <a href="#comments" class="comment-count-link" id="comment-count-top">${commentCountWords(0, true)}</a></p>
           <h1>${escapeHtml(post.title)}</h1>
           <p class="lead" style="white-space:pre-wrap">${escapeHtml(post.excerpt)}</p>
           ${pdfBanner}
@@ -644,6 +755,7 @@ function postPage() {
         <div class="article-body">${post.html}</div>
       </article>
       <div class="ad-slot-wrap" id="ad-post-bottom"></div>
+      ${commentsSectionHTML()}
     </main>`;
 }
 
@@ -678,7 +790,7 @@ document.querySelector('#app').innerHTML = page;
   // Load Twitter widget.js if any twitter-tweet blockquotes exist (original or restored)
   if (document.querySelector('.twitter-tweet, .twitter-timeline')) {
     const s = document.createElement('script');
-    s.src = 'https://platform.twitter.com/widgets.js';
+    s.src = 'https://platform.x.com/widgets.js';
     s.async = true;
     s.charset = 'utf-8';
     document.body.appendChild(s);
@@ -836,4 +948,220 @@ async function loadAds() {
   } catch { /* ads are non-critical — fail silently */ }
 }
 
+// ── Comments ──────────────────────────────────────────────────────────────────
+
+function getAnonId() {
+  try {
+    let id = localStorage.getItem('wk_anon_id');
+    if (!id) {
+      id = (crypto.randomUUID ? crypto.randomUUID() : `anon-${Date.now()}-${Math.random().toString(16).slice(2)}`);
+      localStorage.setItem('wk_anon_id', id);
+    }
+    return id;
+  } catch {
+    return `anon-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  }
+}
+
+function loadTurnstileScript() {
+  if (window.__wkTurnstileLoading) return;
+  window.__wkTurnstileLoading = true;
+  const s = document.createElement('script');
+  s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+  s.async = true;
+  s.defer = true;
+  document.head.appendChild(s);
+}
+
+function getTurnstileToken() {
+  const input = document.querySelector('#comment-turnstile input[name="cf-turnstile-response"]');
+  return input ? input.value : '';
+}
+
+async function initComments(slug) {
+  const section = document.getElementById('comments');
+  if (!section) return;
+
+  const form        = document.getElementById('comment-form');
+  const nameInput   = document.getElementById('comment-name');
+  const bodyInput   = document.getElementById('comment-body');
+  const warningEl   = document.getElementById('comment-warning');
+  const statusEl    = document.getElementById('comment-status');
+  const postBtn     = document.getElementById('btn-post-comment');
+  const listEl      = document.getElementById('comment-list');
+  const countLabel  = document.getElementById('comments-count-label');
+  const countTop    = document.getElementById('comment-count-top');
+  const sortBtns    = [...document.querySelectorAll('.comments-sort-btn')];
+  const rulesBtn    = document.getElementById('btn-view-rules');
+  const rulesModal  = document.getElementById('rules-modal');
+  const rulesClose  = document.getElementById('rules-modal-close');
+  const rulesBackdrop = document.getElementById('rules-modal-backdrop');
+
+  const anonId = getAnonId();
+  let sort = 'newest';
+  let lastFocused = null;
+
+  // Prefill + remember name
+  try {
+    const savedName = localStorage.getItem('wk_comment_name');
+    if (savedName) nameInput.value = savedName;
+  } catch {}
+
+  if (TURNSTILE_SITE_KEY) loadTurnstileScript();
+
+  function updateCounts(n) {
+    countLabel.textContent = commentCountWords(n, false);
+    if (countTop) countTop.textContent = commentCountWords(n, true);
+  }
+
+  function renderList(comments) {
+    if (!comments.length) {
+      listEl.innerHTML = '<li class="comments-empty">No comments yet. Be the first to join the conversation.</li>';
+    } else {
+      listEl.innerHTML = comments.map(commentItemHTML).join('');
+    }
+    listEl.setAttribute('aria-busy', 'false');
+  }
+
+  async function loadComments() {
+    listEl.setAttribute('aria-busy', 'true');
+    try {
+      const params = new URLSearchParams({ slug, sort, anonId });
+      const res = await fetch(`${COMMENTS_API}/api/comments?${params.toString()}`);
+      if (!res.ok) throw new Error('bad response');
+      const data = await res.json();
+      renderList(data.comments || []);
+      updateCounts(data.total || 0);
+    } catch {
+      listEl.innerHTML = '<li class="comments-empty">Comments couldn’t be loaded right now.</li>';
+      listEl.setAttribute('aria-busy', 'false');
+    }
+  }
+
+  function runModeration() {
+    const result = moderate(nameInput.value, bodyInput.value);
+    const bodyEmpty = bodyInput.value.trim() === '';
+    if (!result.allowed && !bodyEmpty) {
+      warningEl.textContent = 'Please review your comment — it may not meet Wuskaloosa’s posting rules.';
+      warningEl.hidden = false;
+      postBtn.disabled = true;
+      postBtn.classList.add('is-disabled');
+      return false;
+    }
+    warningEl.hidden = true;
+    warningEl.textContent = '';
+    postBtn.disabled = false;
+    postBtn.classList.remove('is-disabled');
+    return true;
+  }
+
+  nameInput.addEventListener('input', runModeration);
+  bodyInput.addEventListener('input', runModeration);
+
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    const name = nameInput.value.trim();
+    const body = bodyInput.value.trim();
+    if (!name) { nameInput.focus(); return; }
+    if (!body) { bodyInput.focus(); return; }
+    if (!runModeration()) return;
+
+    postBtn.disabled = true;
+    postBtn.textContent = 'Posting…';
+    statusEl.textContent = '';
+
+    try {
+      const res = await fetch(`${COMMENTS_API}/api/comments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug, name, body, anonId, turnstileToken: getTurnstileToken() }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        warningEl.textContent = data.error || 'Please review your comment before posting.';
+        warningEl.hidden = false;
+        postBtn.disabled = false;
+        postBtn.textContent = 'Post Comment';
+        return;
+      }
+
+      try { localStorage.setItem('wk_comment_name', name); } catch {}
+      bodyInput.value = '';
+      warningEl.hidden = true;
+      statusEl.textContent = 'Comment posted.';
+      setTimeout(() => { statusEl.textContent = ''; }, 4000);
+      postBtn.disabled = false;
+      postBtn.textContent = 'Post Comment';
+      await loadComments();
+    } catch {
+      warningEl.textContent = 'Something went wrong posting your comment. Please try again.';
+      warningEl.hidden = false;
+      postBtn.disabled = false;
+      postBtn.textContent = 'Post Comment';
+    }
+  });
+
+  sortBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (btn.dataset.sort === sort) return;
+      sort = btn.dataset.sort;
+      sortBtns.forEach(b => {
+        b.classList.toggle('is-active', b === btn);
+        b.setAttribute('aria-pressed', b === btn ? 'true' : 'false');
+      });
+      loadComments();
+    });
+  });
+
+  listEl.addEventListener('click', async e => {
+    const btn = e.target.closest('.comment-like-btn');
+    if (!btn) return;
+    const id = btn.dataset.id;
+    btn.disabled = true;
+    try {
+      const res = await fetch(`${COMMENTS_API}/api/comments/${encodeURIComponent(id)}/like`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ anonId }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        btn.classList.toggle('is-liked', data.liked);
+        btn.setAttribute('aria-pressed', data.liked ? 'true' : 'false');
+        btn.querySelector('.comment-like-icon').textContent = data.liked ? '♥' : '♡';
+        btn.querySelector('.comment-like-count').textContent = data.likeCount;
+        const likeWord = data.likeCount === 1 ? 'like' : 'likes';
+        btn.setAttribute('aria-label', `${data.liked ? 'Unlike' : 'Like'} this comment, currently ${data.likeCount} ${likeWord}`);
+      }
+    } catch { /* fail silently, button re-enables below */ }
+    btn.disabled = false;
+  });
+
+  function openRules() {
+    lastFocused = document.activeElement;
+    rulesModal.hidden = false;
+    rulesClose.focus();
+    document.addEventListener('keydown', onRulesKeydown);
+  }
+  function closeRules() {
+    rulesModal.hidden = true;
+    document.removeEventListener('keydown', onRulesKeydown);
+    if (lastFocused) lastFocused.focus();
+  }
+  function onRulesKeydown(e) {
+    if (e.key === 'Escape') closeRules();
+  }
+  rulesBtn?.addEventListener('click', openRules);
+  rulesClose?.addEventListener('click', closeRules);
+  rulesBackdrop?.addEventListener('click', closeRules);
+
+  await loadComments();
+}
+
 loadAds();
+
+if (path === '/post' || /^\/\d{4}\/week\d+$/.test(path)) {
+  let commentSlug = new URLSearchParams(window.location.search).get('slug');
+  if (!commentSlug) commentSlug = window.location.pathname.replace(/^\//, '');
+  initComments(commentSlug);
+}

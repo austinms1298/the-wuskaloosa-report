@@ -7,7 +7,13 @@
 //   USER2_USERNAME / USER2_PASSWORD   second admin
 //   GITHUB_PAT                        Fine-grained PAT, Contents: Read & Write
 //   JWT_SECRET                        openssl rand -hex 32
+//
+// Comments (see worker/COMMENTS_SETUP.md for the full walkthrough):
+//   DB (D1 binding)                   created with `wrangler d1 create ...`
+//   TURNSTILE_SECRET_KEY               optional — omit to run without Turnstile
 // =============================================================================
+
+import { moderate } from './moderation.js';
 
 const REPO       = 'austinms1298/the-wuskaloosa-report';
 const POSTS_PATH = 'src/content/posts';
@@ -239,6 +245,172 @@ async function handleSaveAds(req, env, ch) {
 }
 
 
+// ── Comments (D1: DB) ──────────────────────────────────────────────────────
+// Public, account-free comments. See worker/COMMENTS_SETUP.md for setup.
+
+const MAX_NAME_LEN    = 60;
+const MAX_COMMENT_LEN = 2000;
+const MIN_COMMENT_LEN = 2;
+const RATE_LIMIT_MS   = 15 * 1000;        // min time between comments, per IP
+const DUPLICATE_WINDOW_MS = 5 * 60 * 1000; // reject identical repeat body, per IP
+
+function uid() {
+  return crypto.randomUUID();
+}
+
+async function hashIp(ip, secret) {
+  const data = new TextEncoder().encode(`${ip}|${secret || 'wuskaloosa'}`);
+  const digest = await crypto.subtle.digest('SHA-256', data);
+  return [...new Uint8Array(digest)].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+function stripHtml(str) {
+  return String(str || '').replace(/<[^>]*>/g, '').replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, '');
+}
+
+async function verifyTurnstile(token, ip, env) {
+  if (!env.TURNSTILE_SECRET_KEY) return true; // Turnstile not configured — skip
+  if (!token) return false;
+  try {
+    const form = new FormData();
+    form.append('secret', env.TURNSTILE_SECRET_KEY);
+    form.append('response', token);
+    if (ip) form.append('remoteip', ip);
+    const res = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST', body: form,
+    });
+    const data = await res.json();
+    return !!data.success;
+  } catch {
+    return false;
+  }
+}
+
+function commentRow(r, anonId) {
+  return {
+    id: r.id,
+    slug: r.post_slug,
+    name: r.name,
+    body: r.body,
+    createdAt: r.created_at,
+    likeCount: r.like_count,
+    liked: anonId ? !!r.liked_by_me : false,
+  };
+}
+
+async function handleListComments(url, env, ch) {
+  if (!env.DB) return respond({ error: 'Comments are not configured yet.' }, 503, ch);
+  const slug   = (url.searchParams.get('slug') || '').trim();
+  const sort   = url.searchParams.get('sort') === 'liked' ? 'liked' : 'newest';
+  const anonId = (url.searchParams.get('anonId') || '').trim();
+  if (!slug) return respond({ error: 'Missing slug' }, 400, ch);
+
+  const orderBy = sort === 'liked'
+    ? 'c.like_count DESC, c.created_at DESC'
+    : 'c.created_at DESC';
+
+  const query = anonId
+    ? `SELECT c.*, EXISTS(
+         SELECT 1 FROM comment_likes l WHERE l.comment_id = c.id AND l.anon_id = ?2
+       ) AS liked_by_me
+       FROM comments c WHERE c.post_slug = ?1 AND c.status = 'approved'
+       ORDER BY ${orderBy} LIMIT 500`
+    : `SELECT c.*, 0 AS liked_by_me FROM comments c
+       WHERE c.post_slug = ?1 AND c.status = 'approved'
+       ORDER BY ${orderBy} LIMIT 500`;
+
+  const stmt = anonId
+    ? env.DB.prepare(query).bind(slug, anonId)
+    : env.DB.prepare(query).bind(slug);
+
+  const { results } = await stmt.all();
+  const comments = results.map(r => commentRow(r, anonId));
+  return respond({ comments, total: comments.length }, 200, ch);
+}
+
+async function handleCreateComment(req, env, ch) {
+  if (!env.DB) return respond({ error: 'Comments are not configured yet.' }, 503, ch);
+  const body = await req.json().catch(() => ({}));
+  const slug       = String(body.slug || '').trim();
+  const name       = stripHtml(body.name).trim().slice(0, MAX_NAME_LEN);
+  const commentTxt = stripHtml(body.body).trim().slice(0, MAX_COMMENT_LEN);
+  const turnstileToken = body.turnstileToken || '';
+
+  if (!slug)        return respond({ error: 'Missing post.' }, 400, ch);
+  if (!name)         return respond({ error: 'Please enter a name.' }, 400, ch);
+  if (commentTxt.length < MIN_COMMENT_LEN)
+    return respond({ error: 'Comment is too short.' }, 400, ch);
+
+  const ip = req.headers.get('CF-Connecting-IP') || '0.0.0.0';
+  const ipHash = await hashIp(ip, env.JWT_SECRET);
+
+  const turnstileOk = await verifyTurnstile(turnstileToken, ip, env);
+  if (!turnstileOk) return respond({ error: 'Spam check failed. Please try again.' }, 400, ch);
+
+  // Rate limit: one comment per IP per RATE_LIMIT_MS
+  const last = await env.DB.prepare(
+    `SELECT created_at FROM comments WHERE ip_hash = ?1 ORDER BY created_at DESC LIMIT 1`
+  ).bind(ipHash).first();
+  const now = Date.now();
+  if (last && now - last.created_at < RATE_LIMIT_MS) {
+    return respond({ error: "You're commenting too quickly. Please wait a moment and try again." }, 429, ch);
+  }
+
+  // Duplicate protection: same IP + same body within the window
+  const dup = await env.DB.prepare(
+    `SELECT id FROM comments WHERE ip_hash = ?1 AND body = ?2 AND created_at > ?3 LIMIT 1`
+  ).bind(ipHash, commentTxt, now - DUPLICATE_WINDOW_MS).first();
+  if (dup) return respond({ error: 'That comment was already posted.' }, 400, ch);
+
+  const result = moderate(name, commentTxt);
+  const id = uid();
+  await env.DB.prepare(
+    `INSERT INTO comments (id, post_slug, name, body, created_at, status, moderation_reason, moderation_category, like_count, ip_hash)
+     VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, 0, ?9)`
+  ).bind(id, slug, name, commentTxt, now, result.allowed ? 'approved' : 'rejected',
+         result.reason, result.category, ipHash).run();
+
+  if (!result.allowed) {
+    return respond({ error: result.reason, category: result.category }, 400, ch);
+  }
+
+  const total = await env.DB.prepare(
+    `SELECT COUNT(*) AS n FROM comments WHERE post_slug = ?1 AND status = 'approved'`
+  ).bind(slug).first();
+
+  return respond({
+    comment: { id, slug, name, body: commentTxt, createdAt: now, likeCount: 0, liked: false },
+    total: total.n,
+  }, 200, ch);
+}
+
+async function handleToggleLike(commentId, req, env, ch) {
+  if (!env.DB) return respond({ error: 'Comments are not configured yet.' }, 503, ch);
+  const body = await req.json().catch(() => ({}));
+  const anonId = String(body.anonId || '').trim();
+  if (!anonId) return respond({ error: 'Missing client id.' }, 400, ch);
+
+  const existing = await env.DB.prepare(
+    `SELECT id FROM comment_likes WHERE comment_id = ?1 AND anon_id = ?2`
+  ).bind(commentId, anonId).first();
+
+  let liked;
+  if (existing) {
+    await env.DB.prepare(`DELETE FROM comment_likes WHERE id = ?1`).bind(existing.id).run();
+    await env.DB.prepare(`UPDATE comments SET like_count = MAX(0, like_count - 1) WHERE id = ?1`).bind(commentId).run();
+    liked = false;
+  } else {
+    await env.DB.prepare(
+      `INSERT INTO comment_likes (id, comment_id, anon_id, created_at) VALUES (?1, ?2, ?3, ?4)`
+    ).bind(uid(), commentId, anonId, Date.now()).run();
+    await env.DB.prepare(`UPDATE comments SET like_count = like_count + 1 WHERE id = ?1`).bind(commentId).run();
+    liked = true;
+  }
+
+  const row = await env.DB.prepare(`SELECT like_count FROM comments WHERE id = ?1`).bind(commentId).first();
+  return respond({ liked, likeCount: row ? row.like_count : 0 }, 200, ch);
+}
+
 // ── Email list (KV: EMAIL_LIST) ───────────────────────────────────────────────
 
 async function handleSubscribe(req, env, ch) {
@@ -351,6 +523,15 @@ export default {
         return await handleSubscribe(request, env, ch);
       if (url.pathname === '/api/ads' && method === 'GET')
         return await handleGetAds(env, ch);
+
+      // ── Public: comments ──
+      if (url.pathname === '/api/comments' && method === 'GET')
+        return await handleListComments(url, env, ch);
+      if (url.pathname === '/api/comments' && method === 'POST')
+        return await handleCreateComment(request, env, ch);
+      const likeMatch = url.pathname.match(/^\/api\/comments\/([^/]+)\/like$/);
+      if (likeMatch && method === 'POST')
+        return await handleToggleLike(likeMatch[1], request, env, ch);
 
       // ── Auth guard ──
       const authHeader = request.headers.get('Authorization') || '';
