@@ -113,6 +113,7 @@
     ════════════════════════════════════════════════ */
     #view-ads { display:none; }
     #view-analytics { display:none; }
+    #view-comments { display:none; }
 
     .an-stats-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px}
     .an-stat{background:var(--paper);border:1px solid var(--line);border-radius:2px;padding:16px 20px;flex:1;min-width:120px}
@@ -318,6 +319,7 @@
     <div class="toolbar-brand">THE WUSKALOOSA REPORT <span>/ ADMIN</span></div>
     <span class="toolbar-user" id="toolbar-user"></span>
     <button class="btn btn-white" id="btn-manage-ads">Manage Ads</button>
+    <button class="btn btn-white" id="btn-comments">Comments</button>
     <button class="btn btn-white" id="btn-analytics">Analytics</button>
     <button class="btn btn-white" id="btn-new-post">+ New Post</button>
     <button class="btn btn-ghost btn-sm" id="btn-logout">Log Out</button>
@@ -325,6 +327,23 @@
   <div class="posts-body">
     <div class="posts-header"><h2>All Posts</h2></div>
     <div id="posts-list"></div>
+  </div>
+</div>
+
+<!-- ════ COMMENTS ════════════════════════════════════════════════════════════ -->
+<div id="view-comments">
+  <div class="toolbar">
+    <div class="toolbar-brand">THE WUSKALOOSA REPORT <span>/ COMMENTS</span></div>
+    <span class="toolbar-user" id="cm-toolbar-user"></span>
+    <button class="btn btn-ghost btn-sm" id="btn-cm-back">&#8592; Back</button>
+  </div>
+  <div class="posts-body" style="max-width:900px">
+    <div class="posts-header"><h2 id="cm-header-title">Comments by Post</h2></div>
+    <div id="cm-posts-list"></div>
+    <div id="cm-thread" class="hidden">
+      <button class="btn btn-outline btn-sm" id="btn-cm-thread-back" style="margin-bottom:16px">&#8592; All Posts</button>
+      <div id="cm-thread-list"></div>
+    </div>
   </div>
 </div>
 
@@ -576,7 +595,7 @@ async function api(method, path, body) {
 
 /* ── Views ── */
 function showView(id) {
-  ['view-login','view-posts','view-editor','view-ads','view-analytics'].forEach(v => {
+  ['view-login','view-posts','view-editor','view-ads','view-analytics','view-comments'].forEach(v => {
     document.getElementById(v).style.display =
       v === id ? (v === 'view-login' ? 'flex' : 'block') : 'none';
   });
@@ -1696,6 +1715,78 @@ document.getElementById('btn-an-refresh').addEventListener('click', loadAnalytic
 
 document.getElementById('cf-date-range').addEventListener('change', loadAnalyticsData);
 
+/* ══════════════════════════════════════════════════════
+   COMMENT MODERATION
+══════════════════════════════════════════════════════ */
+
+async function loadCommentsAdmin() {
+  showView('view-comments');
+  document.getElementById('cm-toolbar-user').textContent = username ? `Signed in as ${username}` : '';
+  document.getElementById('cm-thread').classList.add('hidden');
+  document.getElementById('cm-posts-list').classList.remove('hidden');
+  document.getElementById('cm-header-title').textContent = 'Comments by Post';
+
+  const listEl = document.getElementById('cm-posts-list');
+  listEl.innerHTML = '<p class="posts-loading">Loading…</p>';
+  try {
+    const posts = await api('GET', '/api/admin/comments/posts');
+    if (!posts.length) {
+      listEl.innerHTML = '<div class="posts-empty"><p>\u{1F4AC}</p><p>No comments yet.</p></div>';
+      return;
+    }
+    listEl.innerHTML = posts.map(p => `
+      <div class="post-row" style="cursor:pointer" onclick="openCommentThread('${escHtml(p.slug)}')">
+        <div class="post-info">
+          <div class="post-name">${escHtml(p.slug)}</div>
+          <div class="post-meta">${p.total} comment${p.total === 1 ? '' : 's'}${p.rejected ? ` · ${p.rejected} flagged` : ''} · last ${new Date(p.lastAt).toLocaleDateString()}</div>
+        </div>
+        <button class="btn btn-outline btn-sm">View</button>
+      </div>`).join('');
+  } catch (err) {
+    listEl.innerHTML = `<p style="color:#dc2626;font-size:14px;padding:24px 0">Error: ${err.message}</p>`;
+  }
+}
+
+async function openCommentThread(slug) {
+  document.getElementById('cm-posts-list').classList.add('hidden');
+  document.getElementById('cm-thread').classList.remove('hidden');
+  document.getElementById('cm-header-title').textContent = slug;
+
+  const listEl = document.getElementById('cm-thread-list');
+  listEl.innerHTML = '<p class="posts-loading">Loading…</p>';
+  try {
+    const comments = await api('GET', `/api/admin/comments?slug=${encodeURIComponent(slug)}`);
+    if (!comments.length) {
+      listEl.innerHTML = '<div class="posts-empty"><p>\u{1F4AC}</p><p>No comments on this post.</p></div>';
+      return;
+    }
+    listEl.innerHTML = comments.map(c => `
+      <div class="post-row" style="align-items:flex-start">
+        <div class="post-info">
+          <div class="post-name">${escHtml(c.name)}${c.status === 'rejected' ? `<span class="draft-badge" style="background:#fde8e2;color:#ea4110">Flagged${c.moderationCategory ? ': ' + escHtml(c.moderationCategory) : ''}</span>` : ''}</div>
+          <div class="post-meta">${new Date(c.createdAt).toLocaleString()} · ${c.likeCount} like${c.likeCount === 1 ? '' : 's'}</div>
+          <div style="font-size:14px;line-height:1.5;margin-top:8px;white-space:pre-wrap">${escHtml(c.body)}</div>
+        </div>
+        <button class="btn btn-danger btn-sm" onclick="deleteCommentAdmin('${escHtml(c.id)}','${escHtml(slug)}')">Delete</button>
+      </div>`).join('');
+  } catch (err) {
+    listEl.innerHTML = `<p style="color:#dc2626;font-size:14px;padding:24px 0">Error: ${err.message}</p>`;
+  }
+}
+
+async function deleteCommentAdmin(id, slug) {
+  if (!confirm('Delete this comment? This cannot be undone.')) return;
+  try {
+    await api('DELETE', `/api/comments/${encodeURIComponent(id)}`);
+    openCommentThread(slug);
+  } catch (err) {
+    alert(`Delete failed: ${err.message}`);
+  }
+}
+
+document.getElementById('btn-comments').addEventListener('click', loadCommentsAdmin);
+document.getElementById('btn-cm-back').addEventListener('click', () => showView('view-posts'));
+document.getElementById('btn-cm-thread-back').addEventListener('click', loadCommentsAdmin);
 
 /* ══════════════════════════════════════════════════════
    INLINE IMAGE INSERT
