@@ -86,9 +86,14 @@
 .comment-name{font-weight:800;font-size:14px}
 .comment-time{font-size:12px;color:var(--muted)}
 .comment-text{margin:0 0 8px;font-size:15px;line-height:1.55;white-space:pre-wrap;word-break:break-word}
+.comment-actions{display:flex;align-items:center;gap:18px}
 .comment-like-btn{display:inline-flex;align-items:center;gap:5px;background:none;border:none;padding:0;font-family:inherit;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer}
 .comment-like-btn:hover{color:var(--crimson)}
 .comment-like-btn.is-liked{color:var(--crimson)}
+.comment-delete-btn{background:none;border:none;padding:0;font-family:inherit;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+.comment-delete-btn:hover{color:var(--crimson)}
+.comment-delete-btn.is-confirming{color:var(--crimson)}
+.comment-delete-btn:disabled{opacity:.6;cursor:default}
 .comment-like-icon{font-size:15px}
 .rules-modal{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:20px}
 .rules-modal[hidden]{display:none}

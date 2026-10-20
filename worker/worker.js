@@ -295,6 +295,22 @@ function commentRow(r, anonId) {
     createdAt: r.created_at,
     likeCount: r.like_count,
     liked: anonId ? !!r.liked_by_me : false,
+    isMine: !!(anonId && r.anon_id && r.anon_id === anonId),
+  };
+}
+
+// Admin-only fields included on top of commentRow(), for the moderation view
+function adminCommentRow(r) {
+  return {
+    id: r.id,
+    slug: r.post_slug,
+    name: r.name,
+    body: r.body,
+    createdAt: r.created_at,
+    likeCount: r.like_count,
+    status: r.status,
+    moderationReason: r.moderation_reason,
+    moderationCategory: r.moderation_category,
   };
 }
 
@@ -335,6 +351,7 @@ async function handleCreateComment(req, env, ch) {
   const name       = stripHtml(body.name).trim().slice(0, MAX_NAME_LEN);
   const commentTxt = stripHtml(body.body).trim().slice(0, MAX_COMMENT_LEN);
   const turnstileToken = body.turnstileToken || '';
+  const anonId     = String(body.anonId || '').trim().slice(0, 100) || null;
 
   if (!slug)        return respond({ error: 'Missing post.' }, 400, ch);
   if (!name)         return respond({ error: 'Please enter a name.' }, 400, ch);
@@ -365,10 +382,10 @@ async function handleCreateComment(req, env, ch) {
   const result = moderate(name, commentTxt);
   const id = uid();
   await env.DB.prepare(
-    `INSERT INTO comments (id, post_slug, name, body, created_at, status, moderation_reason, moderation_category, like_count, ip_hash)
-     VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, 0, ?9)`
+    `INSERT INTO comments (id, post_slug, name, body, created_at, status, moderation_reason, moderation_category, like_count, ip_hash, anon_id)
+     VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, 0, ?9, ?10)`
   ).bind(id, slug, name, commentTxt, now, result.allowed ? 'approved' : 'rejected',
-         result.reason, result.category, ipHash).run();
+         result.reason, result.category, ipHash, anonId).run();
 
   if (!result.allowed) {
     return respond({ error: result.reason, category: result.category }, 400, ch);
@@ -379,9 +396,68 @@ async function handleCreateComment(req, env, ch) {
   ).bind(slug).first();
 
   return respond({
-    comment: { id, slug, name, body: commentTxt, createdAt: now, likeCount: 0, liked: false },
+    comment: { id, slug, name, body: commentTxt, createdAt: now, likeCount: 0, liked: false, isMine: true },
     total: total.n,
   }, 200, ch);
+}
+
+async function handleDeleteComment(commentId, req, env, ch) {
+  if (!env.DB) return respond({ error: 'Comments are not configured yet.' }, 503, ch);
+
+  const row = await env.DB.prepare(`SELECT id, post_slug, anon_id FROM comments WHERE id = ?1`).bind(commentId).first();
+  if (!row) return respond({ error: 'Comment not found.' }, 404, ch);
+
+  // Admin (valid JWT) can delete anything; otherwise the request must prove
+  // it came from the same browser that posted the comment.
+  const authHeader = req.headers.get('Authorization') || '';
+  const payload = await jwtVerify(authHeader.replace(/^Bearer /, ''), env.JWT_SECRET || '');
+  const isAdmin = !!payload;
+
+  if (!isAdmin) {
+    const body = await req.json().catch(() => ({}));
+    const anonId = String(body.anonId || '').trim();
+    if (!anonId || !row.anon_id || anonId !== row.anon_id) {
+      return respond({ error: 'You can only delete your own comments.' }, 403, ch);
+    }
+  }
+
+  await env.DB.prepare(`DELETE FROM comment_likes WHERE comment_id = ?1`).bind(commentId).run();
+  await env.DB.prepare(`DELETE FROM comments WHERE id = ?1`).bind(commentId).run();
+
+  const total = await env.DB.prepare(
+    `SELECT COUNT(*) AS n FROM comments WHERE post_slug = ?1 AND status = 'approved'`
+  ).bind(row.post_slug).first();
+
+  return respond({ ok: true, total: total.n }, 200, ch);
+}
+
+// ── Admin: comment moderation (protected — mounted after the auth guard) ──────
+
+async function handleAdminListCommentPosts(env, ch) {
+  if (!env.DB) return respond({ error: 'Comments are not configured yet.' }, 503, ch);
+  const { results } = await env.DB.prepare(
+    `SELECT post_slug,
+            COUNT(*) AS total,
+            SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END) AS rejected,
+            MAX(created_at) AS last_at
+     FROM comments
+     GROUP BY post_slug
+     ORDER BY last_at DESC`
+  ).all();
+  const posts = results.map(r => ({
+    slug: r.post_slug, total: r.total, rejected: r.rejected, lastAt: r.last_at,
+  }));
+  return respond(posts, 200, ch);
+}
+
+async function handleAdminListComments(url, env, ch) {
+  if (!env.DB) return respond({ error: 'Comments are not configured yet.' }, 503, ch);
+  const slug = (url.searchParams.get('slug') || '').trim();
+  if (!slug) return respond({ error: 'Missing slug' }, 400, ch);
+  const { results } = await env.DB.prepare(
+    `SELECT * FROM comments WHERE post_slug = ?1 ORDER BY created_at DESC LIMIT 1000`
+  ).bind(slug).all();
+  return respond(results.map(adminCommentRow), 200, ch);
 }
 
 async function handleToggleLike(commentId, req, env, ch) {
@@ -532,6 +608,12 @@ export default {
       const likeMatch = url.pathname.match(/^\/api\/comments\/([^/]+)\/like$/);
       if (likeMatch && method === 'POST')
         return await handleToggleLike(likeMatch[1], request, env, ch);
+      // Delete is "public" (self-service, via matching anonId) but also
+      // doubles as the admin delete route — handleDeleteComment checks for
+      // a valid admin JWT internally and allows either path.
+      const deleteMatch = url.pathname.match(/^\/api\/comments\/([^/]+)$/);
+      if (deleteMatch && method === 'DELETE')
+        return await handleDeleteComment(deleteMatch[1], request, env, ch);
 
       // ── Auth guard ──
       const authHeader = request.headers.get('Authorization') || '';
@@ -558,6 +640,12 @@ export default {
       const emailDel = url.pathname.match(/^\/api\/emails\/(.+)$/);
       if (emailDel && method === 'DELETE')
         return await handleDeleteEmail(decodeURIComponent(emailDel[1]), env, ch);
+
+      // ── Protected: comment moderation ──
+      if (url.pathname === '/api/admin/comments/posts' && method === 'GET')
+        return await handleAdminListCommentPosts(env, ch);
+      if (url.pathname === '/api/admin/comments' && method === 'GET')
+        return await handleAdminListComments(url, env, ch);
 
       // ── Protected: posts ──
       const m        = url.pathname.match(/^\/api\/posts(?:\/([^?]+))?$/);

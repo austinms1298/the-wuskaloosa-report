@@ -648,9 +648,12 @@ function commentItemHTML(c) {
     <div class="comment-main">
       <p class="comment-meta"><span class="comment-name">${escapeHtml(c.name)}</span><span class="comment-time">${timeAgo(c.createdAt)}</span></p>
       <p class="comment-text">${escapeHtml(c.body)}</p>
-      <button type="button" class="comment-like-btn${c.liked ? ' is-liked' : ''}" data-id="${escapeHtml(c.id)}" aria-pressed="${c.liked ? 'true' : 'false'}" aria-label="${c.liked ? 'Unlike' : 'Like'} this comment, currently ${c.likeCount} ${likeWord}">
-        <span class="comment-like-icon" aria-hidden="true">${c.liked ? '♥' : '♡'}</span> Like <span class="comment-like-count">${c.likeCount}</span>
-      </button>
+      <div class="comment-actions">
+        <button type="button" class="comment-like-btn${c.liked ? ' is-liked' : ''}" data-id="${escapeHtml(c.id)}" aria-pressed="${c.liked ? 'true' : 'false'}" aria-label="${c.liked ? 'Unlike' : 'Like'} this comment, currently ${c.likeCount} ${likeWord}">
+          <span class="comment-like-icon" aria-hidden="true">${c.liked ? '♥' : '♡'}</span> Like <span class="comment-like-count">${c.likeCount}</span>
+        </button>
+        ${c.isMine ? `<button type="button" class="comment-delete-btn" data-id="${escapeHtml(c.id)}" aria-label="Delete your comment">Delete</button>` : ''}
+      </div>
     </div>
   </li>`;
 }
@@ -1135,6 +1138,54 @@ async function initComments(slug) {
       }
     } catch { /* fail silently, button re-enables below */ }
     btn.disabled = false;
+  });
+
+  listEl.addEventListener('click', async e => {
+    const btn = e.target.closest('.comment-delete-btn');
+    if (!btn) return;
+
+    // Two-click confirm (no native browser dialog) — first click arms it,
+    // a second click within 4s actually deletes.
+    if (!btn.classList.contains('is-confirming')) {
+      btn.classList.add('is-confirming');
+      btn.textContent = 'Confirm delete?';
+      btn._confirmTimer = setTimeout(() => {
+        btn.classList.remove('is-confirming');
+        btn.textContent = 'Delete';
+      }, 4000);
+      return;
+    }
+
+    clearTimeout(btn._confirmTimer);
+    const id = btn.dataset.id;
+    btn.disabled = true;
+    btn.textContent = 'Deleting…';
+
+    try {
+      const res = await fetch(`${COMMENTS_API}/api/comments/${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ anonId }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        btn.closest('.comment-item')?.remove();
+        updateCounts(data.total || 0);
+        if (!listEl.children.length) {
+          listEl.innerHTML = '<li class="comments-empty">No comments yet. Be the first to join the conversation.</li>';
+        }
+      } else {
+        btn.disabled = false;
+        btn.classList.remove('is-confirming');
+        btn.textContent = 'Delete';
+        statusEl.textContent = data.error || 'Could not delete comment.';
+        setTimeout(() => { statusEl.textContent = ''; }, 4000);
+      }
+    } catch {
+      btn.disabled = false;
+      btn.classList.remove('is-confirming');
+      btn.textContent = 'Delete';
+    }
   });
 
   function openRules() {
