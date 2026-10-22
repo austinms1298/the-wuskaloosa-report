@@ -10,6 +10,7 @@ compatibility_date = "2024-11-01"
 #   wrangler secret put USER2_PASSWORD   (jackie's password)
 #   wrangler secret put GITHUB_PAT       (GitHub fine-grained PAT)
 #   wrangler secret put JWT_SECRET       (any long random string)
+#   wrangler secret put CF_ANALYTICS_TOKEN  (Cloudflare API token scoped to Account Analytics: Read only)
 #
 # Your worker URL will be:
 #   https://wuskaloosa-admin.YOUR-ACCOUNT.workers.dev

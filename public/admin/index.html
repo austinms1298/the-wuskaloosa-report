@@ -1642,15 +1642,11 @@ function fileToBase64(file) {
 
 /* ══════════════════════════════════════════════════════
    ANALYTICS
+   The Cloudflare API token that reads this data lives only as a Worker
+   secret (CF_ANALYTICS_TOKEN) — it is never sent to or stored in the
+   browser. This page just asks the Worker for a date range and gets
+   back the finished numbers.
 ══════════════════════════════════════════════════════ */
-const CF_GQL = 'https://api.cloudflare.com/client/v4/graphql';
-
-const CF_SETTINGS = {
-  accountId: 'a739f4eb91846321263701c2ee0d2ba5',
-  siteTag:   'd7332e889b6548388187632bc18213b8',
-  apiToken:  'cfut_tkKz98mo0PwAlbtiGlZ5IhQVEAsifcOjSHR0bqH145897fdb'
-};
-function getCFSettings() { return CF_SETTINGS; }
 
 async function openAnalytics() {
   showView('view-analytics');
@@ -1658,25 +1654,14 @@ async function openAnalytics() {
 }
 
 async function loadAnalyticsData() {
-  const s = getCFSettings();
-  if (!s.accountId || !s.siteTag || !s.apiToken) return;
   const days = parseInt(document.getElementById('cf-date-range').value) || 30;
-  const to   = new Date().toISOString().split('T')[0];
-  const from = new Date(Date.now() - days * 86400000).toISOString().split('T')[0];
   const statusEl = document.getElementById('an-status');
   statusEl.textContent = 'Loading…';
-  const q = `{viewer{accounts(filter:{accountTag:"${s.accountId}"}){totals:rumPageloadEventsAdaptiveGroups(filter:{AND:[{siteTag:"${s.siteTag}"},{date_geq:"${from}"},{date_leq:"${to}"}]},limit:1){count sum{visits}}topPaths:rumPageloadEventsAdaptiveGroups(filter:{AND:[{siteTag:"${s.siteTag}"},{date_geq:"${from}"},{date_leq:"${to}"}]},limit:15,orderBy:[count_DESC]){count dimensions{requestPath}}byDay:rumPageloadEventsAdaptiveGroups(filter:{AND:[{siteTag:"${s.siteTag}"},{date_geq:"${from}"},{date_leq:"${to}"}]},limit:90,orderBy:[date_ASC]){count dimensions{date}}topRefs:rumPageloadEventsAdaptiveGroups(filter:{AND:[{siteTag:"${s.siteTag}"},{date_geq:"${from}"},{date_leq:"${to}"},{refererHost_neq:""}]},limit:10,orderBy:[count_DESC]){count dimensions{refererHost}}}}}`;
   try {
-    const res = await fetch(CF_GQL, {
-      method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + s.apiToken, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query: q })
-    });
-    const json = await res.json();
-    if (json.errors) throw new Error(json.errors[0].message);
+    const { data, from, to } = await api('POST', '/api/analytics', { days });
     statusEl.textContent = '';
-    renderAnalytics(json.data.viewer.accounts[0], from, to);
-  } catch(err) {
+    renderAnalytics(data, from, to);
+  } catch (err) {
     statusEl.textContent = 'Error: ' + err.message;
   }
 }

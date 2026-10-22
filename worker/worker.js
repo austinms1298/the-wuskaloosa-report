@@ -20,6 +20,14 @@ const POSTS_PATH = 'src/content/posts';
 const BRANCH     = 'main';
 const GH_API     = 'https://api.github.com';
 
+// Cloudflare Web Analytics identifiers — NOT secret (same category as a GA
+// tracking id), safe to keep in code. The API TOKEN that reads this data is
+// the sensitive part — that lives only as the CF_ANALYTICS_TOKEN secret,
+// never in client-side code. See handleAnalytics() below.
+const CF_GQL        = 'https://api.cloudflare.com/client/v4/graphql';
+const CF_ACCOUNT_ID = 'a739f4eb91846321263701c2ee0d2ba5';
+const CF_SITE_TAG   = 'd7332e889b6548388187632bc18213b8';
+
 // ── CORS ─────────────────────────────────────────────────────────────────────
 function corsHeaders(origin) {
   const allowed =
@@ -242,6 +250,28 @@ async function handleSaveAds(req, env, ch) {
   });
   const updated = await ghRequest('GET', `/repos/${REPO}/contents/${ADS_CONFIG_PATH}?ref=${BRANCH}`, env.GITHUB_PAT);
   return respond({ ok: true, sha: updated.sha }, 200, ch);
+}
+
+// ── Analytics (proxied — the Cloudflare API token never reaches the browser) ──
+
+async function handleAnalytics(req, env, ch) {
+  if (!env.CF_ANALYTICS_TOKEN) return respond({ error: 'Analytics not configured. Run: wrangler secret put CF_ANALYTICS_TOKEN' }, 503, ch);
+  const body = await req.json().catch(() => ({}));
+  const days = Math.min(90, Math.max(1, parseInt(body.days, 10) || 30));
+  const to   = new Date().toISOString().split('T')[0];
+  const from = new Date(Date.now() - days * 86400000).toISOString().split('T')[0];
+
+  const q = `{viewer{accounts(filter:{accountTag:"${CF_ACCOUNT_ID}"}){totals:rumPageloadEventsAdaptiveGroups(filter:{AND:[{siteTag:"${CF_SITE_TAG}"},{date_geq:"${from}"},{date_leq:"${to}"}]},limit:1){count sum{visits}}topPaths:rumPageloadEventsAdaptiveGroups(filter:{AND:[{siteTag:"${CF_SITE_TAG}"},{date_geq:"${from}"},{date_leq:"${to}"}]},limit:15,orderBy:[count_DESC]){count dimensions{requestPath}}byDay:rumPageloadEventsAdaptiveGroups(filter:{AND:[{siteTag:"${CF_SITE_TAG}"},{date_geq:"${from}"},{date_leq:"${to}"}]},limit:90,orderBy:[date_ASC]){count dimensions{date}}topRefs:rumPageloadEventsAdaptiveGroups(filter:{AND:[{siteTag:"${CF_SITE_TAG}"},{date_geq:"${from}"},{date_leq:"${to}"},{refererHost_neq:""}]},limit:10,orderBy:[count_DESC]){count dimensions{refererHost}}}}}`;
+
+  const res = await fetch(CF_GQL, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${env.CF_ANALYTICS_TOKEN}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query: q }),
+  });
+  const json = await res.json();
+  if (json.errors) return respond({ error: json.errors[0]?.message || 'Analytics query failed' }, 502, ch);
+
+  return respond({ data: json.data.viewer.accounts[0], from, to }, 200, ch);
 }
 
 
@@ -629,6 +659,10 @@ export default {
       // ── Protected: ads config ──
       if (url.pathname === '/api/ads' && method === 'POST')
         return await handleSaveAds(request, env, ch);
+
+      // ── Protected: analytics ──
+      if (url.pathname === '/api/analytics' && method === 'POST')
+        return await handleAnalytics(request, env, ch);
 
       // ── Protected: email list ──
       if (url.pathname === '/api/emails' && method === 'GET')
