@@ -202,7 +202,8 @@ function homePage() {
               const gd = game.gameDate ? new Date(game.gameDate) : null;
               const isThisWeek = gd && gd >= today && gd <= weekEnd;
               const isPast = gd && gd < today;
-              const label = isThisWeek ? 'THIS WEEK!' : (isPast ? (game.result || 'FINAL') : (game.time || ''));
+              const isBye = game.home === null;
+              const label = isBye ? '' : (isThisWeek ? 'THIS WEEK!' : (isPast ? (game.result || 'FINAL') : (game.time || '')));
               const cls = isThisWeek ? 'featured' : '';
               const matchup = game.home === null ? game.opponent : `${game.home ? 'vs' : 'at'} ${game.opponent}`;
               const rCls = isPast && game.result ? (game.result.startsWith('W') ? 'result-w' : game.result.startsWith('L') ? 'result-l' : '') : '';
@@ -741,6 +742,12 @@ function postPage() {
       </a>`
     : '';
 
+  const leaveCommentBtn = `<a class="leave-comment-btn" href="#comments">
+        <span class="leave-comment-btn__icon">💬</span>
+        <span>Leave a Comment</span>
+        <span class="leave-comment-btn__arrow">↓</span>
+      </a>`;
+
   return `
 
     <main>
@@ -754,6 +761,7 @@ function postPage() {
           <h1>${escapeHtml(post.title)}</h1>
           <p class="lead" style="white-space:pre-wrap">${escapeHtml(post.excerpt)}</p>
           ${pdfBanner}
+          ${leaveCommentBtn}
         </header>
         <div class="article-body">${post.html}</div>
       </article>
