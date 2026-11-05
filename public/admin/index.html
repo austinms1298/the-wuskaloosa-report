@@ -427,7 +427,7 @@
             <button class="btn btn-primary btn-sm" id="btn-do-embed" type="button">Insert</button>
             <button class="btn btn-outline btn-sm" id="btn-cancel-embed" type="button">Cancel</button>
           </div>
-          <p class="embed-hint">Supports: Twitter / X · Facebook (posts &amp; videos) · YouTube · any URL</p>
+          <p class="embed-hint">Paste a link (Twitter / X · Facebook · YouTube · any URL) — or Facebook's own "Embed" &lt;iframe&gt; code works too</p>
         </div>
         <div id="quill-editor"></div>
       </div>
@@ -1882,60 +1882,90 @@ function restoreEmbeds(html) {
 }
 
 async function doInsertEmbed() {
-  const url = document.getElementById('embed-url-input').value.trim();
-  if (!url) return;
+  const raw = document.getElementById('embed-url-input').value.trim();
+  if (!raw) return;
 
   const btn = document.getElementById('btn-do-embed');
   btn.disabled = true;
   btn.textContent = 'Loading…';
 
   let html = '';
-  const kind = detectEmbedKind(url);
 
-  if (kind === 'twitter') {
-    // Fetch real tweet content via noembed so the editor shows actual text
-    try {
-      const resp = await fetch(`https://noembed.com/embed?url=${encodeURIComponent(url)}`);
-      if (resp.ok) {
-        const data = await resp.json();
-        if (data.html) {
-          // noembed returns blockquote + a <script> tag; strip the script (won't run in Quill anyway).
-          // Also strip the trailing "pic.twitter.com/xxxxx" media short-link noembed appends inline —
-          // it's a meaningless random-looking string once the real widget (with the actual photo/video)
-          // renders, and it's the stray link people see when the widget fails to load.
-          html = data.html
-            .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
-            .replace(/<a[^>]*>\s*pic\.twitter\.com\/[^<\s]+\s*<\/a>/gi, '')
-            .trim();
-        }
-      }
-    } catch (e) { /* network error — fall through to fallback */ }
-    // Clean fallback if noembed fails — never leaves a raw/ugly link behind
-    if (!html) html = `<blockquote class="twitter-tweet" data-dnt="true"><p><a href="${url}" target="_blank" rel="noopener">View this post on X / Twitter ↗</a></p></blockquote>`;
-  }
-  else if (kind === 'fb-video') {
-    html = `<blockquote class="fb-video" data-dnt="true"><p><a href="${url}" target="_blank" rel="noopener">▶ View this video on Facebook ↗</a></p></blockquote>`;
-  }
-  else if (kind === 'fb-post') {
-    html = `<blockquote class="fb-post" data-dnt="true"><p><a href="${url}" target="_blank" rel="noopener">View this post on Facebook ↗</a></p></blockquote>`;
+  // Facebook's own "Embed" dialog gives you a full <iframe> snippet, not a plain
+  // link — people naturally paste that in here instead of the share URL. Detect
+  // it and reuse Facebook's iframe directly: it already has the exact width/height
+  // Facebook computed for that specific video/post, so vertical reels come through
+  // at the right aspect ratio instead of being forced into a horizontal box.
+  const iframeSrcM = raw.match(/<iframe[^>]*\ssrc=["']([^"']+)["']/i);
+  if (iframeSrcM && /^https:\/\/(?:www\.)?facebook\.com\/plugins\//i.test(iframeSrcM[1])) {
+    const widthM  = raw.match(/\swidth=["']?(\d+)/i);
+    const heightM = raw.match(/\sheight=["']?(\d+)/i);
+    const w = widthM ? parseInt(widthM[1], 10) : 500;
+    const h = heightM ? parseInt(heightM[1], 10) : 280;
+    const pct = ((h / w) * 100).toFixed(2);
+    html = `<div style="position:relative;max-width:${w}px;margin:1em auto;padding-bottom:${pct}%;height:0;overflow:hidden"><iframe src="${escHtml(iframeSrcM[1])}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" scrolling="no" frameborder="0" allowfullscreen loading="lazy" title="Facebook embed"></iframe></div>`;
   }
   else {
-    const ytM = url.match(/(?:youtube\.com\/watch\?(?:.*&)?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-    if (ytM) {
-      // YouTube — plain iframe, no external script dependency, always works
-      html = `<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;margin:1em 0"><iframe src="https://www.youtube.com/embed/${ytM[1]}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" allowfullscreen loading="lazy" title="YouTube video"></iframe></div>`;
+    // Facebook's classic "Embed Post" dialog instead gives a <div class="fb-post"
+    // data-href="..."> / <div class="fb-video" ...> snippet (no iframe) — if that's
+    // what got pasted, pull the real URL out of data-href and treat it like a
+    // normal link below, rather than trying (and failing) to detect a link in it directly.
+    const dataHrefM = raw.match(/<div[^>]*\bclass=["'][^"']*\bfb-(?:post|video)\b[^"']*["'][^>]*\bdata-href=["']([^"']+)["']/i)
+                   || raw.match(/<div[^>]*\bdata-href=["']([^"']+)["'][^>]*\bclass=["'][^"']*\bfb-(?:post|video)\b[^"']*["']/i);
+    const url = dataHrefM ? dataHrefM[1] : raw;
+    const kind = detectEmbedKind(url);
+
+    if (kind === 'twitter') {
+      // Fetch real tweet content via noembed so the editor shows actual text
+      try {
+        const resp = await fetch(`https://noembed.com/embed?url=${encodeURIComponent(url)}`);
+        if (resp.ok) {
+          const data = await resp.json();
+          if (data.html) {
+            // noembed returns blockquote + a <script> tag; strip the script (won't run in Quill anyway).
+            // Also strip the trailing "pic.twitter.com/xxxxx" media short-link noembed appends inline —
+            // it's a meaningless random-looking string once the real widget (with the actual photo/video)
+            // renders, and it's the stray link people see when the widget fails to load.
+            html = data.html
+              .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+              .replace(/<a[^>]*>\s*pic\.twitter\.com\/[^<\s]+\s*<\/a>/gi, '')
+              .trim();
+          }
+        }
+      } catch (e) { /* network error — fall through to fallback */ }
+      // Clean fallback if noembed fails — never leaves a raw/ugly link behind
+      if (!html) html = `<blockquote class="twitter-tweet" data-dnt="true"><p><a href="${escHtml(url)}" target="_blank" rel="noopener">View this post on X / Twitter ↗</a></p></blockquote>`;
     }
-    // Generic link
+    else if (kind === 'fb-video') {
+      html = `<blockquote class="fb-video" data-dnt="true"><p><a href="${escHtml(url)}" target="_blank" rel="noopener">▶ View this video on Facebook ↗</a></p></blockquote>`;
+    }
+    else if (kind === 'fb-post') {
+      html = `<blockquote class="fb-post" data-dnt="true"><p><a href="${escHtml(url)}" target="_blank" rel="noopener">View this post on Facebook ↗</a></p></blockquote>`;
+    }
     else {
-      html = `<p><a href="${url}" target="_blank" rel="noopener">${url}</a></p>`;
+      const ytM = url.match(/(?:youtube\.com\/watch\?(?:.*&)?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+      if (ytM) {
+        // YouTube — plain iframe, no external script dependency, always works
+        html = `<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;margin:1em 0"><iframe src="https://www.youtube.com/embed/${encodeURIComponent(ytM[1])}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" allowfullscreen loading="lazy" title="YouTube video"></iframe></div>`;
+      }
+      // Generic link — if it's not a recognizable URL at all (e.g. stray pasted
+      // HTML/text we couldn't make sense of), don't insert broken markup
+      else if (/^https?:\/\/\S+$/i.test(url)) {
+        html = `<p><a href="${escHtml(url)}" target="_blank" rel="noopener">${escHtml(url)}</a></p>`;
+      }
+      else {
+        showBanner('error', "That doesn't look like a link or a platform's embed code — paste the post's URL, or the <iframe> embed code from Facebook's own \"Embed\" button.");
+      }
     }
   }
 
-  const range = quill.getSelection(true);
-  const idx = range ? range.index : quill.getLength();
-  quill.clipboard.dangerouslyPasteHTML(idx, html);
-  document.getElementById('embed-panel').style.display = 'none';
-  document.getElementById('embed-url-input').value = '';
+  if (html) {
+    const range = quill.getSelection(true);
+    const idx = range ? range.index : quill.getLength();
+    quill.clipboard.dangerouslyPasteHTML(idx, html);
+    document.getElementById('embed-panel').style.display = 'none';
+    document.getElementById('embed-url-input').value = '';
+  }
   btn.disabled = false;
   btn.textContent = 'Insert';
 }
