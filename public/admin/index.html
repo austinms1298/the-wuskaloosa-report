@@ -1065,6 +1065,49 @@ function buildPreviewDoc({title, category, dateDisp, excerpt, body, pdfBanner, a
 </div>
 ${(body.includes('fb-video') || body.includes('fb-post')) ? '<div id="fb-root"></div><script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v19.0"><\/script>' : ''}
 ${body.includes('twitter-tweet') ? '<script async src="https://platform.x.com/widgets.js" charset="utf-8"><\/script>' : ''}
+<script>
+// Quill rewrites any pasted <iframe> down to a bare <iframe class="ql-video" src="...">,
+// discarding wrapper divs/styles — only src survives. Size it here instead, from
+// whatever's still in that src URL. Kept in sync with upgradeVideoEmbeds() in src/main.js.
+(function upgradeVideoEmbeds() {
+  document.querySelectorAll('iframe.ql-video').forEach(function(iframe) {
+    if (iframe.parentElement && iframe.parentElement.classList.contains('embed-ratio')) return;
+    var src = iframe.getAttribute('src') || '';
+    var w, h, capWidth = null;
+    if (/facebook\.com\/plugins\//i.test(src)) {
+      try {
+        var u = new URL(src, window.location.href);
+        w = parseInt(u.searchParams.get('width'), 10) || 500;
+        h = parseInt(u.searchParams.get('height'), 10) || 280;
+        capWidth = w;
+      } catch (e) { return; }
+    } else if (/youtube\.com\/embed\/|player\.vimeo\.com\//i.test(src)) {
+      w = 16; h = 9;
+    } else {
+      return;
+    }
+    var outer = document.createElement('div');
+    if (capWidth) { outer.style.maxWidth = capWidth + 'px'; outer.style.margin = '1em auto'; }
+    else { outer.style.margin = '1em 0'; }
+    var inner = document.createElement('div');
+    inner.className = 'embed-ratio';
+    inner.style.position = 'relative';
+    inner.style.width = '100%';
+    inner.style.paddingBottom = ((h / w) * 100).toFixed(2) + '%';
+    inner.style.height = '0';
+    inner.style.overflow = 'hidden';
+    iframe.style.position = 'absolute';
+    iframe.style.top = '0';
+    iframe.style.left = '0';
+    iframe.style.width = '100%';
+    iframe.style.height = '100%';
+    iframe.style.border = '0';
+    iframe.parentNode.insertBefore(outer, iframe);
+    outer.appendChild(inner);
+    inner.appendChild(iframe);
+  });
+})();
+<\/script>
 </body></html>`;
 }
 
@@ -1898,12 +1941,15 @@ async function doInsertEmbed() {
   // at the right aspect ratio instead of being forced into a horizontal box.
   const iframeSrcM = raw.match(/<iframe[^>]*\ssrc=["']([^"']+)["']/i);
   if (iframeSrcM && /^https:\/\/(?:www\.)?facebook\.com\/plugins\//i.test(iframeSrcM[1])) {
-    const widthM  = raw.match(/\swidth=["']?(\d+)/i);
-    const heightM = raw.match(/\sheight=["']?(\d+)/i);
-    const w = widthM ? parseInt(widthM[1], 10) : 500;
-    const h = heightM ? parseInt(heightM[1], 10) : 280;
-    const pct = ((h / w) * 100).toFixed(2);
-    html = `<div style="position:relative;max-width:${w}px;margin:1em auto;padding-bottom:${pct}%;height:0;overflow:hidden"><iframe src="${escHtml(iframeSrcM[1])}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" scrolling="no" frameborder="0" allowfullscreen loading="lazy" title="Facebook embed"></iframe></div>`;
+    // IMPORTANT: Quill rewrites ANY <iframe> we insert down to its own canonical
+    // <iframe class="ql-video" src="..."> — it discards wrapper divs, inline
+    // styles, width/height, everything except src (confirmed by inspecting what
+    // actually got saved). So there's no point building a sized wrapper here; it
+    // would never survive. Facebook's own width/height are preserved automatically
+    // because they're baked into the src URL's query string, which Quill does
+    // keep — sizing is applied at render time instead (see upgradeVideoEmbeds in
+    // both this file's buildPreviewDoc and src/main.js, kept in sync).
+    html = `<iframe src="${escHtml(iframeSrcM[1])}" allowfullscreen></iframe>`;
   }
   else {
     // Facebook's classic "Embed Post" dialog instead gives a <div class="fb-post"
@@ -1945,8 +1991,10 @@ async function doInsertEmbed() {
     else {
       const ytM = url.match(/(?:youtube\.com\/watch\?(?:.*&)?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
       if (ytM) {
-        // YouTube — plain iframe, no external script dependency, always works
-        html = `<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;margin:1em 0"><iframe src="https://www.youtube.com/embed/${encodeURIComponent(ytM[1])}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" allowfullscreen loading="lazy" title="YouTube video"></iframe></div>`;
+        // Quill reduces any <iframe> we insert to its own bare <iframe class="ql-video">,
+        // discarding wrapper divs/styles regardless — so just insert the iframe itself;
+        // the 16:9 sizing is applied at render time by upgradeVideoEmbeds().
+        html = `<iframe src="https://www.youtube.com/embed/${encodeURIComponent(ytM[1])}" allowfullscreen></iframe>`;
       }
       // Generic link — if it's not a recognizable URL at all (e.g. stray pasted
       // HTML/text we couldn't make sense of), don't insert broken markup

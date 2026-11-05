@@ -852,7 +852,54 @@ document.querySelector('#app').innerHTML = page;
       document.body.appendChild(s);
     }
   }
+
+  upgradeVideoEmbeds();
 })();
+
+// Quill (the admin editor) rewrites ANY <iframe> pasted into a post down to its
+// own bare <iframe class="ql-video" src="...">, discarding every wrapper div,
+// inline style, width and height we try to attach at save time — only `src`
+// survives. So embed sizing has to happen here, after the fact, reading whatever
+// info is still available in that surviving src URL. Kept in sync with the same
+// function in public/admin/index.html's buildPreviewDoc, so Preview matches live.
+function upgradeVideoEmbeds(root) {
+  (root || document).querySelectorAll('iframe.ql-video').forEach(iframe => {
+    if (iframe.parentElement && iframe.parentElement.classList.contains('embed-ratio')) return; // already upgraded
+    const src = iframe.getAttribute('src') || '';
+    let w, h, capWidth = null;
+    if (/facebook\.com\/plugins\//i.test(src)) {
+      try {
+        const u = new URL(src, window.location.href);
+        w = parseInt(u.searchParams.get('width'), 10) || 500;
+        h = parseInt(u.searchParams.get('height'), 10) || 280;
+        capWidth = w; // Facebook computed this for the real video — don't stretch it bigger
+      } catch (e) { return; }
+    } else if (/youtube\.com\/embed\/|player\.vimeo\.com\//i.test(src)) {
+      w = 16; h = 9; // standard widescreen ratio, fills the article width
+    } else {
+      return; // unrecognized source — leave Quill's bare default alone
+    }
+    const outer = document.createElement('div');
+    if (capWidth) { outer.style.maxWidth = capWidth + 'px'; outer.style.margin = '1em auto'; }
+    else { outer.style.margin = '1em 0'; }
+    const inner = document.createElement('div');
+    inner.className = 'embed-ratio';
+    inner.style.position = 'relative';
+    inner.style.width = '100%';
+    inner.style.paddingBottom = ((h / w) * 100).toFixed(2) + '%';
+    inner.style.height = '0';
+    inner.style.overflow = 'hidden';
+    iframe.style.position = 'absolute';
+    iframe.style.top = '0';
+    iframe.style.left = '0';
+    iframe.style.width = '100%';
+    iframe.style.height = '100%';
+    iframe.style.border = '0';
+    iframe.parentNode.insertBefore(outer, iframe);
+    outer.appendChild(inner);
+    inner.appendChild(iframe);
+  });
+}
 
 // Inject newsletter bar before footer on all pages except /subscribe
 if (path !== '/subscribe') {
