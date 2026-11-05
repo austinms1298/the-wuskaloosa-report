@@ -888,10 +888,12 @@ document.getElementById('btn-save-draft').addEventListener('click', async () => 
     document.getElementById('f-title').value = title;
     if (!slug) { slug = `untitled-${n}`; document.getElementById('f-slug').value = slug; }
   }
-  // Reuse existing draft filename or create a new one with draft- prefix
-  const draftFilename = (editFile && editFile.startsWith('draft-'))
-    ? editFile
-    : ('draft-' + makeFilename(slug, dateVal || new Date().toISOString()));
+  // The Drafts list reads its displayed date straight off the filename (not the
+  // frontmatter date), so the filename's date segment must always track the
+  // form's date field — otherwise an old draft gets backdated in the editor but
+  // keeps showing today's (or whenever-it-was-first-saved) date in the list.
+  const isExistingDraft = editFile && editFile.startsWith('draft-');
+  const draftFilename = 'draft-' + makeFilename(slug, dateVal || new Date().toISOString());
   const content = buildFrontmatter({
     title, slug, date: dateVal ? new Date(dateVal).toISOString() : new Date().toISOString(),
     excerpt, category, week, year, schedulePdf: pdfUrl, draft: true,
@@ -899,10 +901,17 @@ document.getElementById('btn-save-draft').addEventListener('click', async () => 
   const btn = document.getElementById('btn-save-draft');
   btn.textContent = 'Saving…'; btn.disabled = true; hideBanner();
   try {
-    // Use existing sha only if we're re-saving the same draft file
+    // Use existing sha only if the filename isn't changing (same file, new content)
     const sha = (editFile === draftFilename) ? editSha : undefined;
     const result = await api('POST', `/api/posts/${draftFilename}`, { content, sha });
+    // If the date/slug changed since this draft was first saved, the filename above
+    // is new — clean up the stale file under the old name so it isn't left behind.
+    const oldDraftFile = (isExistingDraft && editFile !== draftFilename) ? editFile : null;
+    const oldDraftSha  = oldDraftFile ? editSha : null;
     editFile = draftFilename; editSha = result.sha;
+    if (oldDraftFile) {
+      api('DELETE', `/api/posts/${oldDraftFile}?sha=${encodeURIComponent(oldDraftSha)}`).catch(() => {});
+    }
     document.getElementById('editor-toolbar-title').textContent = 'Draft';
     document.getElementById('btn-delete-post').classList.remove('hidden');
     showBanner('success', 'Saved as draft — not visible on the site');
