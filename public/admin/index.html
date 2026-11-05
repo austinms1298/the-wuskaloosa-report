@@ -427,7 +427,7 @@
             <button class="btn btn-primary btn-sm" id="btn-do-embed" type="button">Insert</button>
             <button class="btn btn-outline btn-sm" id="btn-cancel-embed" type="button">Cancel</button>
           </div>
-          <p class="embed-hint">Supports: Twitter / X · YouTube · any URL</p>
+          <p class="embed-hint">Supports: Twitter / X · Facebook (posts &amp; videos) · YouTube · any URL</p>
         </div>
         <div id="quill-editor"></div>
       </div>
@@ -918,7 +918,11 @@ document.getElementById('btn-preview').addEventListener('click', async () => {
   const category = document.getElementById('f-category').value;
   const dateVal  = document.getElementById('f-date').value;
   const excerpt  = document.getElementById('f-excerpt').value.trim();
-  const body     = quill.root.innerHTML;
+  // Quill has already stripped the twitter-tweet/fb-video/fb-post class and data
+  // attributes from any embed blockquote by this point — restore them here too,
+  // exactly like the save path does, or Preview would always show the raw
+  // fallback link instead of the real embed.
+  const body     = restoreEmbeds(quill.root.innerHTML);
   const dateDisp = dateVal
     ? new Date(dateVal).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})
     : new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
@@ -1024,6 +1028,9 @@ function buildPreviewDoc({title, category, dateDisp, excerpt, body, pdfBanner, a
   .ad-slot-wrap + .article-header{margin-top:24px}
   .ad-label{font-size:9px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin-bottom:8px}
   .ad-placeholder{width:728px;max-width:100%;height:90px;background:repeating-linear-gradient(-45deg,#f0ede8,#f0ede8 8px,#e8e4de 8px,#e8e4de 16px);display:flex;align-items:center;justify-content:center;margin:0 auto;font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.08em;text-transform:uppercase;border:1px dashed var(--line)}
+  .article-body blockquote{margin:24px auto;max-width:600px}
+  .article-body .fb-video,.article-body .fb-post,.article-body .twitter-tweet{max-width:100%}
+  .article-body .fb-video iframe,.article-body .fb-post iframe,.article-body .twitter-tweet iframe{max-width:100%}
 </style></head><body>
 <div class="preview-notice">⚠ PREVIEW MODE — This post has not been published yet</div>
 
@@ -1047,7 +1054,8 @@ function buildPreviewDoc({title, category, dateDisp, excerpt, body, pdfBanner, a
   <div class="ad-label">Advertisement</div>
   ${adHtml('post-bottom')}
 </div>
-${body.includes('twitter-tweet') ? '<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"><\/script>' : ''}
+${(body.includes('fb-video') || body.includes('fb-post')) ? '<div id="fb-root"></div><script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v19.0"><\/script>' : ''}
+${body.includes('twitter-tweet') ? '<script async src="https://platform.x.com/widgets.js" charset="utf-8"><\/script>' : ''}
 </body></html>`;
 }
 
@@ -1824,20 +1832,41 @@ document.getElementById('embed-url-input').addEventListener('keydown', e => {
   if (e.key === 'Escape') { document.getElementById('embed-panel').style.display = 'none'; document.getElementById('embed-url-input').value = ''; }
 });
 
-// Quill strips class/data attributes from blockquotes. Before saving, scan for
-// blockquotes whose only link points to twitter.com / x.com and restore the
-// twitter-tweet class so platform.twitter.com/widgets.js can render them.
+// ── Embed detection (kept in sync with src/moderation-free copy in src/main.js's
+// activateSocialEmbeds — same patterns, same classes/attributes) ──
+// Identifies which platform a URL belongs to so the right embed widget renders.
+function detectEmbedKind(url) {
+  if (/(?:twitter\.com|x\.com)\/\w+\/status\/\d+/i.test(url)) return 'twitter';
+  if (/facebook\.com\/[\w.\-]+\/videos\/\d+|facebook\.com\/reel\/\d+|fb\.watch\//i.test(url)) return 'fb-video';
+  if (/facebook\.com\/[\w.\-]+\/posts\/|facebook\.com\/permalink\.php|facebook\.com\/photo(?:\.php)?|facebook\.com\/story\.php|facebook\.com\/watch\/\?/i.test(url)) return 'fb-post';
+  if (/facebook\.com\//i.test(url)) return 'fb-post'; // best-effort default for any other FB link shape
+  return null;
+}
+
+// Quill strips class/data attributes from blockquotes (and would strip a bare
+// <div class="fb-video"> entirely, since it isn't a format Quill recognizes).
+// So embeds are always stored as a <blockquote> containing a plain, visible
+// <a href>, and this function re-derives the correct class + data attributes
+// from that link right before saving — the same trick already proven for
+// Twitter, now generalized to Facebook too.
 function restoreEmbeds(html) {
   const doc = new DOMParser().parseFromString(html, 'text/html');
   doc.querySelectorAll('blockquote').forEach(bq => {
-    if (bq.classList.contains('twitter-tweet')) return; // already tagged
-    const links = bq.querySelectorAll('a');
-    const twitterLink = [...links].find(a =>
-      /(?:twitter\.com|x\.com)\/\w+\/status\/\d+/.test(a.href)
-    );
-    if (twitterLink) {
-      bq.classList.add('twitter-tweet');
-      bq.setAttribute('data-dnt', 'true');
+    if (bq.classList.contains('twitter-tweet') || bq.classList.contains('fb-video') || bq.classList.contains('fb-post')) return; // already tagged
+    const links = [...bq.querySelectorAll('a')];
+    for (const a of links) {
+      const kind = detectEmbedKind(a.href);
+      if (!kind) continue;
+      if (kind === 'twitter') {
+        bq.classList.add('twitter-tweet');
+        bq.setAttribute('data-dnt', 'true');
+      } else {
+        bq.classList.add(kind); // 'fb-video' or 'fb-post'
+        bq.setAttribute('data-href', a.href);
+        bq.setAttribute('data-width', 'auto');
+        bq.setAttribute('data-show-text', 'false');
+      }
+      break;
     }
   });
   return doc.body.innerHTML;
@@ -1852,28 +1881,39 @@ async function doInsertEmbed() {
   btn.textContent = 'Loading…';
 
   let html = '';
+  const kind = detectEmbedKind(url);
 
-  // Twitter / X — fetch real tweet content via noembed so editor shows actual text
-  const twitterM = url.match(/(?:twitter\.com|x\.com)\/\w+\/status\/(\d+)/);
-  if (twitterM) {
+  if (kind === 'twitter') {
+    // Fetch real tweet content via noembed so the editor shows actual text
     try {
       const resp = await fetch(`https://noembed.com/embed?url=${encodeURIComponent(url)}`);
       if (resp.ok) {
         const data = await resp.json();
         if (data.html) {
-          // noembed returns blockquote + a <script> tag; strip the script (won't run in Quill anyway)
-          // Keep the blockquote with the actual tweet text for display & for published rendering
-          html = data.html.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '').trim();
+          // noembed returns blockquote + a <script> tag; strip the script (won't run in Quill anyway).
+          // Also strip the trailing "pic.twitter.com/xxxxx" media short-link noembed appends inline —
+          // it's a meaningless random-looking string once the real widget (with the actual photo/video)
+          // renders, and it's the stray link people see when the widget fails to load.
+          html = data.html
+            .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+            .replace(/<a[^>]*>\s*pic\.twitter\.com\/[^<\s]+\s*<\/a>/gi, '')
+            .trim();
         }
       }
     } catch (e) { /* network error — fall through to fallback */ }
-    // Fallback if noembed fails
-    if (!html) html = `<blockquote class="twitter-tweet" data-dnt="true"><a href="${url}">View tweet on Twitter/X</a></blockquote>`;
+    // Clean fallback if noembed fails — never leaves a raw/ugly link behind
+    if (!html) html = `<blockquote class="twitter-tweet" data-dnt="true"><p><a href="${url}" target="_blank" rel="noopener">View this post on X / Twitter ↗</a></p></blockquote>`;
   }
-  // YouTube — iframe embed (works fine in Quill)
+  else if (kind === 'fb-video') {
+    html = `<blockquote class="fb-video" data-dnt="true"><p><a href="${url}" target="_blank" rel="noopener">▶ View this video on Facebook ↗</a></p></blockquote>`;
+  }
+  else if (kind === 'fb-post') {
+    html = `<blockquote class="fb-post" data-dnt="true"><p><a href="${url}" target="_blank" rel="noopener">View this post on Facebook ↗</a></p></blockquote>`;
+  }
   else {
     const ytM = url.match(/(?:youtube\.com\/watch\?(?:.*&)?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
     if (ytM) {
+      // YouTube — plain iframe, no external script dependency, always works
       html = `<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;margin:1em 0"><iframe src="https://www.youtube.com/embed/${ytM[1]}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" allowfullscreen loading="lazy" title="YouTube video"></iframe></div>`;
     }
     // Generic link

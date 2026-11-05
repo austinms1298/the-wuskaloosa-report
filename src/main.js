@@ -785,26 +785,72 @@ if (path === '/404')      page = notFoundPage();
 
 document.querySelector('#app').innerHTML = page;
 
-// Activate social embeds after injecting page HTML
+// Activate social embeds after injecting page HTML.
+// Kept in sync with public/admin/index.html's detectEmbedKind()/restoreEmbeds() —
+// same patterns, same classes/attributes — so a post looks identical in Preview
+// and once published.
 (function activateSocialEmbeds() {
-  // Old posts were saved with the twitter-tweet class stripped by Quill.
-  // Scan every blockquote for a Twitter/X status link and restore the class
-  // in the DOM so widget.js can find and render them.
-  document.querySelectorAll('blockquote:not(.twitter-tweet)').forEach(bq => {
-    const link = bq.querySelector('a[href*="twitter.com/"], a[href*="x.com/"]');
-    if (link && /\/status\/\d+/.test(link.href)) {
-      bq.classList.add('twitter-tweet');
-      bq.setAttribute('data-dnt', 'true');
+  function detectEmbedKind(url) {
+    if (/(?:twitter\.com|x\.com)\/\w+\/status\/\d+/i.test(url)) return 'twitter';
+    if (/facebook\.com\/[\w.-]+\/videos\/\d+|facebook\.com\/reel\/\d+|fb\.watch\//i.test(url)) return 'fb-video';
+    if (/facebook\.com\/[\w.-]+\/posts\/|facebook\.com\/permalink\.php|facebook\.com\/photo(?:\.php)?|facebook\.com\/story\.php|facebook\.com\/watch\/\?/i.test(url)) return 'fb-post';
+    if (/facebook\.com\//i.test(url)) return 'fb-post';
+    return null;
+  }
+
+  // Old posts were saved with the embed's class/data attributes stripped by Quill.
+  // Scan every blockquote for a link we recognize and restore what's needed so
+  // the right widget script can find and render it.
+  document.querySelectorAll('blockquote:not(.twitter-tweet):not(.fb-video):not(.fb-post)').forEach(bq => {
+    const links = [...bq.querySelectorAll('a')];
+    for (const link of links) {
+      const kind = detectEmbedKind(link.href);
+      if (!kind) continue;
+      if (kind === 'twitter') {
+        bq.classList.add('twitter-tweet');
+        bq.setAttribute('data-dnt', 'true');
+      } else {
+        bq.classList.add(kind);
+        bq.setAttribute('data-href', link.href);
+        bq.setAttribute('data-width', 'auto');
+        bq.setAttribute('data-show-text', 'false');
+      }
+      break;
     }
   });
 
-  // Load Twitter widget.js if any twitter-tweet blockquotes exist (original or restored)
+  // Twitter/X — load widgets.js if needed. Guard against a page that already has
+  // window.twttr defined (shouldn't normally happen on a fresh page load, but if
+  // it does, re-run the scan explicitly instead of silently doing nothing).
   if (document.querySelector('.twitter-tweet, .twitter-timeline')) {
-    const s = document.createElement('script');
-    s.src = 'https://platform.x.com/widgets.js';
-    s.async = true;
-    s.charset = 'utf-8';
-    document.body.appendChild(s);
+    if (window.twttr && window.twttr.widgets) {
+      window.twttr.widgets.load();
+    } else {
+      const s = document.createElement('script');
+      s.src = 'https://platform.x.com/widgets.js';
+      s.async = true;
+      s.charset = 'utf-8';
+      document.body.appendChild(s);
+    }
+  }
+
+  // Facebook — load the XFBML SDK if any fb-video/fb-post embeds are present.
+  if (document.querySelector('.fb-video, .fb-post')) {
+    if (window.FB && window.FB.XFBML) {
+      window.FB.XFBML.parse();
+    } else {
+      if (!document.getElementById('fb-root')) {
+        const root = document.createElement('div');
+        root.id = 'fb-root';
+        document.body.insertBefore(root, document.body.firstChild);
+      }
+      const s = document.createElement('script');
+      s.src = 'https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v19.0';
+      s.async = true;
+      s.defer = true;
+      s.crossOrigin = 'anonymous';
+      document.body.appendChild(s);
+    }
   }
 })();
 
