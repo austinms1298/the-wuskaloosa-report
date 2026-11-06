@@ -12,6 +12,10 @@
 .leave-comment-btn__arrow{font-size:13px;font-weight:800;transition:transform .15s}
 .leave-comment-btn:hover .leave-comment-btn__arrow{transform:translateY(2px)}
 @media(max-width:680px){.leave-comment-btn{font-size:12px;padding:12px 16px;gap:8px}}
+.home-cta-stack{display:flex;flex-direction:column;align-items:flex-start;gap:10px;margin-top:6px}
+.home-cta-stack .button{margin-top:0}
+.home-cta-stack .leave-comment-btn{margin:0;max-width:none}
+@media(max-width:680px){.home-cta-stack{align-items:stretch}}
 
 /* ── Ad slots ─────────────────────────────────────────────────────────────── */
 .ad-slot-wrap{display:flex;flex-direction:column;align-items:center;padding:8px 0 10px;background:#fff;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin:0;overflow:hidden}

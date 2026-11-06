@@ -177,12 +177,14 @@ function homePage() {
                         </ul>
                       </div>`
                    : ''}
-                 <a class="button" href="${postUrl(featured)}">Read More and Download your TV Schedule <span>→</span></a>
-                 <a class="leave-comment-btn" href="${postUrl(featured)}#comments">
-                   <span class="leave-comment-btn__icon">💬</span>
-                   <span>Leave a Comment</span>
-                   <span class="leave-comment-btn__arrow">↓</span>
-                 </a>`
+                 <div class="home-cta-stack">
+                   <a class="button" href="${postUrl(featured)}">Read More and Download your TV Schedule <span>→</span></a>
+                   <a class="leave-comment-btn" href="${postUrl(featured)}#comments">
+                     <span class="leave-comment-btn__icon">💬</span>
+                     <span>Leave a Comment on This Post!</span>
+                     <span class="leave-comment-btn__arrow">↓</span>
+                   </a>
+                 </div>`
               : '<p style="color:var(--muted);font-size:15px;margin:10px 0">The first take drops before kickoff. Check back soon.</p>'
             }
           </div>
@@ -749,7 +751,7 @@ function postPage() {
 
   const leaveCommentBtn = `<a class="leave-comment-btn" href="#comments">
         <span class="leave-comment-btn__icon">💬</span>
-        <span>Leave a Comment</span>
+        <span>Leave a Comment on This Post!</span>
         <span class="leave-comment-btn__arrow">↓</span>
       </a>`;
 
