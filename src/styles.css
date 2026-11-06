@@ -63,6 +63,9 @@
 
 /* ── Social embeds (Twitter/X, Facebook) ──────────────────────────────────── */
 .article-body blockquote{margin:28px auto;max-width:600px}
+.article-body a{color:#1a56db;text-decoration:underline;text-underline-offset:2px}
+.article-body a:hover{color:#15409e}
+.article-body a:visited{color:#6b21a8}
 .article-body .fb-video,.article-body .fb-post,.article-body .twitter-tweet{max-width:100%;overflow:hidden}
 .article-body .fb-video iframe,.article-body .fb-post iframe,.article-body .twitter-tweet iframe{max-width:100%}
 
