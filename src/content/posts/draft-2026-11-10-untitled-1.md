@@ -1,11 +1,12 @@
 ---
-title: "Untitled 1"
+title: "Recognizing how busy lane kiffin is deleting his social media accounts..."
 slug: "untitled-1"
 date: "2026-11-10T20:08:00.000Z"
-excerpt: ""
+excerpt: "I decided to help him out by selecting his next celebrity pregame walkout crew!"
 category: "Latest Take"
-week: 1
+week: 11
 year: 2026
+schedule_pdf: "/schedules/2026/week-11.pdf"
 draft: true
 ---
 
