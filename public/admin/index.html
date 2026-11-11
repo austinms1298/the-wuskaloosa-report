@@ -708,6 +708,7 @@ function initQuill() {
       ['clean'],
     ]},
   });
+  attachImageHandlers();
 }
 
 document.getElementById('f-title').addEventListener('input', () => {
@@ -813,6 +814,7 @@ document.getElementById('btn-upload-pdf').addEventListener('click', async () => 
 
 /* ── Publish ── */
 document.getElementById('btn-publish').addEventListener('click', async () => {
+  if (await convertDataImages()) { showBanner('error', "Some pasted photos couldn't be shrunk and were removed. Add them again with the Photo button, then Publish."); return; }
   const title    = document.getElementById('f-title').value.trim();
   const slug     = document.getElementById('f-slug').value.trim();
   const excerpt  = document.getElementById('f-excerpt').value.trim();
@@ -877,6 +879,7 @@ document.getElementById('btn-publish').addEventListener('click', async () => {
 
 /* ── Save Draft ── */
 document.getElementById('btn-save-draft').addEventListener('click', async () => {
+  if (await convertDataImages()) { showBanner('error', "Some pasted photos couldn't be shrunk and were removed. Add them again with the Photo button, then Save Draft."); return; }
   let title    = document.getElementById('f-title').value.trim();
   let slug     = document.getElementById('f-slug').value.trim();
   const excerpt  = document.getElementById('f-excerpt').value.trim();
@@ -1460,13 +1463,11 @@ document.getElementById('btn-upload-ad').addEventListener('click', async () => {
     const name = row ? row.querySelector('.ad-fname').value.trim() || file.name : file.name;
     const size = row ? row.querySelector('.ad-fsize').value : 'leaderboard';
     const link = row ? row.querySelector('.ad-flink').value.trim() : '';
-    const ext  = file.type.includes('png') ? 'png' : file.type.includes('gif') ? 'gif' : file.type.includes('webp') ? 'webp' : 'jpg';
     const id   = 'ad_' + Date.now() + '_' + i;
-    const path = `ads/${id}.${ext}`;
     statusEl.textContent = `Uploading ${i + 1} of ${files.length}…`; statusEl.style.color = '#706a64';
     try {
-      const b64    = await fileToBase64(file);
-      const result = await api('POST', '/api/upload', { path, content: b64 });
+      const prep   = await prepareImage(file, { maxW: 1600 });
+      const result = await api('POST', '/api/upload', { path: `ads/${id}.${prep.ext}`, content: prep.b64 });
       adsConfig.library[id] = { name, imageUrl: result.url, imageSha: result.sha, link: link || '', size };
       uploaded++;
     } catch (err) { console.warn(`Upload failed for ${name}:`, err.message); }
@@ -1845,6 +1846,152 @@ document.getElementById('btn-cm-back').addEventListener('click', () => showView(
 document.getElementById('btn-cm-thread-back').addEventListener('click', loadCommentsAdmin);
 
 /* ══════════════════════════════════════════════════════
+   IMAGE SHRINKING (every photo is resized + compressed in the browser
+   before it is uploaded, so posts and the site stay small and fast)
+══════════════════════════════════════════════════════ */
+const IMG_MAX_WIDTH = 1400;          // px — plenty for the article column, incl. retina
+const IMG_MAX_BYTES = 400 * 1024;    // aim for ≤ ~400 KB per photo
+
+function loadImageEl(blob) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(blob);
+    const el = new Image();
+    el.onload  = () => resolve({ el, url, w: el.naturalWidth, h: el.naturalHeight });
+    el.onerror = () => { URL.revokeObjectURL(url); reject(new Error("Your browser can't read that image — save it as a JPG or PNG and try again.")); };
+    el.src = url;
+  });
+}
+function canvasToBlob(canvas, type, q) {
+  return new Promise(resolve => canvas.toBlob(resolve, type, q));
+}
+
+// Returns { b64, ext } for a smaller version of the image.
+async function prepareImage(file, opts = {}) {
+  const maxW = opts.maxW || IMG_MAX_WIDTH, maxBytes = opts.maxBytes || IMG_MAX_BYTES;
+  // Animated GIFs can't be re-encoded here — allow small ones, refuse huge ones.
+  if (file.type === 'image/gif') {
+    if (file.size > 3 * 1024 * 1024) throw new Error('That GIF is over 3 MB — use a shorter clip or a still image.');
+    return { b64: await fileToBase64(file), ext: 'gif' };
+  }
+  const { el, url, w, h } = await loadImageEl(file);
+  try {
+    const passthroughExt = { 'image/jpeg':'jpg', 'image/png':'png', 'image/webp':'webp' }[file.type];
+    if (passthroughExt && file.size <= maxBytes && w <= maxW) {
+      return { b64: await fileToBase64(file), ext: passthroughExt };   // already small — leave untouched
+    }
+    let scale = Math.min(1, maxW / w);
+    const draw = (sc) => {
+      const c = document.createElement('canvas');
+      c.width = Math.max(1, Math.round(w * sc)); c.height = Math.max(1, Math.round(h * sc));
+      const ctx = c.getContext('2d', { willReadFrequently: true });
+      return { c, ctx };
+    };
+    // Transparent PNG/WebP stays PNG (so logos don't get a black box); everything else becomes JPEG.
+    let { c, ctx } = draw(scale);
+    ctx.drawImage(el, 0, 0, c.width, c.height);
+    let hasAlpha = false;
+    if (file.type === 'image/png' || file.type === 'image/webp') {
+      const d = ctx.getImageData(0, 0, c.width, c.height).data;
+      for (let i = 3; i < d.length; i += 4) { if (d[i] < 250) { hasAlpha = true; break; } }
+    }
+    let blob;
+    if (hasAlpha) {
+      blob = await canvasToBlob(c, 'image/png');
+      while (blob.size > maxBytes * 2 && scale > 0.3) {
+        scale *= 0.8; ({ c, ctx } = draw(scale)); ctx.drawImage(el, 0, 0, c.width, c.height);
+        blob = await canvasToBlob(c, 'image/png');
+      }
+      return { b64: await fileToBase64(blob), ext: 'png' };
+    }
+    for (let attempt = 0; attempt < 8; attempt++) {
+      ({ c, ctx } = draw(scale));
+      ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height);
+      ctx.drawImage(el, 0, 0, c.width, c.height);
+      for (const q of [0.85, 0.75, 0.65, 0.55]) {
+        blob = await canvasToBlob(c, 'image/jpeg', q);
+        if (blob && blob.size <= maxBytes) return { b64: await fileToBase64(blob), ext: 'jpg' };
+      }
+      if (scale < 0.3) break;
+      scale *= 0.8;               // still too big → shrink the dimensions and try again
+    }
+    return { b64: await fileToBase64(blob), ext: 'jpg' };
+  } finally { URL.revokeObjectURL(url); }
+}
+
+function imgStatus(msg, clearAfter) {
+  const el = document.getElementById('img-upload-status');
+  if (!el) return;
+  el.textContent = msg;
+  if (clearAfter) setTimeout(() => { if (el.textContent === msg) el.textContent = ''; }, clearAfter);
+}
+
+// Shrink + upload one image, return its public URL.
+async function uploadImageFile(file, nameHint) {
+  const prep = await prepareImage(file);
+  const base = (nameHint || file.name || 'image').replace(/\.[a-z0-9]+$/i, '').replace(/[^a-z0-9]+/gi, '_').toLowerCase().replace(/^_+|_+$/g, '') || 'image';
+  const path = `uploads/inline/${Date.now()}_${base}.${prep.ext}`;
+  const result = await api('POST', '/api/upload', { path, content: prep.b64 });
+  return result.url;
+}
+
+async function insertImageFile(file) {
+  imgStatus('Shrinking & uploading photo…');
+  try {
+    const url = await uploadImageFile(file);
+    const range = quill.getSelection(true);
+    const at = range ? range.index : quill.getLength();
+    quill.insertEmbed(at, 'image', url, 'user');
+    quill.setSelection(at + 1);
+    imgStatus('✓ Photo added', 3000);
+  } catch (err) { imgStatus(`Photo failed: ${err.message}`, 8000); }
+}
+
+// Any image pasted/dropped in as raw data (what a Mac screenshot or copied photo becomes) is
+// swapped for a small uploaded file. Returns how many images could not be converted.
+let convertChain = Promise.resolve(0);
+function convertDataImages() {
+  convertChain = convertChain.then(async () => {
+    const imgs = [...quill.root.querySelectorAll('img[src^="data:"]')];
+    if (!imgs.length) return 0;
+    let failed = 0, n = 0;
+    for (const img of imgs) {
+      imgStatus(`Shrinking & uploading photo ${++n} of ${imgs.length}…`);
+      try {
+        const blob = await (await fetch(img.getAttribute('src'))).blob();
+        const url = await uploadImageFile(blob, 'pasted');
+        img.setAttribute('src', url);
+      } catch (err) { failed++; img.remove(); console.warn('Pasted image not converted:', err.message); }
+    }
+    quill.update('user');
+    imgStatus(failed ? `${failed} photo(s) couldn't be added — please use the Photo button` : '✓ Photos added', failed ? 8000 : 3000);
+    return failed;
+  }).catch(() => 0);
+  return convertChain;
+}
+
+function attachImageHandlers() {
+  // Pasting an image file (e.g. a screenshot) — Quill ignores these by default.
+  quill.root.addEventListener('paste', e => {
+    const cd = e.clipboardData; if (!cd) return;
+    const imgs = [...(cd.files || [])].filter(f => f.type.startsWith('image/'));
+    if (!imgs.length || cd.getData('text/plain')) return;
+    e.preventDefault(); e.stopPropagation();
+    imgs.forEach(insertImageFile);
+  }, true);
+  // Dragging image files into the editor.
+  quill.root.addEventListener('drop', e => {
+    const imgs = [...(e.dataTransfer?.files || [])].filter(f => f.type.startsWith('image/'));
+    if (!imgs.length) return;
+    e.preventDefault(); e.stopPropagation();
+    imgs.forEach(insertImageFile);
+  }, true);
+  // Pasted HTML that carries raw (base64) images.
+  quill.on('text-change', (delta, old, source) => {
+    if (source === 'user' && quill.root.querySelector('img[src^="data:"]')) convertDataImages();
+  });
+}
+
+/* ══════════════════════════════════════════════════════
    INLINE IMAGE INSERT
 ══════════════════════════════════════════════════════ */
 document.getElementById('btn-insert-img').addEventListener('click', () => {
@@ -1853,25 +2000,8 @@ document.getElementById('btn-insert-img').addEventListener('click', () => {
 
 document.getElementById('inline-img-file').addEventListener('change', async e => {
   const file = e.target.files[0];
-  if (!file) return;
-  const statusEl = document.getElementById('img-upload-status');
-  statusEl.textContent = 'Uploading…';
-  try {
-    const ext = file.type.includes('png') ? 'png' : file.type.includes('gif') ? 'gif' : file.type.includes('webp') ? 'webp' : 'jpg';
-    const safeName = file.name.replace(/[^a-z0-9.]/gi, '_').toLowerCase();
-    const path = `uploads/inline/${Date.now()}_${safeName}`;
-    const b64 = await fileToBase64(file);
-    const result = await api('POST', '/api/upload', { path, content: b64 });
-    const range = quill.getSelection(true);
-    quill.insertEmbed(range ? range.index : quill.getLength(), 'image', result.url);
-    quill.setSelection((range ? range.index : quill.getLength()) + 1);
-    statusEl.textContent = '✓ Inserted';
-    setTimeout(() => { statusEl.textContent = ''; }, 3000);
-  } catch (err) {
-    statusEl.textContent = `Upload failed: ${err.message}`;
-    setTimeout(() => { statusEl.textContent = ''; }, 6000);
-  }
   e.target.value = '';
+  if (file) await insertImageFile(file);
 });
 
 /* ══════════════════════════════════════════════════════
