@@ -772,8 +772,8 @@ function postPage() {
         </header>
         <div class="article-body">${post.html}</div>
       </article>
-      <div class="ad-slot-wrap" id="ad-post-bottom"></div>
       ${commentsSectionHTML()}
+      <div class="ad-slot-wrap ad-slot-wrap--after-comments" id="ad-post-bottom"></div>
     </main>`;
 }
 
