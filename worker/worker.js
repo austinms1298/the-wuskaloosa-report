@@ -116,7 +116,11 @@ function b64decode(str) {
 function b64encode(str) {
   const bytes = new TextEncoder().encode(str);
   let bin = '';
-  bytes.forEach(b => (bin += String.fromCharCode(b)));
+  // Encode in 32KB chunks: far less CPU than one-byte-at-a-time string concat,
+  // which can exceed the Worker CPU limit on large posts (e.g. pasted photos).
+  for (let i = 0; i < bytes.length; i += 0x8000) {
+    bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  }
   return btoa(bin);
 }
 

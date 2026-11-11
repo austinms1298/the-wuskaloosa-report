@@ -837,7 +837,15 @@ document.getElementById('btn-publish').addEventListener('click', async () => {
     // When publishing from a draft, the target file is new — no sha
     const oldDraftFile = isDraftFile ? editFile : null;
     const oldDraftSha  = isDraftFile ? editSha  : null;
-    const result = await api('POST', `/api/posts/${filename}`, { content, sha: isDraftFile ? undefined : (editSha||undefined) });
+    let publishSha = isDraftFile ? undefined : (editSha||undefined);
+    if (!publishSha) {
+      // GitHub rejects an overwrite without the existing file's sha (422). If a post
+      // with this filename is already live (e.g. an earlier publish of the same
+      // draft), look up its sha so Publish updates it instead of failing.
+      try { const existing = await api('GET', `/api/posts/${filename}`); publishSha = existing.sha || undefined; }
+      catch (_) { /* no such file yet — it's a brand-new post */ }
+    }
+    const result = await api('POST', `/api/posts/${filename}`, { content, sha: publishSha });
     editFile = filename; editSha = result.sha;
     // Delete the draft file now that it's published
     if (oldDraftFile) {
