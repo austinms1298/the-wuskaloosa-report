@@ -1,6 +1,6 @@
 ---
 title: "Recognizing how busy lane kiffin is deleting his social media accounts..."
-slug: "untitled-1"
+slug: "recognizing-how-busy-lane-kiffin-is-deleting-his-social-media-accounts"
 date: "2026-11-10T20:08:00.000Z"
 excerpt: "I decided to help him out by selecting his next celebrity pregame walkout crew!"
 category: "Latest Take"
