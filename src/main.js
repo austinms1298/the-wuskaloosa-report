@@ -757,19 +757,22 @@ function postPage() {
 
   // "Send to your friends" — opens the reader's own email app with a ready-to-send message.
   // (mailto: bodies are plain text; email apps turn the full URLs into clickable links.)
-  const shareArticleUrl = `${window.location.origin}${postUrl(post)}`;
-  const shareSubscribeUrl = `${window.location.origin}/subscribe`;
+  const SHARE_ORIGIN = 'https://wuskaloosareport.com';   // always share the real site address
+  const shareArticleUrl = `${SHARE_ORIGIN}${postUrl(post)}`;
+  const shareSubscribeUrl = `${SHARE_ORIGIN}/subscribe`;
   const shareSubject = "Thought you'd love this week's Wuskaloosa Report";
+  // Each link sits alone on its own line — that's what email apps need to turn it into a clickable link.
   const shareBody = [
     'Hey!',
     '',
     "I'm a fan of The Wuskaloosa Report and I wanted to pass this one along to you. It's smart, sassy, and comes with the weekly football TV schedule so you never miss a game. I think you'll love it too. (This is a personal recommendation from me, not spam!)",
     '',
-    "Read this week's Wuskaloosa Report and get this week's football TV schedule:",
-    post.title,
+    `Read this week's take, "${post.title}", and get this week's football TV schedule:`,
+    '',
     shareArticleUrl,
     '',
-    'Want the Report delivered to your inbox each week? Be sure to subscribe!',
+    'Want the Report delivered to your inbox each week? Be sure to subscribe:',
+    '',
     shareSubscribeUrl,
     '',
     'Roll Tide!',
