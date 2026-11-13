@@ -759,15 +759,20 @@ function postPage() {
   // (mailto: bodies are plain text; email apps turn the full URLs into clickable links.)
   const shareArticleUrl = `${window.location.origin}${postUrl(post)}`;
   const shareSubscribeUrl = `${window.location.origin}/subscribe`;
-  const shareSubject = "Read this week's Wuskaloosa Report";
+  const shareSubject = "Thought you'd love this week's Wuskaloosa Report";
   const shareBody = [
-    "Read this week's Wuskaloosa Report and get this week's football TV schedule!",
+    'Hey!',
     '',
+    "I'm a fan of The Wuskaloosa Report and I wanted to pass this one along to you. It's smart, sassy, and comes with the weekly football TV schedule so you never miss a game. I think you'll love it too. (This is a personal recommendation from me, not spam!)",
+    '',
+    "Read this week's Wuskaloosa Report and get this week's football TV schedule:",
     post.title,
     shareArticleUrl,
     '',
     'Want the Report delivered to your inbox each week? Be sure to subscribe!',
     shareSubscribeUrl,
+    '',
+    'Roll Tide!',
   ].join('\r\n');
   const shareHref = `mailto:?subject=${encodeURIComponent(shareSubject)}&body=${encodeURIComponent(shareBody)}`;
   const shareFriendsBtn = `<a class="share-friends-btn" href="${escapeHtml(shareHref)}">
