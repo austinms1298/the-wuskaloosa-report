@@ -146,6 +146,35 @@ function subscribePage() {
   document.title = 'Subscribe | The Wuskaloosa Report';
   return '';
 }
+// "Send to your friends" — opens the reader's own email app with a ready-to-send message.
+// (mailto: bodies are plain text; email apps turn full URLs on their own line into clickable links.)
+function shareFriendsBtnHTML(post) {
+  const SHARE_ORIGIN = 'https://wuskaloosareport.com';   // always share the real site address
+  const shareArticleUrl = `${SHARE_ORIGIN}${postUrl(post)}`;
+  const shareSubscribeUrl = `${SHARE_ORIGIN}/subscribe`;
+  const shareSubject = "Thought you'd love this week's Wuskaloosa Report";
+  const shareBody = [
+    'Hey!',
+    '',
+    "I'm a fan of The Wuskaloosa Report and I wanted to pass this one along to you. It's smart, sassy, and comes with the weekly football TV schedule so you never miss a game. I think you'll love it too. (This is a personal recommendation from me, not spam!)",
+    '',
+    `Read this week's take, "${post.title}", and get this week's football TV schedule:`,
+    '',
+    shareArticleUrl,
+    '',
+    'Want the Report delivered to your inbox each week? Be sure to subscribe:',
+    '',
+    shareSubscribeUrl,
+    '',
+    'Roll Tide!',
+  ].join('\r\n');
+  const shareHref = `mailto:?subject=${encodeURIComponent(shareSubject)}&body=${encodeURIComponent(shareBody)}`;
+  return `<a class="share-friends-btn" href="${escapeHtml(shareHref)}">
+        <span class="share-friends-btn__icon">✉️</span>
+        <span>Send to Your Friends!</span>
+      </a>`;
+}
+
 function homePage() {
   const featured = posts[0];
   const archive = posts.filter(post => post.slug !== featured?.slug).slice(0, 3);
@@ -184,6 +213,7 @@ function homePage() {
                      <span>Leave a Comment on This Post!</span>
                      <span class="leave-comment-btn__arrow">↓</span>
                    </a>
+                   ${shareFriendsBtnHTML(featured)}
                  </div>`
               : '<p style="color:var(--muted);font-size:15px;margin:10px 0">The first take drops before kickoff. Check back soon.</p>'
             }
@@ -755,33 +785,7 @@ function postPage() {
         <span class="leave-comment-btn__arrow">↓</span>
       </a>`;
 
-  // "Send to your friends" — opens the reader's own email app with a ready-to-send message.
-  // (mailto: bodies are plain text; email apps turn the full URLs into clickable links.)
-  const SHARE_ORIGIN = 'https://wuskaloosareport.com';   // always share the real site address
-  const shareArticleUrl = `${SHARE_ORIGIN}${postUrl(post)}`;
-  const shareSubscribeUrl = `${SHARE_ORIGIN}/subscribe`;
-  const shareSubject = "Thought you'd love this week's Wuskaloosa Report";
-  // Each link sits alone on its own line — that's what email apps need to turn it into a clickable link.
-  const shareBody = [
-    'Hey!',
-    '',
-    "I'm a fan of The Wuskaloosa Report and I wanted to pass this one along to you. It's smart, sassy, and comes with the weekly football TV schedule so you never miss a game. I think you'll love it too. (This is a personal recommendation from me, not spam!)",
-    '',
-    `Read this week's take, "${post.title}", and get this week's football TV schedule:`,
-    '',
-    shareArticleUrl,
-    '',
-    'Want the Report delivered to your inbox each week? Be sure to subscribe:',
-    '',
-    shareSubscribeUrl,
-    '',
-    'Roll Tide!',
-  ].join('\r\n');
-  const shareHref = `mailto:?subject=${encodeURIComponent(shareSubject)}&body=${encodeURIComponent(shareBody)}`;
-  const shareFriendsBtn = `<a class="share-friends-btn" href="${escapeHtml(shareHref)}">
-        <span class="share-friends-btn__icon">✉️</span>
-        <span>Send to Your Friends!</span>
-      </a>`;
+  const shareFriendsBtn = shareFriendsBtnHTML(post);
 
   return `
 

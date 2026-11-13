@@ -19,9 +19,10 @@
 @media(max-width:680px){.article-share-end{padding:0 16px}}
 @media(max-width:680px){.share-friends-btn{font-size:12px;padding:12px 16px;gap:8px}}
 @media(max-width:680px){.leave-comment-btn{font-size:12px;padding:12px 16px;gap:8px}}
-.home-cta-stack{display:flex;flex-direction:column;align-items:flex-start;gap:10px;margin-top:6px}
+.home-cta-stack{display:flex;flex-direction:column;align-items:stretch;width:fit-content;max-width:100%;gap:10px;margin-top:6px}
 .home-cta-stack .button{margin-top:0}
 .home-cta-stack .leave-comment-btn{margin:0;max-width:none}
+.home-cta-stack .share-friends-btn{margin:0;max-width:none}
 @media(max-width:680px){.home-cta-stack{align-items:stretch}}
 
 /* ── Ad slots ─────────────────────────────────────────────────────────────── */
