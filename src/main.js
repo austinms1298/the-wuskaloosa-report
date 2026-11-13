@@ -755,6 +755,26 @@ function postPage() {
         <span class="leave-comment-btn__arrow">↓</span>
       </a>`;
 
+  // "Send to your friends" — opens the reader's own email app with a ready-to-send message.
+  // (mailto: bodies are plain text; email apps turn the full URLs into clickable links.)
+  const shareArticleUrl = `${window.location.origin}${postUrl(post)}`;
+  const shareSubscribeUrl = `${window.location.origin}/subscribe`;
+  const shareSubject = "Read this week's Wuskaloosa Report";
+  const shareBody = [
+    "Read this week's Wuskaloosa Report and get this week's football TV schedule!",
+    '',
+    post.title,
+    shareArticleUrl,
+    '',
+    'Want the Report delivered to your inbox each week? Be sure to subscribe!',
+    shareSubscribeUrl,
+  ].join('\r\n');
+  const shareHref = `mailto:?subject=${encodeURIComponent(shareSubject)}&body=${encodeURIComponent(shareBody)}`;
+  const shareFriendsBtn = `<a class="share-friends-btn" href="${escapeHtml(shareHref)}">
+        <span class="share-friends-btn__icon">✉️</span>
+        <span>Send to Your Friends!</span>
+      </a>`;
+
   return `
 
     <main>
@@ -769,6 +789,7 @@ function postPage() {
           <p class="lead" style="white-space:pre-wrap">${escapeHtml(post.excerpt)}</p>
           ${pdfBanner}
           ${leaveCommentBtn}
+          ${shareFriendsBtn}
         </header>
         <div class="article-body">${post.html}</div>
       </article>
