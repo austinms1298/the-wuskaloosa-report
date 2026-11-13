@@ -14,6 +14,9 @@
 .share-friends-btn{display:flex;align-items:center;justify-content:center;gap:10px;background:var(--crimson);border:2px solid var(--crimson);color:#fff;font-size:13px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:13px 20px;margin:10px auto 0;max-width:600px;border-radius:2px;text-decoration:none;transition:background .15s,color .15s}
 .share-friends-btn:hover{background:#fff;color:var(--crimson)}
 .share-friends-btn__icon{font-size:16px;line-height:1}
+.article-share-end{max-width:760px;margin:12px auto 0;padding:0 24px}
+.article-share-end .share-friends-btn{margin-top:0}
+@media(max-width:680px){.article-share-end{padding:0 16px}}
 @media(max-width:680px){.share-friends-btn{font-size:12px;padding:12px 16px;gap:8px}}
 @media(max-width:680px){.leave-comment-btn{font-size:12px;padding:12px 16px;gap:8px}}
 .home-cta-stack{display:flex;flex-direction:column;align-items:flex-start;gap:10px;margin-top:6px}

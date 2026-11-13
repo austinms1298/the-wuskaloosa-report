@@ -797,6 +797,7 @@ function postPage() {
           ${shareFriendsBtn}
         </header>
         <div class="article-body">${post.html}</div>
+        <div class="article-share-end">${shareFriendsBtn}</div>
       </article>
       ${commentsSectionHTML()}
       <div class="ad-slot-wrap ad-slot-wrap--after-comments" id="ad-post-bottom"></div>
