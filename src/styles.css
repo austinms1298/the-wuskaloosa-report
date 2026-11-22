@@ -124,6 +124,18 @@
 .comment-delete-btn.is-confirming{color:var(--crimson)}
 .comment-delete-btn:disabled{opacity:.6;cursor:default}
 .comment-like-icon{font-size:15px}
+.comment-reply-btn{background:none;border:none;padding:0;font-family:inherit;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer}
+.comment-reply-btn:hover,.comment-reply-btn:focus-visible{color:var(--crimson)}
+.comment-replies{list-style:none;margin:16px 0 0;padding:0 0 0 18px;border-left:2px solid var(--line);display:flex;flex-direction:column;gap:18px}
+.comment-item.is-reply{gap:10px}
+.comment-item.is-reply .comment-avatar{width:30px;height:30px}
+.reply-form{margin:14px 0 4px;padding:14px}
+.reply-form-buttons{display:flex;align-items:center;gap:14px}
+.reply-cancel-btn{background:none;border:none;padding:0;font-family:inherit;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+.reply-cancel-btn:hover{color:var(--crimson)}
+.reply-submit-btn{margin-top:0}
+.reply-submit-btn:disabled,.reply-submit-btn.is-disabled{background:var(--muted);cursor:not-allowed;opacity:.65}
+@media(max-width:680px){.comment-replies{padding-left:10px}}
 .rules-modal{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:20px}
 .rules-modal[hidden]{display:none}
 .rules-modal__backdrop{position:absolute;inset:0;background:rgba(23,19,19,.6)}

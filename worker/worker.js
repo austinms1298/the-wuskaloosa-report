@@ -328,6 +328,7 @@ function commentRow(r, anonId) {
     body: r.body,
     createdAt: r.created_at,
     likeCount: r.like_count,
+    parentId: r.parent_id || null,
     liked: anonId ? !!r.liked_by_me : false,
     isMine: !!(anonId && r.anon_id && r.anon_id === anonId),
   };
@@ -342,6 +343,7 @@ function adminCommentRow(r) {
     body: r.body,
     createdAt: r.created_at,
     likeCount: r.like_count,
+    parentId: r.parent_id || null,
     status: r.status,
     moderationReason: r.moderation_reason,
     moderationCategory: r.moderation_category,
@@ -386,11 +388,23 @@ async function handleCreateComment(req, env, ch) {
   const commentTxt = stripHtml(body.body).trim().slice(0, MAX_COMMENT_LEN);
   const turnstileToken = body.turnstileToken || '';
   const anonId     = String(body.anonId || '').trim().slice(0, 100) || null;
+  let parentId     = String(body.parentId || '').trim().slice(0, 100) || null;
 
   if (!slug)        return respond({ error: 'Missing post.' }, 400, ch);
   if (!name)         return respond({ error: 'Please enter a name.' }, 400, ch);
   if (commentTxt.length < MIN_COMMENT_LEN)
     return respond({ error: 'Comment is too short.' }, 400, ch);
+
+  // Replies: the parent must be an approved comment on this same post. Replies stay one
+  // level deep — replying to a reply attaches to that reply's top-level comment.
+  if (parentId) {
+    const parent = await env.DB.prepare(
+      `SELECT id, post_slug, parent_id FROM comments WHERE id = ?1 AND status = 'approved'`
+    ).bind(parentId).first();
+    if (!parent || parent.post_slug !== slug)
+      return respond({ error: 'The comment you are replying to no longer exists.' }, 404, ch);
+    parentId = parent.parent_id || parent.id;
+  }
 
   const ip = req.headers.get('CF-Connecting-IP') || '0.0.0.0';
   const ipHash = await hashIp(ip, env.JWT_SECRET);
@@ -416,10 +430,10 @@ async function handleCreateComment(req, env, ch) {
   const result = moderate(name, commentTxt);
   const id = uid();
   await env.DB.prepare(
-    `INSERT INTO comments (id, post_slug, name, body, created_at, status, moderation_reason, moderation_category, like_count, ip_hash, anon_id)
-     VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, 0, ?9, ?10)`
+    `INSERT INTO comments (id, post_slug, name, body, created_at, status, moderation_reason, moderation_category, like_count, ip_hash, anon_id, parent_id)
+     VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, 0, ?9, ?10, ?11)`
   ).bind(id, slug, name, commentTxt, now, result.allowed ? 'approved' : 'rejected',
-         result.reason, result.category, ipHash, anonId).run();
+         result.reason, result.category, ipHash, anonId, parentId).run();
 
   if (!result.allowed) {
     return respond({ error: result.reason, category: result.category }, 400, ch);
@@ -430,7 +444,7 @@ async function handleCreateComment(req, env, ch) {
   ).bind(slug).first();
 
   return respond({
-    comment: { id, slug, name, body: commentTxt, createdAt: now, likeCount: 0, liked: false, isMine: true },
+    comment: { id, slug, name, body: commentTxt, createdAt: now, likeCount: 0, parentId, liked: false, isMine: true },
     total: total.n,
   }, 200, ch);
 }
@@ -455,6 +469,11 @@ async function handleDeleteComment(commentId, req, env, ch) {
     }
   }
 
+  // Deleting a comment also deletes any replies under it.
+  await env.DB.prepare(
+    `DELETE FROM comment_likes WHERE comment_id IN (SELECT id FROM comments WHERE parent_id = ?1)`
+  ).bind(commentId).run();
+  await env.DB.prepare(`DELETE FROM comments WHERE parent_id = ?1`).bind(commentId).run();
   await env.DB.prepare(`DELETE FROM comment_likes WHERE comment_id = ?1`).bind(commentId).run();
   await env.DB.prepare(`DELETE FROM comments WHERE id = ?1`).bind(commentId).run();
 

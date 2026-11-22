@@ -679,9 +679,10 @@ function timeAgo(ts) {
   return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(ts));
 }
 
-function commentItemHTML(c) {
+function commentItemHTML(c, replies = []) {
   const likeWord = c.likeCount === 1 ? 'like' : 'likes';
-  return `<li class="comment-item" data-id="${escapeHtml(c.id)}">
+  const isReply = !!c.parentId;
+  return `<li class="comment-item${isReply ? ' is-reply' : ''}" data-id="${escapeHtml(c.id)}">
     <div class="comment-avatar">${avatarMarkup()}</div>
     <div class="comment-main">
       <p class="comment-meta"><span class="comment-name">${escapeHtml(c.name)}</span><span class="comment-time">${timeAgo(c.createdAt)}</span></p>
@@ -690,8 +691,10 @@ function commentItemHTML(c) {
         <button type="button" class="comment-like-btn${c.liked ? ' is-liked' : ''}" data-id="${escapeHtml(c.id)}" aria-pressed="${c.liked ? 'true' : 'false'}" aria-label="${c.liked ? 'Unlike' : 'Like'} this comment, currently ${c.likeCount} ${likeWord}">
           <span class="comment-like-icon" aria-hidden="true">${c.liked ? '♥' : '♡'}</span> Like <span class="comment-like-count">${c.likeCount}</span>
         </button>
-        ${c.isMine ? `<button type="button" class="comment-delete-btn" data-id="${escapeHtml(c.id)}" aria-label="Delete your comment">Delete</button>` : ''}
+        <button type="button" class="comment-reply-btn" data-id="${escapeHtml(c.id)}" data-name="${escapeHtml(c.name)}" data-is-reply="${isReply ? '1' : ''}" aria-label="Reply to ${escapeHtml(c.name)}">Reply</button>
+        ${c.isMine ? `<button type="button" class="comment-delete-btn" data-id="${escapeHtml(c.id)}" aria-label="Delete your ${isReply ? 'reply' : 'comment'}">Delete</button>` : ''}
       </div>
+      ${replies.length ? `<ul class="comment-replies">${replies.map(r => commentItemHTML(r)).join('')}</ul>` : ''}
     </div>
   </li>`;
 }
@@ -1163,7 +1166,16 @@ async function initComments(slug) {
     if (!comments.length) {
       listEl.innerHTML = '<li class="comments-empty">No comments yet. Be the first to join the conversation.</li>';
     } else {
-      listEl.innerHTML = comments.map(commentItemHTML).join('');
+      // Replies sit under their parent comment, oldest first; the chosen sort only orders top-level comments.
+      const ids = new Set(comments.map(c => c.id));
+      const repliesByParent = {};
+      const topLevel = [];
+      comments.forEach(c => {
+        if (c.parentId && ids.has(c.parentId)) (repliesByParent[c.parentId] = repliesByParent[c.parentId] || []).push(c);
+        else topLevel.push(c);
+      });
+      Object.values(repliesByParent).forEach(list => list.sort((x, y) => x.createdAt - y.createdAt));
+      listEl.innerHTML = topLevel.map(c => commentItemHTML(c, repliesByParent[c.id] || [])).join('');
     }
     listEl.setAttribute('aria-busy', 'false');
   }
@@ -1256,6 +1268,115 @@ async function initComments(slug) {
       });
       loadComments();
     });
+  });
+
+  // ── Replies ────────────────────────────────────────────────────────────────
+  function closeReplyForm() {
+    listEl.querySelectorAll('.reply-form').forEach(f => f.remove());
+  }
+
+  function openReplyForm(replyBtn) {
+    closeReplyForm();
+    const parentId = replyBtn.dataset.id;
+    const parentName = replyBtn.dataset.name || '';
+    const isReplyToReply = !!replyBtn.dataset.isReply;
+    let savedName = '';
+    try { savedName = localStorage.getItem('wk_comment_name') || ''; } catch {}
+
+    const formEl = document.createElement('form');
+    formEl.className = 'comment-form reply-form';
+    formEl.noValidate = true;
+    formEl.dataset.parentId = parentId;
+    formEl.innerHTML = `
+      <label class="sr-only">Name</label>
+      <input type="text" class="comment-name-input" name="name" placeholder="Your name" maxlength="60" autocomplete="name" value="${escapeHtml(savedName)}" required>
+      <label class="sr-only">Your reply</label>
+      <textarea class="comment-body-input" name="body" rows="3" placeholder="Reply to ${escapeHtml(parentName)}…" maxlength="2000" required></textarea>
+      <p class="comment-warning" role="status" aria-live="polite" hidden></p>
+      <div class="comment-form-actions">
+        <span class="comment-status" role="status" aria-live="polite"></span>
+        <span class="reply-form-buttons">
+          <button type="button" class="reply-cancel-btn">Cancel</button>
+          <button type="submit" class="button button-small reply-submit-btn">Post Reply</button>
+        </span>
+      </div>`;
+
+    // The form opens right under the comment that was clicked.
+    replyBtn.closest('.comment-actions').insertAdjacentElement('afterend', formEl);
+
+    const nameEl = formEl.querySelector('[name="name"]');
+    const bodyEl = formEl.querySelector('[name="body"]');
+    const warnEl = formEl.querySelector('.comment-warning');
+    const submitEl = formEl.querySelector('.reply-submit-btn');
+    if (isReplyToReply && parentName) bodyEl.value = `@${parentName} `;
+
+    function check() {
+      const result = moderate(nameEl.value, bodyEl.value);
+      const empty = bodyEl.value.trim() === '';
+      if (!result.allowed && !empty) {
+        warnEl.textContent = 'Please review your reply — it may not meet Wuskaloosa’s posting rules.';
+        warnEl.hidden = false;
+        submitEl.disabled = true;
+        submitEl.classList.add('is-disabled');
+        return false;
+      }
+      warnEl.hidden = true; warnEl.textContent = '';
+      submitEl.disabled = false;
+      submitEl.classList.remove('is-disabled');
+      return true;
+    }
+    nameEl.addEventListener('input', check);
+    bodyEl.addEventListener('input', check);
+
+    (savedName ? bodyEl : nameEl).focus();
+    if (savedName) bodyEl.setSelectionRange(bodyEl.value.length, bodyEl.value.length);
+  }
+
+  listEl.addEventListener('click', e => {
+    const replyBtn = e.target.closest('.comment-reply-btn');
+    if (replyBtn) { openReplyForm(replyBtn); return; }
+    if (e.target.closest('.reply-cancel-btn')) closeReplyForm();
+  });
+
+  listEl.addEventListener('submit', async e => {
+    const formEl = e.target.closest('.reply-form');
+    if (!formEl) return;
+    e.preventDefault();
+    const nameEl = formEl.querySelector('[name="name"]');
+    const bodyEl = formEl.querySelector('[name="body"]');
+    const warnEl = formEl.querySelector('.comment-warning');
+    const submitEl = formEl.querySelector('.reply-submit-btn');
+    const name = nameEl.value.trim();
+    const body = bodyEl.value.trim();
+    if (!name) { nameEl.focus(); return; }
+    if (!body) { bodyEl.focus(); return; }
+    if (!moderate(name, body).allowed) return;
+
+    submitEl.disabled = true;
+    submitEl.textContent = 'Posting…';
+    try {
+      // (Turnstile isn't enabled for this site; if it ever is, replies will need their own token.)
+      const res = await fetch(`${COMMENTS_API}/api/comments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug, name, body, anonId, parentId: formEl.dataset.parentId, turnstileToken: getTurnstileToken() }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        warnEl.textContent = data.error || 'Please review your reply before posting.';
+        warnEl.hidden = false;
+        submitEl.disabled = false;
+        submitEl.textContent = 'Post Reply';
+        return;
+      }
+      try { localStorage.setItem('wk_comment_name', name); } catch {}
+      await loadComments();   // re-renders the list, which also closes the reply form
+    } catch {
+      warnEl.textContent = 'Something went wrong posting your reply. Please try again.';
+      warnEl.hidden = false;
+      submitEl.disabled = false;
+      submitEl.textContent = 'Post Reply';
+    }
   });
 
   listEl.addEventListener('click', async e => {

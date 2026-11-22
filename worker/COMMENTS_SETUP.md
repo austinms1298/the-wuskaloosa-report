@@ -118,3 +118,17 @@ terms are intentionally multi-word phrases (e.g. `"vote for trump"`, not
 just `"trump"`) so ordinary words aren't blocked out of context. Remember:
 edit both files identically, then redeploy the Worker (`wrangler deploy`
 from `worker/`) *and* push the site (so the client-side copy updates too).
+
+## Replies (threaded comments)
+
+Replies add a `parent_id` column to the `comments` table. Run the migration once, **before**
+deploying the updated worker:
+
+```
+cd worker
+npx wrangler d1 execute wuskaloosa-comments --remote --yes --file=migration_0002_replies.sql
+npx wrangler deploy
+```
+
+Replies stay one level deep (replying to a reply attaches it to the top-level comment).
+Deleting a comment also deletes its replies.

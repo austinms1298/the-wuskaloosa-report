@@ -14,7 +14,8 @@ CREATE TABLE IF NOT EXISTS comments (
   moderation_category TEXT,
   like_count         INTEGER NOT NULL DEFAULT 0,
   ip_hash            TEXT,                       -- sha-256 of IP, never the raw IP
-  anon_id            TEXT                        -- poster's browser id, lets them delete their own comment
+  anon_id            TEXT,                       -- poster's browser id, lets them delete their own comment
+  parent_id          TEXT                        -- set on replies: the id of the top-level comment replied to
 );
 
 CREATE INDEX IF NOT EXISTS idx_comments_post_status_created
@@ -28,6 +29,9 @@ CREATE INDEX IF NOT EXISTS idx_comments_ip_created
 
 CREATE INDEX IF NOT EXISTS idx_comments_anon
   ON comments(anon_id);
+
+CREATE INDEX IF NOT EXISTS idx_comments_parent
+  ON comments(parent_id);
 
 CREATE TABLE IF NOT EXISTS comment_likes (
   id          TEXT PRIMARY KEY,

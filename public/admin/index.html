@@ -1820,7 +1820,7 @@ async function openCommentThread(slug) {
     listEl.innerHTML = comments.map(c => `
       <div class="post-row" style="align-items:flex-start">
         <div class="post-info">
-          <div class="post-name">${escHtml(c.name)}${c.status === 'rejected' ? `<span class="draft-badge" style="background:#fde8e2;color:#ea4110">Flagged${c.moderationCategory ? ': ' + escHtml(c.moderationCategory) : ''}</span>` : ''}</div>
+          <div class="post-name">${escHtml(c.name)}${c.parentId ? '<span class="draft-badge" style="background:#e8f0fe;color:#1a56db">Reply</span>' : ''}${c.status === 'rejected' ? `<span class="draft-badge" style="background:#fde8e2;color:#ea4110">Flagged${c.moderationCategory ? ': ' + escHtml(c.moderationCategory) : ''}</span>` : ''}</div>
           <div class="post-meta">${new Date(c.createdAt).toLocaleString()} · ${c.likeCount} like${c.likeCount === 1 ? '' : 's'}</div>
           <div style="font-size:14px;line-height:1.5;margin-top:8px;white-space:pre-wrap">${escHtml(c.body)}</div>
         </div>
@@ -1832,7 +1832,7 @@ async function openCommentThread(slug) {
 }
 
 async function deleteCommentAdmin(id, slug) {
-  if (!confirm('Delete this comment? This cannot be undone.')) return;
+  if (!confirm('Delete this comment (and any replies to it)? This cannot be undone.')) return;
   try {
     await api('DELETE', `/api/comments/${encodeURIComponent(id)}`);
     openCommentThread(slug);
