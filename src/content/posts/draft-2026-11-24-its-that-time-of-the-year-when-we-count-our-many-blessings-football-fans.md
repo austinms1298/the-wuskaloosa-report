@@ -4,7 +4,7 @@ slug: "its-that-time-of-the-year-when-we-count-our-many-blessings-football-fans"
 date: "2026-11-24T22:53:00.000Z"
 excerpt: ""
 category: "Latest Take"
-week: 1
+week: 13
 year: 2026
 draft: true
 ---
