@@ -6,6 +6,7 @@ excerpt: ""
 category: "Latest Take"
 week: 13
 year: 2026
+schedule_pdf: "/schedules/2026/week-13.pdf"
 draft: true
 ---
 
